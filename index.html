@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICT互動課件庫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;600;800&family=Baloo+2:wght@600;800&display=swap">
+<style>
+/* 版面：圓點紙底 + 歡迎橫幅（右上角「上傳課件」、右邊電腦小精靈）→ 年級貼紙列 → 單元篩選 + 搜尋 → 按單元分組的課件卡片 */
+:root{
+  color-scheme:light;
+  --bg:#f1f8fd; --dot:#d3e8f6; --card:#ffffff; --ink:#1f2d52; --muted:#5d6890; --line:#dbe6f3;
+  --sun:#ffd23f; --sky:#4cc9f0; --grape:#7b6cf6; --mint:#3ddc97; --pink:#ff7aa2; --orange:#ff9f43;
+  --c:#1295c9; --c-deep:#0d6f97; --c-soft:#ddf3fc;
+  --round:"Chiron GoRound TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --num:"Baloo 2","Chiron GoRound TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background-color:var(--bg);color:var(--ink);font-family:var(--round);font-size:16px;line-height:1.6;
+  background-image:radial-gradient(var(--dot) 2px,transparent 2px);background-size:26px 26px;
+}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--grape);outline-offset:3px}
+.sr{position:absolute;left:-9999px}
+
+/* ---------- 歡迎橫幅 ---------- */
+.hero{position:relative;overflow:hidden;border-radius:32px;padding:26px 30px;
+  background:linear-gradient(135deg,#bfeaff 0%,#d9d4ff 55%,#ffe3ef 100%);
+  display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  box-shadow:0 8px 0 rgba(31,45,82,.08)}
+.hero-text{position:relative;z-index:1;min-width:0;flex:1 1 320px}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.school{display:inline-block;font-family:var(--num);font-size:13px;letter-spacing:.06em;background:#fff;
+  color:var(--grape);padding:3px 12px;border-radius:99px;font-weight:600}
+h1{font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1.15;margin:10px 0 6px;text-wrap:balance;letter-spacing:.02em}
+.hi{color:var(--muted);margin:0;font-size:16px}
+.stats{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.stat{background:#fff;border-radius:99px;padding:4px 14px;font-size:14px;font-weight:600}
+.stat.offline{color:var(--ink);font-size:13px;border:2px dashed var(--muted)}
+.stat b{font-family:var(--num);font-size:18px;color:var(--c-deep);margin-right:2px;font-variant-numeric:tabular-nums}
+.floaty{position:absolute;font-family:var(--num);font-weight:800;opacity:.3;pointer-events:none;user-select:none}
+.side{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:12px;flex:0 0 auto}
+.bot{width:170px;max-width:40vw;animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-2deg)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.eye{transform-origin:center;transform-box:fill-box;animation:blink 4s infinite}
+
+/* 按鈕 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:99px;cursor:pointer;
+  font-weight:800;font-size:16px;padding:10px 20px;background:var(--c);color:#fff;box-shadow:0 4px 0 var(--c-deep);
+  text-decoration:none;transition:transform .12s,box-shadow .12s;min-height:44px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--c-deep)}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--c-deep)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.btn.warn{background:#fff;color:#a3122e;border:3px solid #a3122e;box-shadow:0 4px 0 #a3122e}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn.upload{background:var(--ink);box-shadow:0 4px 0 #0c1530;font-size:17px;padding:11px 22px}
+
+/* ---------- 篩選 ---------- */
+.filters{margin:24px 0 20px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row .lbl{font-weight:800;font-size:14px;color:var(--muted);margin-right:4px;min-width:3em}
+.chip{border:2px solid transparent;border-radius:99px;padding:6px 15px;background:var(--card);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;
+  box-shadow:0 3px 0 var(--line);display:inline-flex;gap:6px;align-items:center;min-height:40px}
+.chip .n{font-family:var(--num);font-size:13px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--sun);border-color:var(--ink);box-shadow:0 3px 0 #c99c10}
+.chip[aria-pressed="true"]::before{content:"✓";font-weight:800}
+.chip[aria-pressed="true"] .n{color:var(--ink)}
+.chip:disabled{opacity:.4;cursor:default}
+.search-box{position:relative;flex:1 1 260px;max-width:420px}
+.search-box svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px}
+.search{width:100%;border:3px solid var(--line);border-radius:99px;padding:8px 16px 8px 40px;font-size:16px;background:var(--card);min-height:44px}
+.search:focus{border-color:var(--c);outline:none}
+
+/* ---------- 課件清單 ---------- */
+main{display:flex;flex-direction:column;gap:32px}
+.gradeblock>h2{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;font-size:24px;font-weight:800}
+.badge{font-family:var(--num);background:var(--c);color:#fff;border-radius:14px;padding:2px 14px;transform:rotate(-3deg);display:inline-block;box-shadow:0 4px 0 var(--c-deep)}
+.gradeblock>h2 small{font-size:14px;font-weight:600;color:var(--muted)}
+.unit{margin-bottom:20px}
+.unit>h3{margin:0 0 10px;font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ucode{font-family:var(--num);background:var(--ink);color:#fff;border-radius:8px;padding:0 9px;font-size:15px}
+.unit>h3 small{font-weight:600;color:var(--muted);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;align-items:stretch}
+.card{background:var(--card);border-radius:22px;box-shadow:0 5px 0 var(--line);border:2px solid var(--line);padding:16px 18px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.card .topic{font-size:13px;font-weight:600;color:var(--muted)}
+.card .topic b{color:var(--ink)}
+.card .t{font-weight:800;font-size:18px;line-height:1.35;overflow-wrap:anywhere}
+.card .d{color:var(--muted);font-size:14.5px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12.5px;font-weight:600;padding:1px 10px;border-radius:99px;background:var(--c-soft);color:var(--c-deep)}
+.meta{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:auto;padding-top:4px}
+.card .btn{align-self:flex-start;font-size:15px;padding:7px 18px;min-height:40px}
+.card.soon{background:transparent;border:3px dashed var(--muted);box-shadow:none}
+.soon-lbl{align-self:flex-start;font-weight:800;font-size:14px;border:2px solid var(--ink);border-radius:99px;padding:2px 12px;background:#fff}
+.nolink{font-size:14px;font-weight:600;color:var(--muted)}
+.empty{background:var(--card);border:3px dashed var(--line);border-radius:24px;padding:28px;text-align:center;color:var(--muted);line-height:1.9}
+.empty .big{font-size:40px;display:block}
+.empty code{font-family:var(--num);background:var(--bg);padding:1px 8px;border-radius:8px;color:var(--ink)}
+
+/* ---------- 上傳表單 ---------- */
+dialog{border:0;border-radius:26px;padding:0;width:min(640px,calc(100vw - 20px));max-height:calc(100dvh - 20px);color:var(--ink);background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(15,25,50,.55)}
+dialog:not([open]){display:none}
+.dlg-head{position:sticky;top:0;z-index:2;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 20px 12px;border-bottom:2px solid var(--line)}
+.dlg-head h2{margin:0;font-size:22px}
+.x{border:2px solid var(--line);background:#fff;border-radius:99px;width:44px;height:44px;font-size:20px;cursor:pointer}
+.dlg-body{padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field>label,.field>.fl{font-weight:800;font-size:15px}
+.req{font-size:12px;font-weight:600;color:var(--muted);margin-left:4px}
+.field input:not([type=checkbox]),.field select,.field textarea{width:100%;border:2px solid #b9c6d9;border-radius:12px;padding:9px 12px;background:#fff;font-size:16px;min-height:44px}
+.field textarea{min-height:64px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--c);outline:none}
+.hint{font-size:13px;color:var(--muted)}
+.pathbox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:var(--bg);border-radius:10px;padding:6px 10px;overflow-wrap:anywhere}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.check input{width:22px;height:22px;margin-top:2px;flex:0 0 auto}
+.fallback{border:2px dashed var(--muted);border-radius:14px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.status{border-radius:14px;padding:12px 14px;font-size:15px;display:none;border:3px solid}
+.status.show{display:block}
+.status.busy{border-color:var(--c);background:var(--c-soft)}
+.status.err{border-color:#a3122e;background:#fff0f2}
+.status.ok{border-color:#0f7a4a;background:#e9fbf2}
+.status.ask{border-color:#9a6a00;background:#fff7dc}
+.status strong{display:block;font-size:16px;margin-bottom:4px}
+.status a{color:var(--c-deep);font-weight:800;overflow-wrap:anywhere}
+.steps{list-style:none;margin:6px 0 0;padding:0;font-size:14px}
+.steps li::before{content:"○ ";font-weight:800}
+.steps li.done::before{content:"✔ "}
+.steps li.now{font-weight:800}
+.steps li.now::before{content:"▶ "}
+.bar{height:8px;border-radius:99px;background:#fff;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:35%;background:var(--c);border-radius:99px;animation:slide 1.2s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+
+@media (max-width:640px){
+  .hero{padding:22px 18px}
+  .side{flex-direction:row;align-items:center;width:100%;justify-content:space-between}
+  .bot{width:110px}
+  .grid2{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .search-box{max-width:none}
+}
+@media (prefers-reduced-motion:reduce){.bot,.eye,.bar i{animation:none}}
+</style>
+
+<div class="wrap" id="app">
+  <section class="hero">
+    <span class="floaty" style="left:4%;top:8%;font-size:32px;color:var(--grape)">&lt;/&gt;</span>
+    <span class="floaty" style="left:42%;top:6%;font-size:26px;color:#0d6f97">01</span>
+    <span class="floaty" style="left:56%;bottom:8%;font-size:28px;color:var(--pink)">{ }</span>
+    <span class="floaty" style="left:30%;bottom:4%;font-size:24px;color:#178f5c">if</span>
+    <div class="hero-text">
+      <span class="school" id="school"></span>
+      <h1 id="title"></h1>
+      <p class="hi">揀年級、揀單元，打開互動課件就可以開始學習！</p>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="side">
+      <button class="btn upload" id="openUpload" type="button">⬆ 上傳課件</button>
+      <svg class="bot" viewBox="0 0 200 190" aria-hidden="true">
+        <ellipse cx="100" cy="182" rx="62" ry="7" fill="#1f2d52" opacity=".12"/>
+        <rect x="78" y="140" width="44" height="22" rx="6" fill="#8fb4d9"/>
+        <rect x="54" y="158" width="92" height="16" rx="8" fill="#b3cde8"/>
+        <rect x="18" y="14" width="164" height="132" rx="30" fill="#1295c9"/>
+        <rect x="32" y="28" width="136" height="100" rx="20" fill="#ffffff"/>
+        <text x="44" y="56" font-family="Baloo 2, sans-serif" font-weight="800" font-size="17" fill="#7b6cf6">&lt;html&gt;</text>
+        <ellipse class="eye" cx="78" cy="82" rx="9" ry="11" fill="#1f2d52"/>
+        <ellipse class="eye" cx="122" cy="82" rx="9" ry="11" fill="#1f2d52"/>
+        <path d="M84 104q16 12 32 0" stroke="#1f2d52" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <text x="128" y="120" font-family="Baloo 2, sans-serif" font-weight="800" font-size="15" fill="#ff7aa2">01</text>
+        <circle cx="100" cy="8" r="7" fill="#ffd23f"/>
+        <rect x="97" y="8" width="6" height="10" fill="#ffd23f"/>
+      </svg>
+    </div>
+  </section>
+
+  <div class="filters">
+    <div class="row" id="grades" aria-label="年級"></div>
+    <div class="row" id="units" aria-label="單元"></div>
+    <div class="row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#5d6890" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg>
+        <label for="q" class="sr">搜尋</label>
+        <input class="search" id="q" type="search" placeholder="搜尋課件、課題、標籤或上傳者">
+      </div>
+    </div>
+  </div>
+
+  <main id="list"><div class="empty"><span class="big">⏳</span>正在載入課件清單…</div></main>
+</div>
+
+<!-- ============ 上傳表單 ============ -->
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form id="upForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlgTitle">⬆ 上傳課件</h2>
+      <button class="x" type="button" id="closeUpload" aria-label="關閉">✕</button>
+    </div>
+    <div class="dlg-body">
+      <div class="fallback" id="iframeNote" hidden>
+        <span>在學校網站內，如果按「選擇檔案」沒有反應，請改在新分頁上傳。</span>
+        <a class="btn ghost" id="newTab" href="#" target="_blank" rel="noopener">↗ 在新分頁開啟</a>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label for="fGrade">年級<span class="req">必填</span></label>
+          <select id="fGrade" required></select>
+        </div>
+        <div class="field">
+          <label for="fUnitSel" id="unitLabel">單元<span class="req">必填</span></label>
+          <select id="fUnitSel"></select>
+          <input id="fUnitTxt" list="unitList" placeholder="例如：電腦基礎" hidden>
+          <datalist id="unitList"></datalist>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fTopic">課題<span class="req">必填</span></label>
+        <input id="fTopic" list="topicList" maxlength="60" placeholder="例如：網絡拓撲" required>
+        <datalist id="topicList"></datalist>
+        <span class="hint">同一課題的課件會放在一起；可從建議中選擇。</span>
+      </div>
+      <div class="field">
+        <label for="fFile">HTML 檔案<span class="req">必填 · 只限 .html / .htm · 上限 5MB</span></label>
+        <input id="fFile" type="file" accept=".html,.htm,text/html" required>
+      </div>
+      <div class="field">
+        <label for="fTitle">課件名稱<span class="req">必填 · 亦用作檔名</span></label>
+        <input id="fTitle" maxlength="80" placeholder="例如：網絡拓撲互動演示" required>
+        <span class="hint">選擇檔案後會自動填入網頁標題，可再修改。將儲存為：</span>
+        <span class="pathbox" id="pathPreview">—</span>
+      </div>
+      <div class="field">
+        <label for="fDesc">簡介</label>
+        <textarea id="fDesc" maxlength="300" placeholder="一兩句介紹課件內容（可留空）"></textarea>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="fTags">標籤</label>
+          <input id="fTags" maxlength="120" placeholder="例如：互動,練習">
+          <span class="hint">多個標籤用逗號分隔</span>
+        </div>
+        <div class="field">
+          <label for="fName">上傳者姓名<span class="req">必填</span></label>
+          <input id="fName" maxlength="40" autocomplete="name" placeholder="例如：陳老師" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fPw">教師密碼<span class="req">必填</span></label>
+        <input id="fPw" type="password" autocomplete="current-password" required>
+      </div>
+      <label class="check" id="rememberWrap">
+        <input type="checkbox" id="fRemember">
+        <span>記住姓名和密碼（只限此電腦）<br><span class="hint" id="rememberHint">公用電腦或課室電腦請不要勾選。</span></span>
+      </label>
+
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <div class="actions">
+        <button class="btn ghost" type="button" id="cancelBtn">取消</button>
+        <button class="btn" type="submit" id="submitBtn">⬆ 上傳</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* ============================================================
+   設定（只需設定一次）
+   ============================================================ */
+const CONFIG = {
+  school: "Maryknoll Secondary School",
+  title: "ICT互動課件庫",
+  API_URL: "",   // Apps Script 網頁應用程式網址（…/exec），用來讀取課件清單及上傳
+  BASE_URL: "https://johnathan-lh.github.io/Maryknoll-ICT-Courseware/",   // 「連結」欄可只填路徑，例如 F4/網絡拓撲.html
+  grades: ["中一", "中二", "中三", "中四", "中五", "中六"],
+  dseGrades: ["中四", "中五", "中六"],    // 這些年級的「單元」用 DSE 課程下拉選單
+  units: [                               // DSE ICT 單元（顯示次序）
+    "A 資訊處理", "B 電腦系統基礎", "C 互聯網及其應用", "D 計算思維與程式編寫", "E 資訊及通訊科技的社會影響",
+    "2A 數據庫", "2B 網頁應用開發", "2C 算法與程式編寫", "2D 軟件開發"
+  ],
+  MAX_MB: 5
+};
+/* 試算表第一行（欄名）：年級 | 單元 | 課題 | 課件名稱 | 連結 | 簡介 | 標籤 | 上傳者 | 更新日期 */
+
+/* ============================================================
+   以下是程式，一般不用修改
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+  del(k){ try { localStorage.removeItem(k); } catch (e) {} },
+  ok(){ try { localStorage.setItem("__t", "1"); localStorage.removeItem("__t"); return true; } catch (e) { return false; } }
+};
+const K = { view: "ictcw-view", list: "ictcw-list", cred: "ictcw-cred" };
+
+let COURSES = [];
+const state = { grade: "全部", unit: "全部", q: "" };
+try { Object.assign(state, JSON.parse(store.get(K.view) || "{}"), { q: "" }); } catch (e) {}
+const saveView = () => store.set(K.view, JSON.stringify({ grade: state.grade, unit: state.unit }));
+
+$("#school").textContent = CONFIG.school;
+$("#title").textContent = CONFIG.title;
+document.title = CONFIG.title;
+
+function fullUrl(u){
+  if (!u) return "";
+  if (/^https?:\/\//i.test(u)) return u;
+  return CONFIG.BASE_URL + u.replace(/^\.?\//, "").split("/").map(encodeURIComponent).join("/");
+}
+const splitTags = s => String(s || "").split(/[,，、]/).map(x => x.trim()).filter(Boolean);
+const gradeOrder = g => { const i = CONFIG.grades.indexOf(g); return i < 0 ? 99 : i; };
+const unitOrder = u => { const i = CONFIG.units.indexOf(u); return i < 0 ? 50 : i; };
+function unitParts(u){
+  const m = /^([A-E]|2[A-D])\s+(.+)$/.exec(u || "");
+  return m ? { code: m[1], name: m[2] } : { code: "", name: u || "未分單元" };
+}
+const unitLabel = u => { const p = unitParts(u); return p.code ? `<span class="ucode">${esc(p.code)}</span>${esc(p.name)}` : esc(p.name); };
+
+function toCourses(list){
+  return (list || []).map(r => ({
+    grade: (r.grade || "").trim(), unit: (r.unit || "").trim(), topic: (r.topic || "").trim(), title: (r.title || "").trim(),
+    url: fullUrl((r.link || "").trim()), desc: (r.desc || "").trim(), tags: splitTags(r.tags),
+    uploader: (r.uploader || "").trim(), updated: (r.updated || "").trim()
+  })).filter(c => c.grade && (c.title || c.topic));
+}
+
+const matchQ = c => !state.q || [c.topic, c.title, c.desc, c.unit, c.uploader, ...c.tags].join(" ").toLowerCase().includes(state.q.toLowerCase());
+const countReal = arr => arr.filter(c => c.title).length;
+
+function render(){
+  if (!COURSES.length){
+    $("#grades").innerHTML = ""; $("#units").innerHTML = "";
+    $("#stats").innerHTML = "";
+    $("#list").innerHTML = `<div class="empty"><span class="big">📭</span>暫時未有課件。<br>按右上角「上傳課件」加入第一個課件吧！</div>`;
+    return;
+  }
+  $("#stats").innerHTML = `<span class="stat"><b>${countReal(COURSES)}</b> 個課件</span><span class="stat"><b>${new Set(COURSES.map(c => c.grade + "|" + c.topic)).size}</b> 個課題</span>`;
+
+  const searched = COURSES.filter(matchQ);
+  const allGrades = [...new Set([...CONFIG.grades, ...COURSES.map(c => c.grade)])].sort((a, b) => gradeOrder(a) - gradeOrder(b));
+  if (state.grade !== "全部" && !allGrades.includes(state.grade)) state.grade = "全部";
+  $("#grades").innerHTML = `<span class="lbl">年級</span>` + ["全部", ...allGrades].map(g => {
+    const rows = searched.filter(c => g === "全部" || c.grade === g);
+    const off = rows.length === 0 && g !== "全部" && g !== state.grade;
+    return `<button class="chip" type="button" data-g="${esc(g)}" aria-pressed="${g === state.grade}" ${off ? "disabled" : ""}>${esc(g)}<span class="n">${countReal(rows)}</span></button>`;
+  }).join("");
+
+  const inGrade = searched.filter(c => state.grade === "全部" || c.grade === state.grade);
+  const units = [...new Set(COURSES.filter(c => state.grade === "全部" || c.grade === state.grade).map(c => c.unit))]
+    .sort((a, b) => unitOrder(a) - unitOrder(b) || a.localeCompare(b, "zh-Hant"));
+  if (state.unit !== "全部" && !units.includes(state.unit)) state.unit = "全部";
+  $("#units").innerHTML = `<span class="lbl">單元</span>` + ["全部", ...units].map(u => {
+    const rows = inGrade.filter(c => u === "全部" || c.unit === u);
+    const label = u === "全部" ? "全部" : (unitParts(u).code ? unitParts(u).code + " " + unitParts(u).name : (u || "未分單元"));
+    return `<button class="chip" type="button" data-u="${esc(u)}" aria-pressed="${u === state.unit}">${esc(label)}<span class="n">${countReal(rows)}</span></button>`;
+  }).join("");
+
+  const shown = inGrade.filter(c => state.unit === "全部" || c.unit === state.unit);
+  if (!shown.length){
+    $("#list").innerHTML = `<div class="empty"><span class="big">🔍</span>${state.q ? `找不到「${esc(state.q)}」相關的課件。` : "這裏暫時未有課件。"}</div>`;
+    return;
+  }
+
+  const grades = allGrades.filter(g => shown.some(c => c.grade === g));
+  $("#list").innerHTML = grades.map(g => {
+    const gRows = shown.filter(c => c.grade === g);
+    const gUnits = [...new Set(gRows.map(c => c.unit))].sort((a, b) => unitOrder(a) - unitOrder(b) || a.localeCompare(b, "zh-Hant"));
+    return `<section class="gradeblock">
+      <h2><span class="badge">${esc(g)}</span><small>${countReal(gRows)} 個課件</small></h2>
+      ${gUnits.map(u => {
+        const uRows = gRows.filter(c => c.unit === u)
+          .sort((a, b) => a.topic.localeCompare(b.topic, "zh-Hant") || (b.title ? 1 : 0) - (a.title ? 1 : 0));
+        return `<div class="unit"><h3>${unitLabel(u)}<small>· ${countReal(uRows)} 個課件</small></h3>
+          <div class="cards">${uRows.map(card).join("")}</div></div>`;
+      }).join("")}
+    </section>`;
+  }).join("");
+}
+
+function card(c){
+  if (!c.title){
+    return `<article class="card soon">
+      <span class="topic">課題：<b>${esc(c.topic)}</b></span>
+      <span class="soon-lbl">⏳ 課件準備中</span>
+      ${c.desc ? `<span class="d">${esc(c.desc)}</span>` : ""}
+    </article>`;
+  }
+  const date = c.updated ? c.updated.slice(0, 10) : "";
+  return `<article class="card">
+    ${c.topic ? `<span class="topic">課題：<b>${esc(c.topic)}</b></span>` : ""}
+    <span class="t">${esc(c.title)}</span>
+    ${c.desc ? `<span class="d">${esc(c.desc)}</span>` : ""}
+    ${c.tags.length ? `<span class="tags">${c.tags.map(x => `<span class="tag">#${esc(x)}</span>`).join("")}</span>` : ""}
+    <span class="meta">${c.uploader ? `<span>👤 ${esc(c.uploader)}</span>` : ""}${date ? `<span>📅 ${esc(date)}</span>` : ""}</span>
+    ${/^https?:\/\//i.test(c.url) ? `<a class="btn" href="${esc(c.url)}" target="_blank" rel="noopener">▶ 開始學習</a>` : `<span class="nolink">（未有連結）</span>`}
+  </article>`;
+}
+
+$("#grades").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b || b.disabled) return;
+  state.grade = b.dataset.g; state.unit = "全部"; saveView(); render();
+});
+$("#units").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  state.unit = b.dataset.u; saveView(); render();
+});
+$("#q").addEventListener("input", e => { state.q = e.target.value.trim(); if (COURSES.length) render(); });
+
+async function load(){
+  if (!CONFIG.API_URL){
+    $("#list").innerHTML = `<div class="empty"><span class="big">🔌</span>還未連接課件清單。請把 Apps Script 網址貼到程式碼的 <code>API_URL</code>。</div>`;
+    return;
+  }
+  try {
+    const res = await fetch(CONFIG.API_URL + "?action=list&t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || "讀取失敗");
+    COURSES = toCourses(data.courses);
+    store.set(K.list, JSON.stringify(data.courses));
+    render();
+  } catch (err){
+    // 讀取失敗時，改用上次成功讀到的清單（存在這部電腦的瀏覽器）
+    let cached = null;
+    try { cached = JSON.parse(store.get(K.list) || "null"); } catch (e) {}
+    if (cached){
+      COURSES = toCourses(cached); render();
+      $("#stats").insertAdjacentHTML("beforeend", `<span class="stat offline">⚠️ 未能連線，顯示的可能不是最新清單</span>`);
+      return;
+    }
+    $("#list").innerHTML = `<div class="empty"><span class="big">😵</span>未能讀取課件清單。<br>請檢查網絡，稍後重新整理此頁。</div>`;
+  }
+}
+
+/* ============================================================
+   上傳
+   ============================================================ */
+const dlg = $("#dlg"), form = $("#upForm"), statusBox = $("#status");
+const F = { grade: $("#fGrade"), unitSel: $("#fUnitSel"), unitTxt: $("#fUnitTxt"), topic: $("#fTopic"), file: $("#fFile"),
+  title: $("#fTitle"), desc: $("#fDesc"), tags: $("#fTags"), name: $("#fName"), pw: $("#fPw"), remember: $("#fRemember") };
+let busy = false, pending = null;
+
+let inIframe = true;
+try { inIframe = window.self !== window.top; } catch (e) {}
+if (inIframe){
+  $("#iframeNote").hidden = false;
+  const u = new URL(location.href); u.searchParams.set("upload", "1");
+  $("#newTab").href = u.toString();
+}
+if (!store.ok()){
+  F.remember.disabled = true;
+  $("#rememberHint").textContent = "此瀏覽器不允許儲存資料（例如在學校網站內），所以不能記住。";
+}
+
+F.grade.innerHTML = `<option value="">請選擇</option>` + CONFIG.grades.map(g => `<option>${esc(g)}</option>`).join("");
+F.unitSel.innerHTML = `<option value="">請選擇</option>` + CONFIG.units.map(u => `<option>${esc(u)}</option>`).join("");
+
+/** 與 Apps Script 的 safeName_() 相同：保留中文，移除危險字元 */
+function safeName(s){
+  return String(s || "").replace(/[\u0000-\u001f\u007f]/g, "").replace(/[\/\\:*?"<>|#%{}^~\[\]`]/g, "")
+    .replace(/\.{2,}/g, "").replace(/\s+/g, " ").trim().replace(/^[.\s]+|[.\s]+$/g, "").slice(0, 80);
+}
+const folderOf = g => "F" + (CONFIG.grades.indexOf(g) + 1);
+const isDse = g => CONFIG.dseGrades.includes(g);
+const getUnit = () => (isDse(F.grade.value) ? F.unitSel.value : F.unitTxt.value).trim();
+
+function updatePath(){
+  const t = safeName(F.title.value);
+  $("#pathPreview").textContent = F.grade.value && t ? `${folderOf(F.grade.value)}/${t}.html` : "—（請先選年級及填課件名稱）";
+}
+function updateGrade(){
+  const g = F.grade.value, dse = isDse(g) || !g;
+  F.unitSel.hidden = !dse; F.unitTxt.hidden = dse;
+  $("#unitLabel").htmlFor = dse ? "fUnitSel" : "fUnitTxt";
+  const sameGrade = COURSES.filter(c => !g || c.grade === g);
+  $("#unitList").innerHTML = [...new Set(sameGrade.map(c => c.unit).filter(Boolean))].map(u => `<option value="${esc(u)}">`).join("");
+  $("#topicList").innerHTML = [...new Set(sameGrade.map(c => c.topic).filter(Boolean))].map(t => `<option value="${esc(t)}">`).join("");
+  updatePath();
+}
+F.grade.addEventListener("change", updateGrade);
+F.title.addEventListener("input", () => { updatePath(); pending = null; });
+
+F.file.addEventListener("change", async () => {
+  pending = null; clearStatus();
+  const f = F.file.files[0]; if (!f) return;
+  const err = checkFile(f);
+  if (err){ showStatus("err", "檔案不符合要求", err); return; }
+  if (!F.title.value.trim()){
+    try {
+      const head = await f.slice(0, 65536).text();
+      const m = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(head);
+      if (m){ const ta = document.createElement("textarea"); ta.innerHTML = m[1]; F.title.value = ta.value.replace(/\s+/g, " ").trim().slice(0, 80); }
+      else F.title.value = f.name.replace(/\.html?$/i, "");
+    } catch (e) { F.title.value = f.name.replace(/\.html?$/i, ""); }
+    updatePath();
+  }
+});
+
+function checkFile(f){
+  if (!/\.html?$/i.test(f.name)) return "只接受 .html 或 .htm 檔案。你選的是「" + f.name + "」。";
+  if (f.size === 0) return "檔案是空白的。";
+  if (f.size > CONFIG.MAX_MB * 1048576) return `檔案太大（${(f.size / 1048576).toFixed(1)}MB），上限為 ${CONFIG.MAX_MB}MB。`;
+  return "";
+}
+
+function openUpload(){
+  pending = null; clearStatus();
+  let cred = null;
+  try { cred = JSON.parse(store.get(K.cred) || "null"); } catch (e) {}
+  if (cred){ F.name.value = F.name.value || cred.name || ""; F.pw.value = F.pw.value || cred.pw || ""; F.remember.checked = true; }
+  if (!F.grade.value && state.grade !== "全部") F.grade.value = state.grade;
+  updateGrade();
+  if (typeof dlg.showModal === "function"){ try { dlg.showModal(); } catch (e) { dlg.setAttribute("open", ""); } }
+  else dlg.setAttribute("open", "");
+}
+function closeUpload(){
+  if (busy) return;
+  if (typeof dlg.close === "function") dlg.close(); else dlg.removeAttribute("open");
+}
+$("#openUpload").addEventListener("click", openUpload);
+$("#closeUpload").addEventListener("click", closeUpload);
+$("#cancelBtn").addEventListener("click", closeUpload);
+dlg.addEventListener("cancel", e => { if (busy) e.preventDefault(); });
+
+function clearStatus(){ statusBox.className = "status"; statusBox.innerHTML = ""; }
+function showStatus(kind, title, html){
+  statusBox.className = "status show " + kind;
+  statusBox.innerHTML = `<strong>${esc(title)}</strong>${html || ""}`;
+  statusBox.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+const STEPS = ["讀取檔案", "檢查是否有同名課件", "上傳到網站（約 5–20 秒）", "更新課件清單"];
+function showProgress(i){
+  showStatus("busy", "上傳中，請不要關閉此視窗…",
+    `<ol class="steps">${STEPS.map((s, k) => `<li class="${k < i ? "done" : k === i ? "now" : ""}">${s}</li>`).join("")}</ol><div class="bar"><i></i></div>`);
+}
+function setBusy(b){
+  busy = b;
+  form.querySelectorAll("input,select,textarea,button").forEach(el => { el.disabled = b; });
+  $("#submitBtn").textContent = b ? "上傳中…" : "⬆ 上傳";
+  if (!b && !store.ok()) F.remember.disabled = true;
+}
+
+function readBase64(file){
+  return new Promise((ok, fail) => {
+    const r = new FileReader();
+    r.onload = () => ok(String(r.result).replace(/^data:[^,]*,/, ""));
+    r.onerror = () => fail(new Error("未能讀取檔案，請重新選擇。"));
+    r.readAsDataURL(file);
+  });
+}
+
+async function api(method, params, body){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 120000);
+  try {
+    const url = CONFIG.API_URL + (params ? "?" + new URLSearchParams(params) : "");
+    const opt = { method, signal: ctrl.signal, redirect: "follow" };
+    if (body){ opt.headers = { "Content-Type": "text/plain;charset=utf-8" }; opt.body = JSON.stringify(body); }
+    const res = await fetch(url, opt);
+    if (!res.ok) throw new Error("NET");
+    return await res.json();
+  } catch (e){
+    if (e.name === "AbortError") throw new Error("等候太久沒有回應，請檢查網絡後再試。");
+    throw new Error("未能連線到上傳系統，請檢查網絡後再試。如在學校網站內，可按「在新分頁開啟」。");
+  } finally { clearTimeout(timer); }
+}
+
+function validate(){
+  if (!CONFIG.API_URL) return "上傳系統未設定（API_URL 留空），請聯絡管理員。";
+  if (!F.grade.value) return "請選擇年級。";
+  if (!getUnit()) return "請選擇或填寫單元。";
+  if (!F.topic.value.trim()) return "請填寫課題。";
+  const f = F.file.files[0];
+  if (!f) return "請選擇 HTML 檔案。";
+  const fe = checkFile(f); if (fe) return fe;
+  if (!F.title.value.trim()) return "請填寫課件名稱。";
+  if (!safeName(F.title.value)) return "課件名稱不可只有符號，請加入文字。";
+  if (!F.name.value.trim()) return "請填寫上傳者姓名。";
+  if (!F.pw.value) return "請輸入教師密碼。";
+  return "";
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  if (busy) return;
+  const err = validate();
+  if (err){ showStatus("err", "未能上傳", `<div>${esc(err)}</div>`); return; }
+  await startUpload(false);
+});
+
+async function startUpload(overwrite){
+  setBusy(true);
+  try {
+    const f = F.file.files[0];
+    if (!pending || pending.file !== f){
+      showProgress(0);
+      pending = { file: f, content: await readBase64(f) };
+    }
+    const payload = {
+      grade: F.grade.value, unit: getUnit(), topic: F.topic.value.trim(), title: F.title.value.trim(),
+      desc: F.desc.value.trim(), tags: F.tags.value.trim(), uploader: F.name.value.trim(), password: F.pw.value,
+      filename: f.name, content: pending.content, overwrite
+    };
+    if (!overwrite){
+      showProgress(1);
+      const chk = await api("GET", { action: "exists", grade: payload.grade, title: payload.title });
+      if (chk.ok && chk.exists){ askOverwrite(chk.path, chk.uploader); return; }
+    }
+    showProgress(2);
+    const r = await api("POST", null, payload);
+    if (!r.ok){
+      if (r.code === "EXISTS"){ askOverwrite(r.path, r.uploader); return; }
+      showStatus("err", "上傳失敗", `<div>${esc(r.message || "發生未知錯誤。")}</div>`);
+      if (r.code === "BAD_PASSWORD" || r.code === "LOCKED"){ F.pw.value = ""; store.del(K.cred); }
+      return;
+    }
+    if (F.remember.checked && !F.remember.disabled) store.set(K.cred, JSON.stringify({ name: payload.uploader, pw: payload.password }));
+    else store.del(K.cred);
+    showProgress(3);
+    await load();
+    showStatus("ok", r.updated ? "✔ 已更新課件" : "✔ 上傳成功",
+      `<div>課件網址：<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></div>
+       <div style="margin-top:6px">網站需要 <b>1–3 分鐘</b> 處理。如果打開網址顯示「404」，請稍等一會，再重新整理便會出現。</div>
+       <div class="actions" style="margin-top:10px"><button class="btn ghost" type="button" id="againBtn">再上傳一個</button></div>`);
+    pending = null;
+    F.file.value = ""; F.title.value = ""; F.desc.value = ""; F.tags.value = ""; updatePath();
+    $("#againBtn").addEventListener("click", () => { clearStatus(); F.file.focus(); });
+  } catch (err){
+    showStatus("err", "上傳失敗", `<div>${esc(err.message)}</div>`);
+  } finally {
+    setBusy(false);
+    if (statusBox.querySelector("#againBtn")) statusBox.querySelector("#againBtn").disabled = false;
+    statusBox.querySelectorAll(".ask-btn").forEach(b => b.disabled = false);
+  }
+}
+
+function askOverwrite(path, uploader){
+  showStatus("ask", "⚠ 已有同名課件，是否更新？",
+    `<div>檔案「${esc(path)}」已經存在${uploader ? `（原上傳者：<b>${esc(uploader)}</b>）` : ""}。</div>
+     <div>選擇「是，更新」會以你的檔案取代舊版本，並更新試算表原有那一行。</div>
+     <div class="actions" style="margin-top:10px">
+       <button class="btn ghost ask-btn" type="button" id="noBtn">不要，改名</button>
+       <button class="btn warn ask-btn" type="button" id="yesBtn">是，更新</button>
+     </div>`);
+  $("#yesBtn").addEventListener("click", () => startUpload(true));
+  $("#noBtn").addEventListener("click", () => { clearStatus(); F.title.focus(); F.title.select(); });
+}
+
+load().then(() => { if (new URLSearchParams(location.search).get("upload") === "1") openUpload(); });
+</script>
