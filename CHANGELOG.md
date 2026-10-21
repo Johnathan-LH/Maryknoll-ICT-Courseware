@@ -3,6 +3,7 @@
 最新的記錄放在最上方。格式及規則見 [AGENTS.md](AGENTS.md) 第 4 節。
 
 ## 2026-10-21
+- 修改：README.md 加入管理員維護說明（密碼、token、鎖定、部署、下架）。
 - 刪除：測試課件「上傳測試課件」（F4/上傳測試課件.html）及其試算表行；原因：教師要求刪除。
 - 上架（由 Teacher 倉庫複製，原檔保留，已同步）：中五「D 計算思維與程式編寫」課題「檢索及排序算法」— DSE 算法追蹤室（F5/DSE 算法追蹤室.html）
 - 新增：與 Teacher 倉庫同步 ICT 課件的規則（AGENTS.md 第 4 節）、對照表 ict-sync.tsv 及檢查腳本 tools/check-ict-sync.sh。
