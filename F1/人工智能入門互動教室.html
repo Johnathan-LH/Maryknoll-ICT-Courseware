@@ -1,0 +1,1922 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>人工智能入門互動教室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+/* Layout: a book on a projector. One concept per page; chapter tabs on top, page numbers and turn buttons at the bottom.
+   Engine: HK school textbook + teacher's marking. Yellow highlighter only behind key terms, blue ballpoint for anything you can press, red pen only for marking. Single light theme on purpose (projectors wash out dark pages). */
+:root{
+  --paper:#FBFBF8;
+  --paper-2:#F1F2EE;
+  --ink:#17181C;
+  --lead:#5A5E66;
+  --rule:#D9DCE1;
+  --blue:#2348B5;
+  --blue-soft:#E4E9F7;
+  --hl:#FFE357;
+  --red:#D42C2C;
+  --red-soft:#FBE9E7;
+  --f-title:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-hand:"LXGW WenKai TC","Kaiti TC","DFKai-SB","BiauKai",cursive;
+  --f-code:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --fs:clamp(18px, 1.1vw + 10px, 28px);
+  --line:2.5px;
+  --r:6px;
+  --barH:3.4rem;
+  color-scheme:light;
+}
+html{font-size:var(--fs);height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.65;min-height:100%}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.stage:focus,.stage:focus-visible{outline:none}
+a{color:var(--blue);text-underline-offset:.2em}
+p{margin:0}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--paper);border-bottom:var(--line) solid var(--ink);display:flex;align-items:stretch;gap:1rem;padding-inline:clamp(16px,2vw,40px);min-height:var(--barH)}
+.brand{display:flex;flex-direction:column;justify-content:center;line-height:1.15;flex:none}
+.brand b{font-family:var(--f-title);font-weight:900;font-size:.95rem}
+.brand span{font-family:var(--f-code);font-size:.55rem;color:var(--lead);letter-spacing:.08em}
+.tabs{position:relative;display:flex;align-items:stretch;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;z-index:1;border:0;background:transparent;padding:.2rem .85rem;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;line-height:1.15;white-space:nowrap;color:var(--lead)}
+.tab .k{font-family:var(--f-code);font-weight:600;font-size:.6rem}
+.tab .t{font-weight:700;font-size:.72rem}
+.tab[aria-selected="true"],.tab:hover{color:var(--ink)}
+.tab-ind{position:absolute;bottom:0;height:7px;background:var(--hl);border-top:var(--line) solid var(--ink);border-inline:var(--line) solid var(--ink);transition:left .28s cubic-bezier(.3,.7,.2,1),width .28s cubic-bezier(.3,.7,.2,1)}
+.tools{display:flex;align-items:center;gap:.5rem;flex:none}
+
+/* ---------- page area ---------- */
+.stage{overflow-x:clip;padding-block:1.6rem calc(var(--barH) + 2.4rem);padding-inline:clamp(16px,4vw,96px)}
+.page{max-width:82rem;margin-inline:auto;display:flex;flex-direction:column;gap:1.3rem}
+.page.enter-r{animation:enterR .34s cubic-bezier(.2,.7,.2,1)}
+.page.enter-l{animation:enterL .34s cubic-bezier(.2,.7,.2,1)}
+@keyframes enterR{from{transform:translateX(48px);opacity:0}to{transform:none;opacity:1}}
+@keyframes enterL{from{transform:translateX(-48px);opacity:0}to{transform:none;opacity:1}}
+.page.first [data-in]{animation:rise .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 60ms + 80ms)}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.ph{display:grid;gap:.25rem}
+.kicker{display:flex;align-items:center;gap:.6rem;font-family:var(--f-code);font-weight:600;font-size:.62rem;color:var(--lead);letter-spacing:.06em}
+.kicker .act{font-family:var(--f-body);font-weight:900;letter-spacing:0;font-size:.62rem;color:#fff;background:var(--blue);padding:.05rem .55rem;border-radius:3px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+.ph h2{font-family:var(--f-title);font-weight:900;font-size:2.15rem;line-height:1.22}
+.lead{color:var(--lead);max-width:46em}
+h3{font-family:var(--f-title);font-weight:900;font-size:1.3rem;line-height:1.3}
+h4{font-weight:900;font-size:1.02rem;line-height:1.35}
+
+/* highlighter */
+mark.hl{background:linear-gradient(transparent 52%, var(--hl) 52% 92%, transparent 92%) no-repeat 0 0/100% 100%;color:inherit;padding-inline:.08em;font-weight:700}
+.page.first mark.hl{animation:swipe .55s cubic-bezier(.4,.1,.2,1) both;animation-delay:calc(var(--i,0) * 60ms + 380ms)}
+@keyframes swipe{from{background-size:0% 100%}to{background-size:100% 100%}}
+
+/* prose & rules */
+.prose{display:grid;gap:.75rem;max-width:44em}
+.prose ul,.prose ol{margin:0;padding-left:1.3em;display:grid;gap:.35rem}
+.defn{font-size:1.35rem;line-height:1.55;font-weight:700;max-width:34em;border-left:6px solid var(--ink);padding-left:1rem}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1rem,3vw,3rem);align-items:start}
+.split.wide-l{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+.rule-top{border-top:var(--line) solid var(--ink);padding-top:.7rem}
+.note{font-size:.78rem;color:var(--lead)}
+.hand{font-family:var(--f-hand);font-size:1.05rem;line-height:1.55;color:var(--blue)}
+.margin{font-family:var(--f-hand);color:var(--blue);font-size:.95rem;line-height:1.5;border-left:2px dashed var(--blue);padding:.2rem 0 .2rem .9rem;max-width:46em}
+.src{font-size:.62rem;color:var(--lead);font-family:var(--f-body)}
+
+/* comparison table */
+.cmp{width:100%;border-collapse:collapse}
+.cmp th{font-family:var(--f-title);font-weight:900;font-size:1.1rem;text-align:left;padding:.4rem .8rem;border-bottom:var(--line) solid var(--ink)}
+.cmp td{padding:.45rem .8rem;border-bottom:1px solid var(--rule);vertical-align:top}
+.cmp td+td,.cmp th+th{border-left:var(--line) solid var(--ink)}
+.cmp .rowh{font-weight:900;white-space:nowrap}
+
+/* buttons: ballpoint blue, press down */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.3rem;padding:.3rem 1rem;border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;font-weight:700;font-size:.82rem;line-height:1.2;box-shadow:0 4px 0 var(--ink);transform:translateY(0);transition:transform .08s ease,box-shadow .08s ease,background .15s;text-decoration:none;color:var(--ink)}
+.btn:hover{background:var(--blue-soft)}
+.btn:active:not([disabled]){transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.primary:hover{background:#1B3A99}
+.btn.quiet{box-shadow:none;border-color:var(--rule);background:transparent}
+.btn.quiet:active:not([disabled]){transform:translateY(1px)}
+.btn.small{min-height:1.8rem;padding:.15rem .6rem;font-size:.7rem;box-shadow:0 3px 0 var(--ink)}
+.btn.small:active:not([disabled]){transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn.quiet.small{box-shadow:none}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn svg{width:1em;height:1em;flex:none}
+.row{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
+.row .grow{flex:1}
+
+/* red pen marks */
+.pen{stroke:var(--red);fill:none;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.pen-draw path{stroke-dasharray:60;stroke-dashoffset:60;animation:draw .38s ease-out forwards}
+.pen-draw path+path{animation-delay:.16s}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* Q&A block */
+.qa{display:grid;gap:.5rem;border-top:var(--line) solid var(--ink);padding-top:.7rem}
+.qa .q{display:grid;grid-template-columns:auto 1fr;gap:.6rem;font-weight:700}
+.qa .q::before{content:"問";font-family:var(--f-title);font-weight:900;background:var(--ink);color:#fff;width:1.6rem;height:1.6rem;display:grid;place-items:center;border-radius:3px;font-size:.8rem;margin-top:.15rem}
+.qa .a{font-family:var(--f-hand);color:var(--red);font-size:1.1rem;line-height:1.5;padding-left:2.2rem}
+.qa .a.show{animation:rise .35s ease both}
+.qa .ctl{padding-left:2.2rem}
+
+/* ---------- bottom bar ---------- */
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-top:var(--line) solid var(--ink);min-height:var(--barH);display:flex;align-items:center;gap:1rem;padding-inline:clamp(16px,2vw,40px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.pages{display:flex;gap:.3rem;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;align-items:center;padding-block:.3rem}
+.pages::-webkit-scrollbar{display:none}
+.pg{flex:none;min-width:2.1rem;height:2.1rem;border:2px solid var(--rule);border-radius:4px;background:#fff;font-family:var(--f-code);font-weight:600;font-size:.62rem;color:var(--lead);display:grid;place-items:center;padding-inline:.3rem}
+.pg.act{border-style:dashed;border-color:var(--blue);color:var(--blue)}
+.pg.act::before{content:"活動 ";font-family:var(--f-body);font-weight:700}
+.pg[aria-current="true"]{background:var(--ink);border:2px solid var(--ink);color:#fff}
+.pg[aria-current="true"].act{background:var(--blue);border-color:var(--blue);border-style:solid;color:#fff}
+.pnum{font-family:var(--f-code);font-weight:600;font-size:.66rem;color:var(--lead);white-space:nowrap}
+.turn{display:flex;gap:.5rem}
+.bump-r{animation:bumpR .28s ease}
+.bump-l{animation:bumpL .28s ease}
+@keyframes bumpR{50%{transform:translateX(12px)}}
+@keyframes bumpL{50%{transform:translateX(-12px)}}
+
+/* ---------- contents page ---------- */
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:0 3rem}
+.toc-item{display:grid;grid-template-columns:3.6rem 1fr auto;gap:.8rem;align-items:baseline;padding:.75rem 0;border:0;border-bottom:1px solid var(--rule);background:transparent;text-align:left;width:100%}
+.toc-item:hover .tt{text-decoration:underline;text-decoration-color:var(--blue);text-decoration-thickness:3px;text-underline-offset:6px}
+.toc-item .no{font-family:var(--f-code);font-weight:600;font-size:1.1rem}
+.toc-item .tt{font-family:var(--f-title);font-weight:900;font-size:1.25rem;line-height:1.3}
+.toc-item .acts{display:block;font-family:var(--f-body);font-weight:400;font-size:.72rem;color:var(--lead);margin-top:.15rem}
+.toc-item .pp{font-family:var(--f-code);font-size:.7rem;color:var(--lead);white-space:nowrap}
+.cover-title{font-family:var(--f-title);font-weight:900;font-size:3.4rem;line-height:1.15}
+.cover-title small{display:block;font-family:var(--f-code);font-weight:600;font-size:.8rem;color:var(--lead);letter-spacing:.12em;margin-bottom:.4rem}
+
+/* ---------- turing ---------- */
+.question{font-size:1.3rem;font-weight:900;padding:.6rem 0;border-bottom:var(--line) solid var(--ink)}
+.question[contenteditable="true"]{background:#FFFBE0;outline:2px dashed var(--blue);outline-offset:4px}
+.cards6{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem}
+.tcard{perspective:1400px;min-height:13rem}
+.tcard-inner{position:relative;height:100%;min-height:13rem;transition:transform .65s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.tcard.flipped .tcard-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;padding:.8rem 1rem;display:flex;flex-direction:column;gap:.5rem;overflow:auto}
+.face .lab{font-family:var(--f-code);font-size:.66rem;font-weight:600;color:var(--lead);display:flex;justify-content:space-between;align-items:center;gap:.4rem}
+.face .ans{flex:1;font-size:.92rem;line-height:1.55}
+.face .ans[contenteditable="true"]{outline:2px dashed var(--blue);outline-offset:3px;background:#FFFBE0}
+.back{transform:rotateY(180deg);align-items:center;justify-content:center;text-align:center}
+.back.is-ai{background:var(--ink);color:#fff}
+.back.is-ai .lab{color:#B9BEC8}
+.back.is-human{background:repeating-linear-gradient(0deg,#fff 0 1.9rem,var(--rule) 1.9rem calc(1.9rem + 1px))}
+.verdict{font-family:var(--f-title);font-size:2.1rem;font-weight:900;line-height:1.1}
+.back .tally{font-family:var(--f-code);font-size:.75rem}
+.vote{display:flex;align-items:center;gap:.5rem;font-size:.72rem}
+.count{font-family:var(--f-code);font-weight:600;font-size:1.25rem;min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
+.toggle-ai{font-size:.66rem;border:2px solid var(--rule);border-radius:999px;padding:.05rem .6rem;background:#fff}
+.toggle-ai[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.edit-banner{background:#FFFBE0;border:2px dashed var(--blue);border-radius:var(--r);padding:.5rem .9rem;font-size:.78rem}
+.big-num{font-family:var(--f-code);font-weight:600;font-size:3rem;line-height:1}
+.fact{display:grid;grid-template-columns:auto 1fr;gap:1.2rem;align-items:center;border-top:var(--line) solid var(--ink);border-bottom:var(--line) solid var(--ink);padding-block:.9rem}
+.diagram svg{width:100%;height:auto;max-width:44rem}
+
+/* waves */
+.waves{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.wave{position:relative;border:var(--line) solid var(--ink);border-left-width:0;padding:.8rem 1rem 1rem;display:grid;gap:.4rem;align-content:start;background:#fff;text-align:left}
+.wave:first-child{border-left-width:var(--line);border-radius:var(--r) 0 0 var(--r)}
+.wave:last-child{border-radius:0 var(--r) var(--r) 0}
+.wave .yr{font-family:var(--f-code);font-weight:600;font-size:.72rem;color:var(--lead)}
+.wave .nm{font-family:var(--f-title);font-weight:900;font-size:1.45rem;line-height:1.2}
+.wave .what{font-size:.86rem}
+.wave .out{font-family:var(--f-hand);font-size:1rem;line-height:1.45;color:var(--red);border-top:1px dashed var(--rule);padding-top:.4rem;margin-top:.2rem}
+.wave.cur{background:var(--blue-soft)}
+.wave .stamp{position:absolute;top:.5rem;right:.6rem;font-weight:900;font-size:.62rem;border:2px solid currentColor;color:var(--red);padding:0 .35rem;border-radius:3px;transform:rotate(6deg)}
+.wave .stamp.go{color:var(--blue)}
+.chain3{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.6rem;align-items:stretch}
+.chain3 .node{border:var(--line) solid var(--ink);border-radius:var(--r);padding:.6rem .8rem;display:grid;gap:.25rem;background:#fff;align-content:start}
+.chain3 .node b{font-family:var(--f-title);font-weight:900;font-size:1.15rem}
+.chain3 .node small{font-size:.72rem;color:var(--lead)}
+.chain3 .arr{align-self:center;font-family:var(--f-code);font-weight:600;font-size:1.4rem}
+.who{display:grid;grid-template-columns:auto 1fr;gap:.15rem .5rem;font-size:.8rem;margin:0}
+.who dt{font-weight:900}
+.who dd{margin:0}
+
+/* sorter */
+.sorter{display:flex;flex-direction:column;gap:1rem}
+.pool{min-height:4.6rem;display:flex;flex-wrap:wrap;gap:.6rem;align-content:flex-start;padding:.7rem;border:2px dashed var(--rule);border-radius:var(--r)}
+.pool:empty::after{content:"全部卡片已放好，可以按「批改」。";color:var(--lead);font-size:.78rem;align-self:center}
+.bins{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,11.5rem),1fr))}
+.bin{display:flex;flex-direction:column;border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;min-height:11rem;min-width:0}
+.bin-head{border-bottom:var(--line) solid var(--ink);padding:.4rem .7rem;display:flex;justify-content:space-between;gap:.4rem;align-items:baseline;flex-wrap:wrap}
+.bin-head span{font-family:var(--f-title);font-weight:900;font-size:1rem}
+.bin-head small{font-size:.6rem;color:var(--lead)}
+.bin-drop{flex:1;display:flex;flex-direction:column;gap:.5rem;padding:.6rem;transition:background .15s}
+.over{background:var(--blue-soft)!important}
+.target-ready .bin-drop,.target-ready.pool{outline:3px dashed var(--blue);outline-offset:-7px}
+.dcard{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;background:#fff;border:2px solid var(--ink);border-radius:5px;padding:.4rem .7rem;font-size:.82rem;line-height:1.35;font-weight:700;cursor:grab;box-shadow:0 3px 0 var(--ink);display:flex;flex-direction:column;gap:.25rem;max-width:100%}
+.dcard:active{cursor:grabbing}
+.dcard.selected{background:var(--hl);box-shadow:0 0 0 3px var(--blue)}
+.dcard.dragging-src{opacity:.25}
+.dcard .why{display:none;font-weight:400;font-size:.7rem;color:var(--lead);border-top:1px dashed var(--rule);padding-top:.25rem}
+.dcard.graded .why{display:block}
+.dcard .mark{display:none;font-family:var(--f-hand);font-size:.9rem;color:var(--red);font-weight:700}
+.dcard.graded .mark{display:block}
+.dcard .tick{position:absolute;top:-.8rem;right:-.6rem;width:2.1rem;height:2.1rem}
+.dcard.wrong{border-style:dashed;box-shadow:none;background:var(--red-soft)}
+.dcard.pop{animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+.drag-ghost{position:fixed;z-index:1000;pointer-events:none;transform:rotate(-2deg);box-shadow:0 12px 24px rgba(23,24,28,.25)}
+.score{font-family:var(--f-code);font-weight:600;font-size:.95rem}
+
+/* domain explorer */
+.dom{display:grid;grid-template-columns:minmax(12rem,16rem) minmax(0,1fr);gap:2rem;align-items:start}
+.dom-list{display:grid;border-top:var(--line) solid var(--ink)}
+.dom-list button{display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:baseline;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--rule);padding:.6rem .4rem}
+.dom-list button .n{font-family:var(--f-code);font-weight:600;color:var(--lead)}
+.dom-list button .t{font-family:var(--f-title);font-weight:900;font-size:1.15rem}
+.dom-list button[aria-selected="true"]{background:var(--hl)}
+.dom-list button[aria-selected="true"] .n{color:var(--ink)}
+.dom-panel{display:grid;gap:1rem}
+.says{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+.say{border:var(--line) solid var(--ink);border-radius:var(--r);padding:.8rem 1rem;display:grid;gap:.3rem;background:#fff;align-content:start}
+.say .who2{font-family:var(--f-code);font-size:.62rem;font-weight:600;color:var(--lead)}
+.say p{font-weight:700}
+.say.pc{background:var(--ink);color:#fff}
+.say.pc .who2{color:#B9BEC8}
+
+/* dilemma */
+.dil{display:grid;gap:1rem}
+.road{border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;overflow:hidden}
+.road svg{display:block;width:100%;height:auto}
+.choices{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+.choice{border:var(--line) solid var(--ink);border-radius:var(--r);padding:.8rem 1rem;display:grid;gap:.5rem;background:#fff;align-content:start}
+.choice .lbl{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+.choice .lbl b{font-family:var(--f-title);font-weight:900;font-size:1.2rem}
+.choice .lbl span{font-family:var(--f-code);font-size:.62rem;color:var(--lead)}
+.choice p{font-size:.92rem}
+.vbar{height:2.2rem;border:2px solid var(--ink);border-radius:5px;background:#fff;overflow:hidden;position:relative}
+.vbar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--blue) 0 8px,#3B5FCC 8px 16px);transition:width .35s ease}
+.vbar.alt i{background:repeating-linear-gradient(90deg,var(--ink) 0 6px,#33363D 6px 12px)}
+.vbar b{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-family:var(--f-code);font-size:.85rem;background:#fff;border:1.5px solid var(--ink);border-radius:4px;padding:0 .35rem;font-variant-numeric:tabular-nums}
+.steps{display:flex;gap:.3rem;flex-wrap:wrap}
+.steps span{font-family:var(--f-code);font-size:.66rem;font-weight:600;border:2px solid var(--rule);border-radius:4px;min-width:1.8rem;text-align:center;padding:.05rem .3rem;color:var(--lead)}
+.steps span.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.steps span.done{border-color:var(--ink);color:var(--ink)}
+.sumtbl{width:100%;border-collapse:collapse;font-size:.85rem}
+.sumtbl th,.sumtbl td{border-bottom:1px solid var(--rule);padding:.4rem .5rem;text-align:left;vertical-align:top}
+.sumtbl th{border-bottom:var(--line) solid var(--ink);font-weight:900}
+.sumtbl td.num{font-family:var(--f-code);white-space:nowrap}
+
+/* vision */
+.vision{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1.4rem;align-items:start}
+.viewer{position:relative;aspect-ratio:4/3;max-width:100%;background:var(--ink);border-radius:var(--r);overflow:hidden;display:grid;place-items:center;color:#B9BEC8;text-align:center;border:var(--line) solid var(--ink)}
+.viewer video,.viewer canvas{width:100%;height:100%;object-fit:contain}
+.viewer .empty{padding:1rem;font-size:.82rem}
+.viewer.drop-hover{outline:4px dashed var(--hl);outline-offset:-10px}
+.results{display:flex;flex-direction:column;gap:.7rem}
+.res{display:grid;gap:.25rem}
+.res .rw{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline}
+.res .name{font-weight:900;font-size:1.05rem;min-width:0;overflow-wrap:anywhere}
+.res .en{font-family:var(--f-code);font-size:.6rem;color:var(--lead);display:block;font-weight:500}
+.res .pct{font-family:var(--f-code);font-weight:600;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.bar{height:1.1rem;border:2px solid var(--ink);border-radius:4px;background:#fff;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--blue) 0 8px,#3B5FCC 8px 16px);transition:width .6s ease}
+.res:nth-child(2) .bar i{background:repeating-linear-gradient(45deg,#7A8FCF 0 8px,#8DA0D7 8px 16px)}
+.res:nth-child(3) .bar i{background:repeating-linear-gradient(45deg,#B3BEDF 0 8px,#C2CCE6 8px 16px)}
+.status{font-size:.78rem;color:var(--lead);min-height:1.4em}
+.spinner{display:inline-block;width:1em;height:1em;border:3px solid var(--rule);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;vertical-align:-.15em;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.warn{border:2px dashed var(--red);background:var(--red-soft);border-radius:var(--r);padding:.7rem .9rem;font-size:.82rem}
+.warn strong{color:var(--red)}
+
+/* speech */
+.seg{display:inline-flex;position:relative;border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;padding:3px}
+.seg button{position:relative;z-index:1;border:0;background:transparent;padding:.2rem .9rem;font-weight:700;font-size:.78rem;border-radius:3px;transition:color .2s}
+.seg button[aria-selected="true"]{color:#fff}
+.seg .knob{position:absolute;top:3px;bottom:3px;left:3px;background:var(--ink);border-radius:3px;transition:left .25s cubic-bezier(.3,.7,.2,1),width .25s cubic-bezier(.3,.7,.2,1)}
+.mic{width:5.4rem;height:5.4rem;border-radius:50%;border:var(--line) solid var(--ink);background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.mic:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.mic svg{width:2.3rem;height:2.3rem}
+.mic.on{background:var(--red);color:#fff;animation:pulse 1.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 4px 0 var(--ink),0 0 0 0 rgba(212,44,44,.45)}100%{box-shadow:0 4px 0 var(--ink),0 0 0 22px rgba(212,44,44,0)}}
+.transcript{min-height:8rem;font-size:1.9rem;font-weight:900;line-height:1.4;border-top:var(--line) solid var(--ink);border-bottom:var(--line) solid var(--ink);padding:.8rem 0;overflow-wrap:anywhere}
+.transcript .interim{color:var(--lead);font-weight:400}
+.transcript .ph{color:var(--lead);font-weight:400;font-size:1rem}
+.idiom{font-family:var(--f-title);font-size:4rem;font-weight:900;letter-spacing:.2em;text-align:center;line-height:1.2}
+.compare{display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap;min-height:3.6rem}
+.compare span{font-size:2.1rem;font-weight:900;width:3.1rem;height:3.5rem;display:grid;place-items:center;border:2px solid var(--ink);border-radius:5px;background:#fff;position:relative}
+.compare span.miss{border-style:dashed;background:var(--red-soft)}
+.compare span.miss::after{content:"✗";position:absolute;top:-.7rem;right:-.5rem;font-family:var(--f-hand);font-size:1.1rem;color:var(--red);font-weight:700}
+.verdict2{text-align:center;font-family:var(--f-hand);color:var(--red);font-size:1.4rem;font-weight:700;min-height:1.6em}
+
+/* vote */
+.votes{display:grid;gap:.6rem}
+.vrow{display:grid;grid-template-columns:minmax(6rem,11rem) minmax(0,1fr) auto;gap:.8rem;align-items:center}
+.vrow .whoq{font-weight:900}
+.vctl{display:flex;gap:.35rem}
+.vrow:nth-child(2) .vbar i{background:repeating-linear-gradient(90deg,var(--ink) 0 6px,#33363D 6px 12px)}
+.vrow:nth-child(3) .vbar i{background:radial-gradient(circle,var(--blue) 2px,var(--blue-soft) 2.5px) 0 0/10px 10px}
+.vrow:nth-child(4) .vbar i{background:var(--hl)}
+.vrow:nth-child(5) .vbar i{background:repeating-linear-gradient(0deg,#6B7080 0 5px,#8D919C 5px 10px)}
+.risks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:var(--line) solid var(--ink)}
+.risk{padding:.8rem 1.1rem .9rem 0;display:grid;gap:.35rem;align-content:start}
+.risk+.risk{border-left:1px solid var(--rule);padding-left:1.1rem}
+.risk .k{font-family:var(--f-code);font-size:.62rem;color:var(--lead)}
+.risk p{font-size:.88rem}
+
+/* prompt challenge */
+.pc-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.6rem;align-items:start}
+.taskcard{border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;padding:.9rem 1.1rem;display:grid;gap:.5rem;box-shadow:0 4px 0 var(--ink)}
+.taskcard .no{font-family:var(--f-code);font-weight:600;font-size:.66rem;color:var(--lead)}
+.taskcard .scene{font-family:var(--f-title);font-weight:900;font-size:1.3rem;line-height:1.45}
+.slots{display:grid;gap:.6rem}
+.slot{display:grid;grid-template-columns:5.4rem 1fr;gap:.6rem;align-items:start}
+.slot .sl{font-weight:900;font-size:.8rem;padding-top:.15rem;line-height:1.3}
+.slot .sl small{display:block;font-weight:400;font-size:.6rem;color:var(--lead)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.chip{border:2px solid var(--ink);border-radius:999px;background:#fff;padding:.05rem .65rem;font-size:.72rem;font-weight:700;transition:background .15s,color .15s}
+.chip[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+.promptbox{width:100%;min-height:6rem;resize:vertical;border:var(--line) solid var(--ink);border-radius:var(--r);padding:.6rem .8rem;font-family:var(--f-code);font-size:.8rem;line-height:1.5;background:#fff}
+.checklist{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.checklist li button{width:100%;display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:center;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--rule);padding:.4rem 0;font-size:.92rem}
+.checklist .box{width:1.5rem;height:1.5rem;border:2px solid var(--ink);border-radius:3px;position:relative;background:#fff}
+.checklist .box svg{position:absolute;left:-.3rem;top:-.55rem;width:2.3rem;height:2.3rem}
+.toast{font-family:var(--f-hand);color:var(--blue);font-size:.92rem;min-height:1.4em;overflow-wrap:anywhere}
+
+/* face game */
+.rounds{display:flex;flex-wrap:wrap;gap:.45rem}
+.rounds .rd{width:2.6rem;height:2.6rem;border:2px solid var(--rule);border-radius:5px;display:grid;place-items:center;position:relative;font-family:var(--f-code);font-size:.6rem;color:var(--lead)}
+.rounds .rd svg{position:absolute;inset:.1rem;width:calc(100% - .2rem);height:calc(100% - .2rem)}
+.rounds .rd.set{border-color:var(--ink)}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:0 2rem;margin:0;padding:0;list-style:none}
+.tips li{display:grid;grid-template-columns:1.8rem 1fr;gap:.4rem;padding:.45rem 0;border-bottom:1px solid var(--rule);font-size:.88rem}
+.tips li b{font-family:var(--f-code);font-weight:600;color:var(--lead)}
+
+/* IoT */
+.iot{display:grid;grid-template-columns:minmax(0,14rem) minmax(0,1fr);gap:1.6rem;align-items:start}
+.binwrap{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.binwrap svg{width:100%;max-width:12rem;height:auto}
+.reading{font-family:var(--f-code);font-weight:600;font-size:1.5rem;font-variant-numeric:tabular-nums;text-align:center;line-height:1.2}
+.reading small{display:block;font-size:.6rem;color:var(--lead);font-weight:500}
+input[type=range]{width:100%;accent-color:var(--blue);height:2.2rem}
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.3rem;position:relative}
+.station{position:relative;border:2px solid var(--rule);border-radius:var(--r);background:#fff;padding:.6rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.25rem;transition:border-color .3s,background .3s}
+.station svg{width:2.4rem;height:2.4rem}
+.station .t{font-weight:900;font-size:.86rem;line-height:1.25}
+.station .d{font-size:.62rem;color:var(--lead);line-height:1.35}
+.station:not(:last-child)::after{content:"→";position:absolute;right:-1.15rem;top:50%;transform:translateY(-50%);font-family:var(--f-code);font-weight:600;color:var(--rule)}
+.station.lit{border-color:var(--ink);background:var(--hl)}
+.station.done{border-color:var(--ink)}
+.station.done:not(:last-child)::after{color:var(--ink)}
+.packet{position:absolute;width:1rem;height:1rem;border-radius:50%;background:var(--blue);border:2px solid var(--ink);top:-.6rem;left:0;opacity:0;transition:left .6s ease,opacity .2s}
+.alertbox{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;border:var(--line) solid var(--ink);background:var(--hl);border-radius:var(--r);padding:.9rem 1.1rem;animation:pop .45s ease}
+.alertbox svg{width:2.8rem;height:2.8rem}
+.log{font-family:var(--f-code);font-size:.62rem;color:var(--lead);display:flex;flex-direction:column;gap:.1rem;max-height:6.5rem;overflow:auto}
+
+/* areas */
+.areas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:var(--line) solid var(--ink)}
+.area{padding:.9rem 1.2rem .9rem 0;display:grid;gap:.35rem;align-content:start;border-bottom:1px solid var(--rule)}
+.area:nth-child(even){padding-left:1.2rem;border-left:1px solid var(--rule)}
+.area .k{font-family:var(--f-code);font-size:.62rem;color:var(--lead)}
+.area p{font-size:.88rem}
+.boxed{border:var(--line) solid var(--ink);border-radius:var(--r);padding:.8rem 1rem;display:grid;gap:.35rem;background:#fff}
+.boxed .tag{font-weight:900;font-size:.74rem}
+.flow3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.2rem;counter-reset:f}
+.flow3.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.flow3 > div{border-top:var(--line) solid var(--ink);padding-top:.5rem;display:grid;gap:.25rem;align-content:start}
+.flow3 > div::before{counter-increment:f;content:"步驟 " counter(f);font-family:var(--f-code);font-size:.62rem;font-weight:600;color:var(--lead)}
+.flow3 .eg{font-family:var(--f-hand);color:var(--blue);font-size:.95rem}
+
+/* quiz */
+.qtext{font-family:var(--f-title);font-size:1.55rem;font-weight:900;line-height:1.35;text-wrap:balance}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
+.opt{position:relative;display:grid;grid-template-columns:2.4rem 1fr;gap:.7rem;align-items:center;border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;padding:.65rem .9rem;font-size:1.02rem;font-weight:700;line-height:1.35}
+.opt .L{font-size:1.2rem;display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:4px;background:var(--ink);color:#fff}
+.opt .ring{position:absolute;inset:-.55rem -.45rem;width:calc(100% + .9rem);height:calc(100% + 1.1rem);pointer-events:none;overflow:visible}
+.opt .ring ellipse{stroke-dasharray:1300;stroke-dashoffset:1300;animation:drawLong .55s ease-out forwards}
+@keyframes drawLong{to{stroke-dashoffset:0}}
+.opt .ok{position:absolute;right:.8rem;bottom:-.1rem;transform:translateY(50%);background:var(--paper);padding:0 .3rem;font-family:var(--f-hand);color:var(--red);font-weight:700;font-size:.95rem}
+.opt.dim{opacity:.4}
+.teams{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem}
+.team{border:var(--line) solid var(--ink);border-radius:var(--r);background:#fff;padding:.5rem .7rem;display:grid;gap:.3rem;text-align:center}
+.team .tn{font-weight:900;font-size:.86rem;border-bottom:1px dashed var(--rule);outline:none}
+.team .tn:focus{background:#FFFBE0}
+.team .ts{font-family:var(--f-code);font-weight:600;font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums;display:inline-block}
+.team .ts.roll{animation:roll .3s ease}
+@keyframes roll{from{transform:translateY(-40%);opacity:.2}to{transform:none;opacity:1}}
+.team .tb{display:flex;gap:.3rem;justify-content:center}
+.board{display:grid;gap:.6rem}
+.brow{display:grid;grid-template-columns:3rem minmax(5rem,10rem) minmax(0,1fr);gap:.8rem;align-items:center}
+.brow .rk{font-family:var(--f-code);font-weight:600;font-size:1.4rem;text-align:center}
+.brow .nm{font-weight:900;font-size:1.05rem}
+.brow.first .rk{background:var(--hl);border:2px solid var(--ink);border-radius:5px}
+.summary{display:grid;counter-reset:s;border-top:var(--line) solid var(--ink);margin:0;padding:0;max-width:52em}
+.summary li{list-style:none;display:grid;grid-template-columns:3rem 1fr;gap:.6rem;padding:.75rem 0;border-bottom:1px solid var(--rule)}
+.summary li::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-family:var(--f-code);font-weight:600;color:var(--lead);font-size:1.1rem}
+
+/* responsive */
+@media (max-width:1100px){
+  .vision,.iot,.pc-grid,.split,.split.wide-l,.dom{grid-template-columns:1fr}
+  .risks{grid-template-columns:1fr}
+  .risk+.risk{border-left:0;padding-left:0;border-top:1px solid var(--rule)}
+  .flow3.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:800px){
+  .brand{display:none}
+  .waves{grid-template-columns:1fr}
+  .wave,.wave:first-child,.wave:last-child{border-left-width:var(--line);border-radius:0;border-top-width:0}
+  .wave:first-child{border-top-width:var(--line);border-radius:var(--r) var(--r) 0 0}
+  .wave:last-child{border-radius:0 0 var(--r) var(--r)}
+  .chain3{grid-template-columns:1fr}
+  .chain3 .arr{transform:rotate(90deg);justify-self:center}
+  .chain{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .station:not(:last-child)::after{display:none}
+  .teams{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .areas{grid-template-columns:1fr}
+  .area:nth-child(even){padding-left:0;border-left:0}
+  .flow3,.flow3.four{grid-template-columns:1fr}
+  .says,.choices{grid-template-columns:1fr}
+  .pnum{display:none}
+  .turn .btn{padding-inline:.6rem}
+}
+@media (max-width:560px){
+  .opts{grid-template-columns:1fr}
+  .vrow{grid-template-columns:1fr;gap:.3rem}
+  .idiom{font-size:2.5rem}
+  .ph h2{font-size:1.55rem}
+  .cover-title{font-size:2.2rem}
+  .fact{grid-template-columns:1fr}
+  .slot{grid-template-columns:1fr}
+  .toc-item{grid-template-columns:3rem 1fr}
+  .toc-item .pp{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---------- stickers: hand-drawn die-cut stickers + mascot 智智 ---------- */
+.stk{display:inline-block;flex:none;width:var(--sz,5rem);height:var(--sz,5rem);transform:rotate(var(--rot,-4deg));cursor:pointer;vertical-align:middle;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;
+  filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(1px 3px 0 rgba(23,24,28,.22))}
+.stk svg{display:block;width:100%;height:100%;overflow:visible;animation:stkBob 4.2s ease-in-out infinite;animation-delay:calc(var(--d,0) * -1s)}
+.stk.still svg{animation:none}
+.stk .eye{transform-box:fill-box;transform-origin:center;animation:stkBlink 4.6s infinite}
+@keyframes stkBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(1.6deg)}}
+@keyframes stkBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+@keyframes stkPop{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.2) rotate(calc(var(--rot,-4deg) + 7deg))}100%{transform:scale(1) rotate(var(--rot,-4deg))}}
+@keyframes stkWig{0%,100%{transform:rotate(var(--rot,-4deg)) scale(1)}20%{transform:rotate(calc(var(--rot,-4deg) - 16deg)) scale(1.12)}45%{transform:rotate(calc(var(--rot,-4deg) + 13deg)) scale(1.12)}70%{transform:rotate(calc(var(--rot,-4deg) - 6deg)) scale(1.04)}}
+.page.first .stk,.stk.pop-in{animation:stkPop .62s cubic-bezier(.3,1.4,.5,1) both;animation-delay:calc(.3s + var(--d,0) * 80ms)}
+.stk.wig,.page.first .stk.wig{animation:stkWig .6s ease-out;animation-delay:0s}
+
+/* page header with a sticker on the right */
+.ph.has-stk{grid-template-columns:minmax(0,1fr) auto;column-gap:1rem;align-items:center;min-height:5.2rem}
+.ph.has-stk>.kicker,.ph.has-stk>h2{grid-column:1}
+.ph-stk{grid-column:2;grid-row:1 / span 2;display:flex;align-items:center;gap:.4rem;position:relative}
+.ph-stk.hero{width:15rem;height:10rem;display:block}
+.ph-stk.hero .stk{position:absolute}
+
+/* mascot speech bubble row at the end of a page */
+.mrow{display:flex;align-items:center;gap:1.1rem;margin-top:.4rem}
+.bub{position:relative;background:#fff;border:var(--line) solid var(--ink);border-radius:16px;padding:.55rem 1rem;font-family:var(--f-hand);font-size:1.08rem;line-height:1.5;box-shadow:3px 3px 0 var(--ink);max-width:42em}
+.bub::before{content:"";position:absolute;left:-.62rem;top:50%;width:.9rem;height:.9rem;background:#fff;border-left:var(--line) solid var(--ink);border-bottom:var(--line) solid var(--ink);transform:translateY(-50%) rotate(45deg)}
+.bub b{color:var(--blue);margin-right:.25rem}
+.page.first .mrow .bub{animation:bubIn .5s cubic-bezier(.3,1.5,.5,1) both;animation-delay:.95s;transform-origin:left center}
+@keyframes bubIn{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
+
+/* praise toast + confetti */
+.praise{position:fixed;left:50%;bottom:calc(var(--barH) + 1.6rem);z-index:70;display:flex;align-items:center;gap:1rem;pointer-events:none;transform:translateX(-50%);animation:praiseIn .55s cubic-bezier(.3,1.5,.5,1) both;max-width:94vw}
+.praise .bub{font-size:1.35rem;font-weight:700;padding:.7rem 1.3rem;box-shadow:4px 4px 0 var(--ink)}
+.praise.out{opacity:0;transition:opacity .4s}
+@keyframes praiseIn{from{transform:translate(-50%,40px) scale(.6);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
+.cf{position:absolute;display:block;border-radius:2px;will-change:transform}
+.cf.k2{border-radius:50%}
+.cf svg{width:100%;height:100%;display:block}
+
+/* decoration hooks */
+.toc-item{grid-template-columns:3.6rem 3.6rem 1fr auto;align-items:center}
+.toc-item .stk{--sz:3rem}
+.dom-list button{grid-template-columns:2rem 2.8rem 1fr;align-items:center}
+.dom-list button .stk{--sz:2.5rem}
+.dom-head{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.who2{display:inline-flex;align-items:center;gap:.4rem}
+.bin-head .bh{display:inline-flex;align-items:center;gap:.45rem}
+.area{position:relative}
+.area.has-stk{padding-right:5rem}
+.area.has-stk>.stk{position:absolute;right:.9rem;top:.7rem;--sz:3.2rem}
+.areas .area:nth-child(even).has-stk>.stk{right:.2rem}
+.chain3 .node{position:relative}
+.chain3 .node>.stk{position:absolute;right:.6rem;top:.5rem;--sz:2.6rem}
+.chain3 .node.has-stk{padding-right:3.6rem}
+.wave>.stk.lead-stk{justify-self:start;--sz:3.3rem;margin-bottom:.1rem}
+.h3-flex{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.flow3 h4 .stk{--sz:2rem;margin-right:.45rem;vertical-align:-.55rem}
+.boardcrown{display:inline-block}
+.brow .nm .stk{--sz:1.9rem;margin-right:.35rem;vertical-align:-.45rem}
+
+@media (max-width:700px){
+  .ph-stk .stk{width:3.6rem;height:3.6rem}
+  .ph-stk.hero{width:6.4rem;height:6rem}
+  .ph-stk.hero .stk:not(:first-child){display:none}
+  .ph-stk.hero .stk:first-child{width:5.6rem;height:5.6rem;left:0!important;top:.2rem!important}
+  .ph.has-stk{min-height:0}
+  .mrow .stk{width:3.4rem;height:3.4rem}
+  .toc-item{grid-template-columns:2.6rem 2.6rem 1fr}
+  .toc-item .stk{width:2.4rem;height:2.4rem}
+  .area.has-stk{padding-right:4rem}
+  .praise .bub{font-size:1.05rem}
+  .h3-flex .stk{width:3.2rem;height:3.2rem}
+}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="brand"><b>第 1 課 人工智能入門</b><span>ICT · 互動教室</span></div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="章節"><div class="tab-ind" id="tabInd"></div></nav>
+  <div class="tools"><button class="btn quiet small" type="button" id="fsBtn">全螢幕</button></div>
+</header>
+<main class="stage" id="stage" tabindex="-1"></main>
+<footer class="bottom">
+  <div class="pages" id="pages" aria-label="本章頁數"></div>
+  <span class="pnum" id="pnum"></span>
+  <div class="turn" id="turn">
+    <button class="btn" type="button" id="prevBtn">‹ 上一頁</button>
+    <button class="btn primary" type="button" id="nextBtn">下一頁 ›</button>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ================= helpers ================= */
+const $ = (s, r = document) => r.querySelector(s);
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "html") el.innerHTML = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat()) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+const H = html => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content; };
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const inFrame = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const TICK = () => H('<svg class="pen-draw" viewBox="0 0 32 32" aria-hidden="true"><path class="pen" d="M5 17 L12 24 L27 7"/></svg>').firstChild;
+const CROSS = () => H('<svg class="pen-draw" viewBox="0 0 32 32" aria-hidden="true"><path class="pen" d="M8 8 L24 24"/><path class="pen" d="M24 8 L8 24"/></svg>').firstChild;
+const SVG = {
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>',
+  sensor: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><rect x="14" y="18" width="20" height="20" rx="3" fill="#fff"/><path d="M18 12a10 10 0 0 1 12 0M13 7a17 17 0 0 1 22 0" stroke-linecap="round"/><circle cx="24" cy="28" r="4" fill="currentColor"/></svg>',
+  net: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M24 40V20M14 40h20M24 20l-8-12M24 20l8-12M18 14h12M8 18a20 20 0 0 1 6-10M40 18a20 20 0 0 0-6-10"/></svg>',
+  cloud: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M14 36h22a8 8 0 0 0 0-16 12 12 0 0 0-23-2 9 9 0 0 0 1 18z" fill="#fff"/><path d="M20 28h10M20 32h6" stroke-linecap="round"/></svg>',
+  ai: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><rect x="12" y="12" width="24" height="24" rx="4" fill="#fff"/><path d="M18 12V6M24 12V6M30 12V6M18 42v-6M24 42v-6M30 42v-6M12 18H6M12 24H6M12 30H6M42 18h-6M42 24h-6M42 30h-6" stroke-linecap="round"/><text x="24" y="29" text-anchor="middle" font-size="11" font-family="monospace" font-weight="700" fill="currentColor" stroke="none">AI</text></svg>',
+  bell: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 34h24l-3-5V20a9 9 0 0 0-18 0v9z" fill="#fff" stroke-linejoin="round"/><path d="M20 38a4 4 0 0 0 8 0" stroke-linecap="round"/></svg>',
+  ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>'
+};
+const ext = (href, label) => h("a", { class: "btn", href, target: "_blank", rel: "noopener" }, label, h("span", { html: SVG.ext, style: "display:inline-flex" }));
+function qa(q, a, note) {
+  const ans = h("div", { class: "a", hidden: true }, a);
+  const b = h("button", { class: "btn small", type: "button", onclick: () => { const show = ans.hidden; ans.hidden = !show; if (show) { ans.classList.remove("show"); void ans.offsetWidth; ans.classList.add("show"); } b.textContent = show ? "收起答案" : "顯示參考答案"; } }, "顯示參考答案");
+  return h("div", { class: "qa", "data-in": "" }, h("div", { class: "q" }, h("span", {}, q)), h("div", { class: "ctl" }, b), ans, note ? h("p", { class: "note", style: "padding-left:2.2rem" }, note) : null);
+}
+const hl = t => h("mark", { class: "hl" }, t);
+
+/* ============ sorter: drag, or tap card then tap column ============ */
+function makeSorter(host, cfg) {
+  let selected = null, grading = false;
+  const root = h("div", { class: "sorter", "data-in": "" });
+  const pool = h("div", { class: "pool", "data-drop": "pool", "aria-label": "未分類的卡片" });
+  const bins = h("div", { class: "bins" });
+  const binDrops = {};
+  cfg.bins.forEach(b => {
+    const drop = h("div", { class: "bin-drop", "data-drop": b.id, "aria-label": b.label });
+    binDrops[b.id] = drop;
+    bins.append(h("section", { class: "bin" }, h("div", { class: "bin-head" }, h("span", { class: "bh" }, b.stk ? stk(b.stk, { size: "2.2rem", cls: "still", rot: "-6deg" }) : null, b.label), b.sub ? h("small", {}, b.sub) : null), drop));
+  });
+  const score = h("span", { class: "score", "aria-live": "polite" });
+  const checkBtn = h("button", { class: "btn primary", type: "button", onclick: check }, "批改");
+  const resetBtn = h("button", { class: "btn", type: "button", onclick: reset }, "重設");
+  root.append(pool, bins, h("div", { class: "row" }, checkBtn, resetBtn, h("span", { class: "note grow" }, "拖動卡片到欄目；也可以先點卡片，再點欄目。"), score));
+  host.append(root);
+  function cardEl(c) {
+    const el = h("div", { class: "dcard", tabindex: "0", role: "button", "data-id": c.id, "data-answer": c.answer },
+      h("span", { class: "txt" }, c.text), h("span", { class: "mark" }), h("span", { class: "why" }, c.why));
+    el.addEventListener("pointerdown", e => startDrag(e, el));
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(el); } });
+    return el;
+  }
+  function ungrade() {
+    root.querySelectorAll(".dcard").forEach(c => { c.classList.remove("graded", "wrong"); c.querySelector(".mark").textContent = ""; c.querySelector(".tick")?.remove(); });
+    score.textContent = "";
+  }
+  function place(card, drop) {
+    if (grading) return;
+    ungrade(); drop.append(card);
+    card.classList.add("pop"); setTimeout(() => card.classList.remove("pop"), 420);
+    select(null);
+  }
+  function select(el) {
+    if (selected) selected.classList.remove("selected");
+    selected = (el && el !== selected) ? el : null;
+    if (selected) selected.classList.add("selected");
+    root.querySelectorAll(".bin, .pool").forEach(x => x.classList.toggle("target-ready", !!selected));
+  }
+  root.addEventListener("click", e => {
+    if (!selected || e.target.closest(".dcard")) return;
+    const zone = e.target.closest("[data-drop]") || (e.target.closest(".bin") && e.target.closest(".bin").querySelector("[data-drop]"));
+    if (zone) place(selected, zone);
+  });
+  function startDrag(e, el) {
+    if (grading || e.button > 0) return;
+    const sx = e.clientX, sy = e.clientY;
+    let ghost = null, over = null, moved = false, lx = sx, ly = sy, raf = 0;
+    const r = el.getBoundingClientRect(), ox = sx - r.left, oy = sy - r.top;
+    el.setPointerCapture?.(e.pointerId);
+    const hit = () => {
+      const t = document.elementFromPoint(lx, ly);
+      const z = t && (t.closest("[data-drop]") || (t.closest(".bin") && t.closest(".bin").querySelector("[data-drop]")));
+      const zz = z && root.contains(z) ? z : null;
+      if (zz !== over) { over && over.classList.remove("over"); over = zz; over && over.classList.add("over"); }
+    };
+    const edge = () => { const m = 90, sp = ly > innerHeight - m ? 16 : ly < m ? -16 : 0; if (sp) { window.scrollBy(0, sp); hit(); } raf = requestAnimationFrame(edge); };
+    const move = ev => {
+      lx = ev.clientX; ly = ev.clientY;
+      if (!moved && Math.hypot(lx - sx, ly - sy) < 6) return;
+      if (!moved) {
+        moved = true; select(null);
+        ghost = el.cloneNode(true); ghost.classList.add("drag-ghost"); ghost.style.width = r.width + "px";
+        document.body.append(ghost); el.classList.add("dragging-src"); raf = requestAnimationFrame(edge);
+      }
+      ghost.style.left = (lx - ox) + "px"; ghost.style.top = (ly - oy) + "px"; hit();
+    };
+    const up = () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up);
+      if (moved) { ghost.remove(); el.classList.remove("dragging-src"); if (over) { over.classList.remove("over"); place(el, over); } }
+      else {
+        const zone = el.parentElement;
+        if (selected && selected !== el && zone && zone.dataset.drop !== "pool" && selected.parentElement !== zone) place(selected, zone);
+        else select(el);
+      }
+    };
+    el.addEventListener("pointermove", move); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+  }
+  async function check() {
+    if (grading) return;
+    select(null); ungrade();
+    grading = true; checkBtn.disabled = true; resetBtn.disabled = true;
+    let right = 0; const n = cfg.cards.length;
+    for (const b of cfg.bins) {
+      for (const c of Array.from(binDrops[b.id].children)) {
+        const ok = c.dataset.answer === b.id;
+        if (ok) right++;
+        const mk = ok ? TICK() : CROSS(); mk.classList.add("tick");
+        c.append(mk);
+        c.classList.add("graded", "pop"); if (!ok) c.classList.add("wrong");
+        c.querySelector(".mark").textContent = ok ? "✓ 正確" : "✗ 應放在「" + cfg.bins.find(x => x.id === c.dataset.answer).label + "」";
+        score.textContent = "答對 " + right + " / " + n;
+        await sleep(650);
+      }
+    }
+    const left = pool.children.length;
+    score.textContent = "答對 " + right + " / " + n + (left ? "（" + left + " 張未放）" : "");
+    grading = false; checkBtn.disabled = false; resetBtn.disabled = false;
+    if (right === n) { praise("happy", "全部啱！叻仔叻女！"); burst(innerWidth / 2, innerHeight * .55, 70, 1.8); }
+    else if (right >= n * .6) praise("wow", "差少少！睇睇紅色嗰啲原因。");
+    else praise("oops", "唔緊要，睇完原因再試一次。");
+  }
+  function reset() {
+    grading = false; checkBtn.disabled = false; resetBtn.disabled = false;
+    pool.innerHTML = ""; Object.values(binDrops).forEach(d => d.innerHTML = "");
+    shuffle(cfg.cards).forEach(c => pool.append(cardEl(c)));
+    score.textContent = ""; select(null);
+  }
+  reset();
+  return { reset };
+}
+
+/* ================= stickers & mascot ================= */
+const K = "#17181C", B = "#2348B5", S = "#A9CCFF", Y = "#FFE357", R = "#D42C2C", P = "#F9B4C0", G = "#35A46F", M = "#BFE8D2", O = "#F58A2B", W = "#fff";
+const sv = inner => '<svg viewBox="0 0 64 64" fill="none" stroke="' + K + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">' + inner + '</svg>';
+const dot = (x, y, r = 2.2, c = K) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + c + '" stroke="none"/>';
+const spark = (x, y, s = 1, c = Y) => '<path transform="translate(' + x + ' ' + y + ') scale(' + s + ')" d="M0-8l2.2 5.8L8 0 2.2 2.2 0 8-2.2 2.2-8 0l5.8-2.2z" fill="' + c + '" stroke-width="2"/>';
+const FACE = {
+  hi: '<g class="eye">' + dot(25, 30, 3.2) + dot(39, 30, 3.2) + '</g><path d="M26 37q6 5 12 0"/><ellipse cx="19.5" cy="36" rx="3" ry="2" fill="' + P + '" stroke="none"/><ellipse cx="44.5" cy="36" rx="3" ry="2" fill="' + P + '" stroke="none"/>',
+  happy: '<path d="M21 32q4-6 8 0M35 32q4-6 8 0"/><path d="M25 36q7 9 14 0z" fill="' + R + '" stroke-width="2.5"/><ellipse cx="19.5" cy="37" rx="3" ry="2" fill="' + P + '" stroke="none"/><ellipse cx="44.5" cy="37" rx="3" ry="2" fill="' + P + '" stroke="none"/>',
+  think: '<g class="eye"><circle cx="25" cy="30" r="4.3" fill="#fff" stroke-width="2.4"/><circle cx="39" cy="30" r="4.3" fill="#fff" stroke-width="2.4"/>' + dot(26.4, 28.6, 2) + dot(40.4, 28.6, 2) + '</g><path d="M28 38.5h9"/>',
+  wow: '<g class="eye"><circle cx="25" cy="29" r="5" fill="#fff" stroke-width="2.4"/><circle cx="39" cy="29" r="5" fill="#fff" stroke-width="2.4"/>' + dot(25, 29, 2.2) + dot(39, 29, 2.2) + '</g><ellipse cx="32" cy="38" rx="3.2" ry="3.8" fill="' + K + '"/>',
+  oops: '<path d="M21 27l7 3.5-7 3.5M43 27l-7 3.5 7 3.5" stroke-width="2.6"/><path d="M24 39q2.7-3 5.3 0t5.3 0 5.3 0" stroke-width="2.6"/>',
+  love: '<path d="M25 34l-5-5a3 3 0 0 1 5-3 3 3 0 0 1 5 3z" fill="' + R + '" stroke-width="2"/><path d="M39 34l-5-5a3 3 0 0 1 5-3 3 3 0 0 1 5 3z" fill="' + R + '" stroke-width="2"/><path d="M26 37q6 6 12 0"/>'
+};
+const EXTRA = {
+  think: '<path d="M52 12q0-7 6-7t6 7q0 4-6 6v4" stroke-width="2.6"/>' + dot(58, 28, 1.6),
+  wow: spark(5, 8, .9) + spark(60, 6, .7),
+  oops: '<path d="M54 12q5 7 0 11-5-4 0-11z" fill="' + S + '" stroke-width="2.2"/>',
+  happy: spark(58, 8, .8) + spark(6, 12, .6),
+  love: '<path d="M54 14l-5-5a3 3 0 0 1 5-3 3 3 0 0 1 5 3z" fill="' + R + '" stroke-width="2"/>' + spark(7, 10, .7)
+};
+const bot = m => sv('<path d="M32 4v9"/><circle cx="32" cy="5" r="3.6" fill="' + Y + '"/><rect x="3" y="25" width="7" height="15" rx="3.5" fill="' + B + '"/><rect x="54" y="25" width="7" height="15" rx="3.5" fill="' + B + '"/><path d="M17 47v7a4 4 0 0 0 4 4h22a4 4 0 0 0 4-4v-7" fill="' + B + '"/><circle cx="32" cy="53" r="2.4" fill="' + Y + '" stroke="none"/><rect x="9" y="12" width="46" height="36" rx="11" fill="' + S + '"/><rect x="15" y="19" width="34" height="23" rx="8" fill="#fff"/>' + FACE[m] + (EXTRA[m] || ""));
+const STK = {
+  brain: sv('<path d="M32 14C30 8 20 7 17 13 10 13 7 21 12 26 7 31 9 40 16 41 17 48 26 51 32 47z" fill="' + P + '"/><path d="M32 14C34 8 44 7 47 13 54 13 57 21 52 26 57 31 55 40 48 41 47 48 38 51 32 47z" fill="' + P + '"/><path d="M32 14v33M19 22c3 0 6 2 6 5M45 22c-3 0-6 2-6 5M18 34c3 0 6-1 8-4M46 34c-3 0-6-1-8-4" stroke-width="2.4"/><path d="M26 54h12" stroke="' + B + '"/>'),
+  eye: sv('<path d="M3 32C11 18 22 13 32 13s21 5 29 19c-8 14-19 19-29 19S11 46 3 32z" fill="#fff"/><circle cx="32" cy="32" r="11" fill="' + B + '"/><circle cx="32" cy="32" r="5" fill="' + K + '"/>' + dot(27.5, 27.5, 2.6, "#fff") + '<path d="M32 4v5M16 8l3 4M48 8l-3 4" stroke="' + O + '"/>'),
+  book: sv('<path d="M5 14c9-3 19-2 27 4v38c-8-6-18-7-27-4z" fill="' + S + '"/><path d="M59 14c-9-3-19-2-27 4v38c8-6 18-7 27-4z" fill="#fff"/><path d="M11 25c5-1 11 0 16 3M11 34c5-1 11 0 16 3M37 28c5-3 11-4 16-3M37 37c5-3 11-4 16-3" stroke-width="2.4"/>' + spark(50, 8, .8)),
+  chat: sv('<path d="M8 10h48a4 4 0 0 1 4 4v26a4 4 0 0 1-4 4H30L18 56V44H8a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z" fill="' + Y + '"/>' + dot(20, 27, 3) + dot(32, 27, 3) + dot(44, 27, 3)),
+  scale: sv('<path d="M32 10v40M20 56h24M24 56l4-6h8l4 6" /><path d="M10 18h44"/><path d="M10 18L3 38M10 18l7 20M54 18l-7 20M54 18l7 20" stroke-width="2.2"/><path d="M1 38h18a9 7 0 0 1-18 0z" fill="' + S + '"/><path d="M45 38h18a9 7 0 0 1-18 0z" fill="' + P + '"/><circle cx="32" cy="10" r="4.5" fill="' + Y + '"/>'),
+  camera: sv('<rect x="5" y="18" width="54" height="36" rx="7" fill="' + S + '"/><path d="M20 18l4-8h16l4 8"/><circle cx="32" cy="36" r="12" fill="#fff"/><circle cx="32" cy="36" r="6" fill="' + B + '"/>' + dot(51, 26, 2.4, R) + dot(29.5, 33.5, 1.8, "#fff")),
+  mic: sv('<rect x="22" y="5" width="20" height="31" rx="10" fill="' + S + '"/><path d="M14 28c0 11 8 17 18 17s18-6 18-17M32 45v11M22 57h20"/><path d="M27 14h10M27 21h10" stroke-width="2.4"/><path d="M7 20q-3 7 0 14M57 20q3 7 0 14" stroke="' + B + '"/>'),
+  sparkle: sv(spark(30, 32, 3.1) + spark(52, 12, 1.1, S) + spark(12, 52, 1.2, P) + spark(54, 50, .8, Y)),
+  palette: sv('<path d="M32 7C17 7 6 18 6 31c0 12 9 22 20 22 6 0 7-4 5-7-2-4 0-7 5-7h8c9 0 14-5 14-12C58 15 46 7 32 7z" fill="#fff"/>' + dot(20, 27, 4.2, R) + dot(32, 18, 4.2, Y) + dot(45, 25, 4.2, G) + dot(17, 40, 4.2, B)),
+  pencil: sv('<path d="M13 41L43 11l10 10L23 51z" fill="' + Y + '"/><path d="M13 41l10 10-13 3z" fill="#fff"/><path d="M10 54l2-7 5 5z" fill="' + K + '"/><path d="M43 11l4-4a3 3 0 0 1 4 0l6 6a3 3 0 0 1 0 4l-4 4z" fill="' + P + '"/><path d="M20 34l10 10" stroke-width="2.2"/>'),
+  warning: sv('<path d="M32 7L59 55H5z" fill="' + Y + '"/><path d="M32 24v15" stroke-width="4"/>' + dot(32, 47, 2.6)),
+  ballot: sv('<path d="M8 28h48v26a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z" fill="' + S + '"/><path d="M20 28h24" stroke-width="5"/><g transform="rotate(-7 32 18)"><rect x="21" y="6" width="22" height="26" rx="2" fill="#fff"/><path d="M26 18l4 4 8-9" stroke="' + R + '" stroke-width="3.2"/></g>'),
+  face: sv('<circle cx="28" cy="28" r="21" fill="' + Y + '"/><g class="eye">' + dot(21, 24, 2.8) + dot(35, 24, 2.8) + '</g><path d="M20 33q8 7 16 0"/><circle cx="46" cy="46" r="10" fill="#fff" fill-opacity=".7"/><path d="M53 53l9 9" stroke-width="5"/>'),
+  wifi: sv('<path d="M6 26c15-15 37-15 52 0M15 35c10-10 24-10 34 0M24 44c5-5 11-5 16 0" stroke="' + B + '" stroke-width="3.6"/>' + dot(32, 54, 5, R)),
+  bin: sv('<path d="M14 20h36l-4 38H18z" fill="' + M + '"/><path d="M9 20h46M24 20v-6h16v6"/><path d="M25 30l1 20M32 30v20M39 30l-1 20" stroke-width="2.4"/><path d="M47 8q5-4 10 0M50 13q2-2 5 0" stroke="' + B + '" stroke-width="2.4"/>'),
+  database: sv('<path d="M10 14v36c0 5 9 8 22 8s22-3 22-8V14" fill="' + S + '"/><ellipse cx="32" cy="14" rx="22" ry="8" fill="#fff"/><path d="M10 28c0 5 9 8 22 8s22-3 22-8M10 40c0 5 9 8 22 8s22-3 22-8" /><circle cx="46" cy="46" r="2" fill="' + R + '" stroke="none"/>'),
+  cloud: sv('<path d="M18 50a13 13 0 0 1-2-26 16 16 0 0 1 31 3 11.5 11.5 0 0 1-1 23z" fill="' + S + '"/><path d="M32 44V28M25 35l7-7 7 7" stroke="' + B + '" stroke-width="3.6"/>'),
+  city: sv('<rect x="5" y="28" width="17" height="28" fill="' + S + '"/><rect x="24" y="10" width="18" height="46" fill="#fff"/><rect x="44" y="32" width="15" height="24" fill="' + P + '"/><path d="M2 56h60"/><path d="M29 18h3M35 18h3M29 27h3M35 27h3M29 36h3M35 36h3M10 36h3M15 36h3M10 45h3M15 45h3M49 41h3M49 49h3" stroke="' + K + '" stroke-width="2.6"/><path d="M28 5q4-3 8 0" stroke="' + B + '"/>' + dot(32, 8, 1.8, B)),
+  school: sv('<path d="M6 28L32 10l26 18z" fill="' + R + '"/><rect x="10" y="28" width="44" height="28" fill="#fff"/><rect x="27" y="38" width="10" height="18" fill="' + B + '"/><path d="M15 35h7M15 44h7M42 35h7M42 44h7" stroke-width="3.4"/><path d="M32 10V2"/><path d="M32 2h10l-3 3.5 3 3.5H32z" fill="' + Y + '" stroke-width="2.2"/><path d="M2 56h60"/>'),
+  trophy: sv('<path d="M20 7h24v17c0 9-5 15-12 15S20 33 20 24z" fill="' + Y + '"/><path d="M20 13h-9c0 11 4 15 10 16M44 13h9c0 11-4 15-10 16"/><path d="M32 39v10M23 57h18M25 49h14v8" fill="' + O + '"/>' + spark(32, 20, .9, "#fff") ),
+  crown: sv('<path d="M8 46L4 18l14 12 14-18 14 18 14-12-4 28z" fill="' + Y + '"/><rect x="8" y="46" width="48" height="9" rx="3" fill="' + Y + '"/>' + dot(4, 18, 3, R) + dot(32, 12, 3, R) + dot(60, 18, 3, R)),
+  star: sv('<path d="M32 5l8 18 20 2-15 13 5 20-18-11-18 11 5-20L4 25l20-2z" fill="' + Y + '"/>'),
+  heart: sv('<path d="M32 56L9 33a13 13 0 0 1 23-13 13 13 0 0 1 23 13z" fill="' + R + '"/><path d="M17 26a6 6 0 0 1 6-6" stroke="#fff" stroke-width="3"/>'),
+  hourglass: sv('<path d="M16 6h32M16 58h32"/><path d="M19 6h26c0 14-13 18-13 26s13 12 13 26H19c0-14 13-18 13-26S19 20 19 6z" fill="' + S + '"/><path d="M25 52c3-4 11-4 14 0v6H25z" fill="' + Y + '" stroke="none"/><path d="M32 30v10" stroke="' + Y + '" stroke-width="2.4"/>'),
+  neural: sv('<path d="M12 16L32 12M12 16L32 32M12 32L32 12M12 32L32 32M12 32L32 52M12 48L32 32M12 48L32 52M32 12L52 24M32 32L52 24M32 32L52 40M32 52L52 40M12 16L32 52" stroke-width="1.8"/>' + [[12, 16], [12, 32], [12, 48], [32, 12], [32, 32], [32, 52], [52, 24], [52, 40]].map((p, i) => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="5.2" fill="' + (i < 3 ? S : i < 6 ? Y : P) + '"/>').join("")),
+  gear: sv('<g transform="translate(32 32)"><path d="M-6-27h12l2 7 6 3 7-3 8 8-3 7 3 6 7 2v12l-7 2-3 6 3 7-8 8-7-3-6 3-2 7H-6l-2-7-6-3-7 3-8-8 3-7-3-6-7-2V-4l7-2 3-6-3-7 8-8 7 3 6-3z" fill="' + S + '" transform="scale(.9)"/><circle r="9" fill="#fff"/></g>'),
+  clipboard: sv('<rect x="11" y="9" width="42" height="49" rx="5" fill="#fff"/><rect x="21" y="4" width="22" height="11" rx="3" fill="' + Y + '"/><path d="M19 27l3 3 6-7M19 42l3 3 6-7M34 27h12M34 42h12" stroke="' + R + '" stroke-width="3"/><path d="M34 27h12M34 42h12"/>'),
+  bulb: sv('<path d="M32 5a19 19 0 0 0-10 35c2 2 3 4 3 7h14c0-3 1-5 3-7A19 19 0 0 0 32 5z" fill="' + Y + '"/><path d="M25 53h14M28 59h8M26 20c1-4 4-6 7-6" stroke-width="2.6"/>'),
+  car: sv('<path d="M3 46V37c0-3 2-5 5-6l8-12c1-2 3-3 5-3h20c2 0 4 1 5 3l8 12c4 1 7 3 7 6v9z" fill="' + R + '"/><path d="M21 21h9v10H15zM34 21h7l7 10H34z" fill="' + S + '" stroke-width="2.4"/><circle cx="17" cy="47" r="8" fill="' + K + '"/><circle cx="47" cy="47" r="8" fill="' + K + '"/><circle cx="17" cy="47" r="2.6" fill="#fff" stroke="none"/><circle cx="47" cy="47" r="2.6" fill="#fff" stroke="none"/>'),
+  drop: sv('<path d="M32 5C24 18 13 28 13 41a19 19 0 0 0 38 0C51 28 40 18 32 5z" fill="' + S + '"/><path d="M23 41a9 9 0 0 0 7 9" stroke="#fff" stroke-width="3.4"/>'),
+  coin: sv('<circle cx="32" cy="32" r="25" fill="' + Y + '"/><circle cx="32" cy="32" r="18" stroke-width="2"/><path d="M39 25c-2-4-14-4-14 3s14 4 14 11-12 7-14 3M32 17v6M32 41v6" stroke-width="3"/>'),
+  medical: sv('<rect x="8" y="8" width="48" height="48" rx="11" fill="#fff"/><path d="M27 16h10v11h11v10H37v11H27V37H16V27h11z" fill="' + R + '"/>'),
+  cart: sv('<path d="M3 9h9l7 33h31l6-24H15" fill="#fff"/><rect x="24" y="22" width="9" height="9" fill="' + Y + '" stroke-width="2.4"/><rect x="36" y="22" width="9" height="9" fill="' + S + '" stroke-width="2.4"/><circle cx="23" cy="53" r="5" fill="' + K + '"/><circle cx="45" cy="53" r="5" fill="' + K + '"/>'),
+  play: sv('<rect x="4" y="12" width="56" height="40" rx="10" fill="' + R + '"/><path d="M26 22v20l18-10z" fill="#fff"/>'),
+  magnifier: sv('<circle cx="27" cy="27" r="19" fill="' + S + '"/><path d="M41 41l18 18" stroke-width="6.5"/><path d="M17 22a11 11 0 0 1 8-8" stroke="#fff" stroke-width="3.4"/>'),
+  food: sv('<path d="M7 31a25 20 0 0 1 50 0z" fill="' + O + '"/><path d="M5 34h54l-3 5H8z" fill="' + G + '"/><rect x="6" y="40" width="52" height="8" rx="3" fill="#8C4A2F"/><path d="M8 50h48v2a5 5 0 0 1-5 5H13a5 5 0 0 1-5-5z" fill="' + O + '"/>' + dot(22, 22, 1.6, Y) + dot(32, 18, 1.6, Y) + dot(42, 22, 1.6, Y)),
+  snow: sv('<path d="M32 5v54M9 18.5l46 27M9 45.5l46-27"/><path d="M26 10l6 5 6-5M26 54l6-5 6 5" stroke-width="2.4"/><circle cx="32" cy="32" r="7" fill="' + S + '"/>'),
+  chip: sv('<path d="M22 6v10M32 6v10M42 6v10M22 48v10M32 48v10M42 48v10M6 22h10M6 32h10M6 42h10M48 22h10M48 32h10M48 42h10" stroke-width="3.4"/><rect x="14" y="14" width="36" height="36" rx="6" fill="' + S + '"/><rect x="23" y="23" width="18" height="18" rx="3" fill="' + B + '"/>' + spark(32, 32, .75, "#fff")),
+  bell: sv('<path d="M12 46h40l-5-9V27a15 15 0 0 0-30 0v10z" fill="' + Y + '"/><path d="M26 52a6.5 6.5 0 0 0 12 0"/><path d="M32 7v5"/><path d="M5 22q2-6 6-9M59 22q-2-6-6-9" stroke="' + R + '" stroke-width="2.6"/>'),
+  person: sv('<path d="M8 60c0-15 10-24 24-24s24 9 24 24z" fill="' + B + '"/><circle cx="32" cy="24" r="14" fill="#F6D2B0"/><path d="M18 22c0-10 6-16 14-16s14 6 14 16c-5-5-9-7-14-7s-9 2-14 7z" fill="' + K + '"/><g class="eye">' + dot(26, 27, 2) + dot(38, 27, 2) + '</g><path d="M27 33q5 4 10 0" stroke-width="2.4"/>')
+};
+["hi", "happy", "think", "wow", "oops", "love"].forEach(m => STK["bot-" + m] = bot(m));
+function stk(name, o = {}) {
+  const el = h("span", { class: "stk" + (o.cls ? " " + o.cls : ""), "aria-hidden": "true", html: STK[name] || STK.star });
+  if (o.size) el.style.setProperty("--sz", o.size);
+  if (o.rot !== undefined) el.style.setProperty("--rot", o.rot);
+  if (o.d !== undefined) el.style.setProperty("--d", o.d);
+  if (name.startsWith("bot-")) el.dataset.bot = "1";
+  return el;
+}
+
+/* ---------- confetti ---------- */
+const REDUCE = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const CONF = [B, Y, R, G, O, S, P];
+function burst(x, y, n = 28, spread = 1) {
+  if (REDUCE || !document.body.animate) return;
+  const layer = h("div", { class: "confetti", "aria-hidden": "true" }); document.body.append(layer);
+  for (let i = 0; i < n; i++) {
+    const kind = i % 4, c = CONF[i % CONF.length], sz = 9 + Math.random() * 9;
+    const p = h("i", { class: "cf k" + kind, style: "left:" + x + "px;top:" + y + "px;width:" + sz + "px;height:" + (kind === 0 ? sz * .5 : sz) + "px;" + (kind === 3 ? "" : "background:" + c) });
+    if (kind === 3) p.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 1l3.2 7.4 8 .8-6 5.4 1.8 7.9L12 18.2 5 22.5l1.8-7.9-6-5.4 8-.8z" fill="' + c + '" stroke="' + K + '" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+    const ang = -Math.PI / 2 + (Math.random() - .5) * Math.PI * spread, v = 150 + Math.random() * 300;
+    const dx = Math.cos(ang) * v, dy = Math.sin(ang) * v, fall = 240 + Math.random() * 260, rot = (Math.random() - .5) * 1000;
+    p.animate([
+      { transform: "translate(0,0) rotate(0deg)", opacity: 1 },
+      { transform: "translate(" + dx * .75 + "px," + dy + "px) rotate(" + rot * .5 + "deg)", opacity: 1, offset: .42 },
+      { transform: "translate(" + dx + "px," + (dy + fall) + "px) rotate(" + rot + "deg)", opacity: 0 }
+    ], { duration: 1300 + Math.random() * 800, easing: "cubic-bezier(.25,.6,.4,1)", fill: "forwards" });
+    layer.append(p);
+  }
+  setTimeout(() => layer.remove(), 2400);
+}
+function praise(mood, text) {
+  document.querySelectorAll(".praise").forEach(x => x.remove());
+  const el = h("div", { class: "praise", role: "status" }, stk("bot-" + mood, { size: "5rem", rot: "-6deg", cls: "still" }), h("div", { class: "bub" }, text));
+  document.body.append(el);
+  setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 450); }, 3400);
+}
+document.addEventListener("click", e => {
+  const s = e.target.closest && e.target.closest(".stk"); if (!s) return;
+  s.classList.remove("wig"); void s.offsetWidth; s.classList.add("wig"); setTimeout(() => s.classList.remove("wig"), 700);
+  if (s.dataset.bot) { const r = s.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 3, 14, 1.7); }
+});
+const mrow = (mood, text) => h("div", { class: "mrow", "data-in": "" }, stk("bot-" + mood, { size: "4.6rem", rot: "-4deg" }), h("div", { class: "bub" }, h("b", {}, "智智："), text));
+
+/* which sticker heads each page, and what 智智 says at the end */
+const PAGE_STK = {
+  def: ["bot-hi", "5.8rem"], turing: ["chat"], "turing-game": ["bot-think"], history: ["hourglass"], ml: ["neural"], "weak-strong": ["bulb"], "ws-sort": ["scale"],
+  domains: ["brain"], social: ["scale"], moral: ["car"], "dom-sort": ["clipboard"],
+  image: ["eye"], vision: ["camera"], "speech-k": ["mic"], speech: ["mic"],
+  gen: ["sparkle"], prompt: ["pencil"], risk: ["warning"], vote: ["ballot"], faces: ["face"],
+  "iot-k": ["wifi"], iot: ["bin"], bigdata: ["database"], cloud: ["cloud"],
+  city: ["city"], "city-sort": ["clipboard"], school: ["school"], summary: ["book"], quiz: ["trophy"]
+};
+const PAGE_SAY = {
+  def: ["think", "AI 同人腦，邊樣更叻？我覺得：各有各叻。"],
+  turing: ["wow", "73%！即係十個人入面，有七個人將 AI 當成真人。"],
+  "turing-game": ["think", "邊個先係真人？留意用字、語氣同細節。"],
+  history: ["happy", "兩次失敗，第三次終於行得通——失敗都係學習嘅一部分。"],
+  ml: ["think", "記住問自己：「規則」由邊個定？專家，定電腦自己搵？"],
+  "weak-strong": ["hi", "我只係弱 AI，淨係識做你吩咐我做嘅嘢。"],
+  "ws-sort": ["happy", "放卡啦！答錯唔緊要，我會講原因。"],
+  domains: ["wow", "五個範疇，好似人類嘅五種能力。逐個撳睇睇！"],
+  social: ["think", "科技本身冇對錯，用嘅人要決定底線。"],
+  moral: ["oops", "呢啲冇標準答案，但每個選擇都要有理由。"],
+  "dom-sort": ["happy", "同一個例子可能涉及幾個範疇，揀最貼切嗰個。"],
+  image: ["wow", "AI 睇相，睇到嘅唔係畫面，而係好多好多數字。"],
+  vision: ["hi", "影幾件物件試試，睇我估唔估得啱。"],
+  "speech-k": ["hi", "你講嘅說話，會先變成聲音數據，再轉成文字。"],
+  speech: ["wow", "試吓講廣東話、普通話同英文，睇邊樣最準。"],
+  gen: ["wow", "生成式 AI 識「創作」：文字、圖像、音樂都得。"],
+  prompt: ["think", "提示詞越清楚，出嚟嘅結果越似你想要嘅。"],
+  risk: ["oops", "AI 可能講錯嘢，仲會講到好似好真，要自己查證。"],
+  vote: ["think", "AI 作品嘅版權屬於邊個？未有一致答案，要講理由。"],
+  faces: ["wow", "留意眼睛、牙齒、頭髮同背景嘅細節，睇仔細啲！"],
+  "iot-k": ["hi", "感應器收集數據，經網絡傳走，物件就變聰明。"],
+  iot: ["happy", "拉動滑桿，睇垃圾筒幾時會通知清潔工。"],
+  bigdata: ["think", "數據越多，AI 越準；但你嘅私隱都要小心。"],
+  cloud: ["happy", "相片、文件放喺雲端，去到邊度都開到。"],
+  city: ["wow", "香港已經有好多智慧城市應用，你用過幾多個？"],
+  "city-sort": ["happy", "配對完，記得問自己：呢個點樣幫到市民？"],
+  school: ["wow", "好方案要講得清楚：感應、傳送、判斷、行動。"],
+  summary: ["happy", "五個重點，你記得幾多個？"],
+  quiz: ["wow", "準備好未？睇邊一組又快又準！"]
+};
+/* decorate pages after they are built: put small stickers on matching headings */
+const AREA_STK = { "智慧出行": "car", "智慧生活": "medical", "智慧環境": "drop", "智慧金融": "coin", "搜尋器、社交媒體": "magnifier", "網上購物": "cart", "串流影片服務": "play", "問題 A": "food", "問題 B": "snow", "問題 C": "book", "問題 D": "pencil" };
+const FLOW_STK = { "感應器": "wifi", "網絡與雲端": "cloud", "AI 分析": "chip", "行動": "bell" };
+const NODE_STK = { "專家系統": "book", "機器學習": "gear", "深度學習": "neural" };
+const WAVE_STK = { "符號邏輯": "bulb", "專家系統": "book", "機器學習": "bot-happy" };
+function decorate(el) {
+  let d = 0;
+  el.querySelectorAll(".area").forEach(a => { const s = AREA_STK[(a.querySelector(".k") || {}).textContent]; if (s) { a.classList.add("has-stk"); a.append(stk(s, { d: d++, rot: (d % 2 ? "6deg" : "-6deg") })); } });
+  el.querySelectorAll(".flow3 > div > h4").forEach(t => { const s = FLOW_STK[t.textContent.trim()]; if (s) t.prepend(stk(s, { d: d++ })); });
+  el.querySelectorAll(".chain3 .node").forEach(n => { const s = NODE_STK[(n.querySelector("b") || {}).textContent]; if (s) { n.classList.add("has-stk"); n.append(stk(s, { d: d++, rot: "7deg" })); } });
+  el.querySelectorAll(".wave").forEach(w => { const s = WAVE_STK[(w.querySelector(".nm") || {}).textContent]; if (s) w.prepend(stk(s, { d: d++, cls: "lead-stk", rot: "-5deg" })); });
+  el.querySelectorAll(".prose.rule-top").forEach(p => { const t = (p.querySelector("h3") || {}).textContent; const s = t === "弱人工智能" ? "bot-hi" : t === "強人工智能" ? "bot-love" : null; if (s) { const h3 = p.querySelector("h3"); h3.classList.add("h3-flex"); h3.append(stk(s, { size: "4.2rem", d: d++, rot: s === "bot-hi" ? "5deg" : "-5deg" })); } });
+}
+
+/* ================= CONTENT ================= */
+const CH = [];
+const chapter = c => CH.push(c);
+
+/* ---------- 目錄 ---------- */
+chapter({ id: "c0", code: "目錄", name: "本課內容", pages: [{
+  id: "toc", title: "第 1 課　人工智能入門", kicker: "目錄",
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "本課共六個小節：人工智能是甚麼、它的五大範疇、辨識技術、生成式人工智能、相關技術，以及香港的智慧城市。每個小節都有課堂活動。"));
+    const toc = h("div", { class: "toc", "data-in": "" });
+    CH.slice(1).forEach((c, k) => {
+      const acts = c.pages.filter(p => p.act).map(p => p.title.replace(/^活動[一二三四五六七八九十]+：/, ""));
+      toc.append(h("button", { class: "toc-item", type: "button", onclick: () => go(k + 1, 0) },
+        h("span", { class: "no" }, c.code),
+        stk(["bot-think", "brain", "camera", "palette", "wifi", "city", "star"][k], { d: k, rot: (k % 2 ? "6deg" : "-6deg") }),
+        h("span", {}, h("span", { class: "tt" }, c.name), acts.length ? h("span", { class: "acts" }, "活動：" + acts.join("、")) : null),
+        h("span", { class: "pp" }, c.pages.length + " 頁")));
+    });
+    host.append(toc, h("p", { class: "note", "data-in": "" }, "操作：按鍵盤 ← → 或簡報翻頁器翻頁；按頂部標籤跳到其他小節。"));
+  }
+}]});
+
+/* ---------- 1.1 ---------- */
+chapter({ id: "c1", code: "1.1", name: "甚麼是人工智能？", pages: [
+{
+  id: "def", title: "人工智能的定義",
+  build(host) {
+    host.append(
+      h("p", { class: "defn", "data-in": "" }, hl("人工智能"), "（Artificial Intelligence，簡稱 AI）是指電腦", hl("模擬人類思維"), "來執行任務的一種科技。"),
+      h("p", { class: "lead", "data-in": "" }, "人工智能讓電腦像人類一般思考、學習、預測和作出決策。"),
+      h("div", { "data-in": "", style: "overflow-x:auto" }, H(`<table class="cmp"><thead><tr><th>人工智能</th><th>人類智能</th></tr></thead><tbody>
+        <tr><td>模擬人腦的思考模式</td><td>更擅長知性和情感的溝通</td></tr>
+        <tr><td>累積和分析大量數據</td><td>與他人協同合作</td></tr>
+        <tr><td>反應速度快</td><td>發揮創作力</td></tr>
+        <tr><td>能夠不眠不休工作</td><td>憑直覺解決問題</td></tr>
+        <tr><td>根據經驗不斷改善</td><td>依據常識來調整行動</td></tr>
+        <tr><td>也能進行藝術創作</td><td></td></tr></tbody></table>`)),
+      h("p", { class: "margin", "data-in": "" }, "想一想：哪些工作交給 AI 做較好？哪些仍然需要人？"));
+  }
+},
+{
+  id: "turing", title: "圖靈測試",
+  build(host) {
+    host.append(h("div", { class: "split wide-l" },
+      h("div", { class: "prose", "data-in": "" },
+        h("p", {}, "自從電腦面世以來，科學家便想製造像人類一樣聰明的系統。"),
+        h("p", {}, "1950 年，「人工智能之父」英國科學家", hl("圖靈（Alan Turing）"), "提出一個實驗，測試電腦能否擁有和人類一樣的智慧，這個實驗稱為", hl("圖靈測試"), "。"),
+        h("ol", {}, h("li", {}, "測試者分別向電腦和人提問，但看不到對方。"), h("li", {}, "如果測試者分辨不出哪個是人、哪個是電腦的答覆，電腦就通過測試，被認為具有人類智慧。"))),
+      h("div", { class: "diagram", "data-in": "", html: `
+<svg viewBox="0 0 420 250" role="img" aria-label="圖靈測試示意：測試者隔着牆分別向電腦和人提問">
+  <g fill="none" stroke="#17181C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="210" y1="20" x2="210" y2="225" stroke-dasharray="10 8"/>
+    <circle cx="90" cy="95" r="22" fill="#fff"/><path d="M50 185c0-30 18-50 40-50s40 20 40 50" fill="#fff"/>
+    <rect x="285" y="40" width="80" height="58" rx="5" fill="#17181C"/><path d="M310 112h30M325 98v14"/>
+    <circle cx="325" cy="160" r="17" fill="#fff"/><path d="M293 228c0-24 14-40 32-40s32 16 32 40" fill="#fff"/>
+    <path d="M140 100 L270 70" stroke="#2348B5"/><path d="M262 63 L272 70 L262 78" stroke="#2348B5"/>
+    <path d="M140 120 L285 170" stroke="#2348B5"/><path d="M274 172 L286 170 L280 160" stroke="#2348B5"/>
+  </g>
+  <g font-family="Noto Sans TC, sans-serif" font-weight="700" font-size="16" fill="#17181C" text-anchor="middle">
+    <text x="90" y="212">測試者</text><text x="325" y="30">電腦</text><text x="372" y="208" text-anchor="start">人</text>
+    <text x="210" y="246" font-size="12" fill="#5A5E66" font-weight="400">看不到對方</text>
+  </g>
+  <text x="325" y="76" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="#fff">? ? ?</text>
+</svg>` })),
+      h("div", { class: "fact", "data-in": "" }, h("div", { class: "big-num" }, "73%"),
+        h("div", { class: "prose" },
+          h("p", {}, "課本寫：圖靈測試面世超過 70 年，至今還未開發出通過測試的機器；即使語音助理 Siri 對答如流，人們也能單憑交談幾句就推測出它不是人類。"),
+          h("p", { class: "hand" }, "老師補充：2025 年美國加州大學聖地牙哥分校的研究中，測試者同時和一個真人、一個 AI 對話，有 73% 的時候把 GPT-4.5 選為「人類」。"),
+          h("p", { class: "src" }, "資料來源：Jones & Bergen，PNAS，2025。"))),
+      qa("如果你是其中一位測試者，在進行圖靈測試時，你會問甚麼問題？", "自由作答。好的問題通常涉及個人感受、當下環境或常識推理，例如「你而家坐嘅櫈係咩顏色？」"));
+  }
+},
+{
+  id: "turing-game", title: "活動一：人定機？", act: true,
+  build(host) {
+    const DEFAULT_Q = "你最難忘的一餐是甚麼？為甚麼？";
+    const DEFAULT = [
+      { t: "小學六年級畢業營，喺營地自己燒嘅雞翼，一邊燶一邊未熟，但係同全班一齊食，覺得好好味。", ai: false },
+      { t: "我最難忘的一餐是和家人在海邊餐廳享用的晚餐。夕陽映照海面，新鮮的海鮮配上溫馨的氣氛，讓我深深感受到家庭的溫暖。", ai: true },
+      { t: "冇乜特別難忘……硬要講就係考完試同朋友去食放題，食到行唔郁，返到屋企仲要俾阿媽鬧。", ai: false },
+      { t: "最難忘的一餐是一次親手包餃子的經歷。從搓麵團到包餡料，每一步都充滿樂趣，也讓我明白到食物背後的心思與努力。", ai: true },
+      { t: "上年生日嫲嫲煮咗佢拿手嘅豉油雞。佢平時腳痛好少入廚房，所以嗰餐我記得好清楚。", ai: false },
+      { t: "作為一名學生，我最難忘的一餐是學校旅行時的燒烤。大家分工合作，一起準備食物，這次經歷不僅美味，更加深了我們之間的友誼。", ai: true }
+    ];
+    let items, editing = false, revealed = false;
+    host.append(h("p", { class: "lead", "data-in": "" }, "以下六個答案，有些是同學寫的，有些是 AI 寫的。逐張投票：你認為哪幾個是 AI 寫的？"));
+    const qEl = h("div", { class: "question", "data-in": "" });
+    const banner = h("div", { class: "edit-banner", hidden: true }, "編輯模式：直接點擊問題和答案修改文字，並用按鈕標記「AI 寫的」或「人寫的」。學生看不到標記，完成後按「完成編輯」。");
+    const grid = h("div", { class: "cards6", "data-in": "" });
+    const editBtn = h("button", { class: "btn quiet", type: "button", onclick: toggleEdit }, "編輯問題和答案");
+    const revealBtn = h("button", { class: "btn primary", type: "button", onclick: reveal }, "揭曉");
+    const done = h("p", { class: "margin", hidden: true }, "討論：AI 寫的答案有甚麼共通點？（提示：用字、語氣、會不會講廣東話）");
+    host.append(qEl, banner, grid, h("div", { class: "row", "data-in": "" }, revealBtn, h("button", { class: "btn", type: "button", onclick: () => reset(false) }, "重設票數"), h("span", { class: "grow" }), editBtn, h("button", { class: "btn quiet", type: "button", onclick: () => reset(true) }, "還原預設答案")), done);
+    function render() {
+      grid.innerHTML = "";
+      items.forEach((it, i) => {
+        const count = h("span", { class: "count" }, it.votes);
+        const tally = h("div", { class: "tally" }, it.votes + " 票認為是 AI");
+        const setV = v => { it.votes = Math.max(0, v); count.textContent = it.votes; tally.textContent = it.votes + " 票認為是 AI"; };
+        const tog = editing ? h("button", { class: "toggle-ai", type: "button", "aria-pressed": String(it.ai), onclick: e => { it.ai = !it.ai; e.currentTarget.setAttribute("aria-pressed", String(it.ai)); e.currentTarget.textContent = it.ai ? "AI 寫的" : "人寫的"; } }, it.ai ? "AI 寫的" : "人寫的") : null;
+        const front = h("div", { class: "face" },
+          h("div", { class: "lab" }, h("span", {}, "答案 " + "ABCDEF"[i]), tog),
+          h("div", { class: "ans", contenteditable: editing ? "true" : "false", oninput: e => it.t = e.target.innerText }, it.t),
+          h("div", { class: "vote" }, h("span", {}, "認為是 AI："),
+            h("button", { class: "btn small", type: "button", "aria-label": "答案 " + "ABCDEF"[i] + " 減一票", onclick: () => setV(it.votes - 1) }, "−"), count,
+            h("button", { class: "btn small", type: "button", "aria-label": "答案 " + "ABCDEF"[i] + " 加一票", onclick: () => setV(it.votes + 1) }, "+")));
+        const back = h("div", { class: "face back " + (it.ai ? "is-ai" : "is-human") },
+          h("div", { class: "lab", style: "position:absolute;top:.8rem;left:1rem" }, "答案 " + "ABCDEF"[i]),
+          h("div", { class: "verdict" }, it.ai ? "AI 寫的" : "同學寫的"), tally);
+        grid.append(h("div", { class: "tcard" + (revealed ? " flipped" : "") }, h("div", { class: "tcard-inner" }, front, back)));
+      });
+    }
+    function toggleEdit() {
+      editing = !editing;
+      if (editing && revealed) { revealed = false; done.hidden = true; }
+      qEl.contentEditable = editing ? "true" : "false";
+      banner.hidden = !editing; editBtn.textContent = editing ? "完成編輯" : "編輯問題和答案"; revealBtn.disabled = editing;
+      render();
+    }
+    async function reveal() {
+      if (revealed) return; revealed = true;
+      for (const c of grid.querySelectorAll(".tcard")) { c.classList.add("flipped"); await sleep(240); }
+      done.hidden = false;
+    }
+    function reset(restore) {
+      if (restore || !items) { items = DEFAULT.map(d => ({ ...d, votes: 0 })); qEl.textContent = DEFAULT_Q; } else items.forEach(it => it.votes = 0);
+      revealed = false; done.hidden = true;
+      if (editing) toggleEdit(); else render();
+    }
+    reset(true);
+    return { reset: () => reset(false) };
+  }
+},
+{
+  id: "history", title: "人工智能發展歷程",
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "1956 年，科學家 John McCarthy 首次提出「", hl("人工智能"), "」的概念。自此人工智能經歷了三個主要階段，並發展到現時的深度學習。點擊每一波，看看結果如何。"));
+    const W = [
+      { y: "第一波　1950–1960", n: "符號邏輯", what: "專家試圖訓練電腦具備「人的思考邏輯」。", out: "專家無法完全釐清人類的思考過程，最終失敗。", ok: false },
+      { y: "第二波　1980–1990", n: "專家系統", what: "專家試圖把「人的所有知識」輸入電腦。", out: "專家無法解答所有問題、寫成規則，最終失敗。", ok: false },
+      { y: "第三波　2010–現在", n: "機器學習", what: "專家輸入資料，電腦自行從中歸納規則，讓電腦學習「人看見的事物」。", out: "正在發展中。", ok: true }
+    ];
+    const box = h("div", { class: "waves", "data-in": "", role: "list" });
+    const parts = [];
+    W.forEach(w => {
+      const out = h("p", { class: "out", hidden: true }, "結果：" + w.out);
+      const stamp = h("span", { class: "stamp" + (w.ok ? " go" : ""), hidden: true }, w.ok ? "發展中" : "失敗");
+      const el = h("button", { class: "wave", type: "button", role: "listitem", onclick: () => { out.hidden = false; stamp.hidden = false; el.classList.add("cur"); if (w.ok) { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + 40, 26, 1.3); } } },
+        stamp, h("span", { class: "yr" }, w.y), h("span", { class: "nm" }, w.n), h("span", { class: "what" }, w.what), out);
+      parts.push([out, stamp, el]); box.append(el);
+    });
+    host.append(box,
+      h("div", { class: "row", "data-in": "" }, h("button", { class: "btn", type: "button", onclick: () => parts.forEach(p => p[2].click()) }, "顯示全部結果"), h("button", { class: "btn quiet", type: "button", onclick: reset }, "重設")),
+      h("p", { class: "margin", "data-in": "" }, "留意：前兩波失敗，都是因為人無法把全部思考和知識寫成規則。第三波改為讓電腦自己從資料中學。"));
+    function reset() { parts.forEach(([o, s, el]) => { o.hidden = true; s.hidden = true; el.classList.remove("cur"); }); }
+    return { reset };
+  }
+},
+{
+  id: "ml", title: "機器學習與深度學習",
+  build(host) {
+    host.append(h("div", { class: "prose", "data-in": "" },
+      h("ul", {},
+        h("li", {}, "現時熱門的", hl("機器學習"), "，就是將大量資料輸入電腦，讓電腦分析或執行結果。"),
+        h("li", {}, "機器學習中的特徵檢測功能，需要由程式設計師進行定義，讓電腦從中尋找「有助於人類作出決策」的資訊。"),
+        h("li", {}, hl("深度學習"), "則讓電腦更準確地分析資料：資料輸入", hl("人工類神經網絡"), "後，系統會詢問一連串問題，並根據獲得的答案為資料分類。"))),
+      h("div", { class: "chain3", "data-in": "" },
+        h("div", { class: "node" }, h("b", {}, "專家系統"), h("dl", { class: "who" }, h("dt", {}, "規則"), h("dd", {}, "由專家定義"))),
+        h("span", { class: "arr", "aria-hidden": "true" }, "→"),
+        h("div", { class: "node" }, h("b", {}, "機器學習"), h("dl", { class: "who" }, h("dt", {}, "規則"), h("dd", {}, "由電腦定義"), h("dt", {}, "特徵"), h("dd", {}, "由專家定義"))),
+        h("span", { class: "arr", "aria-hidden": "true" }, "→"),
+        h("div", { class: "node" }, h("b", {}, "深度學習"), h("small", {}, "人工類神經網絡"), h("dl", { class: "who" }, h("dt", {}, "規則"), h("dd", {}, "由電腦定義（更準確）"), h("dt", {}, "特徵"), h("dd", {}, "由專家定義")))),
+      h("p", { class: "margin", "data-in": "" }, "生活例子：郵箱自動把垃圾郵件分類（機器學習）；手機相簿自動認出相中人是誰（深度學習）。"));
+  }
+},
+{
+  id: "weak-strong", title: "弱人工智能與強人工智能",
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "人工智能有多聰明？它會像人類一般聰明嗎？"),
+      h("div", { class: "split" },
+        h("div", { class: "prose rule-top", "data-in": "" }, h("h3", {}, "弱人工智能"),
+          h("p", {}, "根據", hl("人類指令"), "去執行任務的人工智能。"),
+          h("ul", {}, h("li", {}, "人工智能圍棋軟件 AlphaGo 棋藝精湛，但除了下圍棋之外，便不會做其他工作。"), h("li", {}, "語音助理 Siri 幾乎是我們的小秘書，但只會按人類的指令執行任務。"))),
+        h("div", { class: "prose rule-top", "data-in": "" }, h("h3", {}, "強人工智能"),
+          h("p", {}, "就像科幻電影中經常出現的高智能機械人，具備", hl("自我意識"), "，能自主決策和行動。"),
+          h("ul", {}, h("li", {}, "它們是圖靈測試所提出的、擁有人類智慧的機械人。"), h("li", {}, "這項技術暫時還未成為現實。")))),
+      qa("隨着 ChatGPT 的誕生（OpenAI 公司開發的聊天機械人，擁有和人類非常接近的語言能力和邏輯理解能力），不少人擔心強人工智能終有一天會成為現實。你認為人類最終會被機械人取替嗎？", "自由作答，需有立場及理由。可提示學生：ChatGPT 仍按指令生成文字，沒有自我意識，所以仍屬弱人工智能。"));
+  }
+},
+{
+  id: "ws-sort", title: "活動二：弱定強？", act: true,
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "把每張卡放到正確的類別，然後按「批改」。"));
+    return makeSorter(host, {
+      bins: [{ id: "weak", label: "弱人工智能", sub: "按指令做特定任務", stk: "bot-hi" }, { id: "strong", label: "強人工智能", sub: "有自我意識", stk: "bot-love" }],
+      cards: [
+        { id: "a", text: "AlphaGo 圍棋軟件", answer: "weak", why: "棋藝精湛，但除了下圍棋，便不會做其他工作。" },
+        { id: "b", text: "語音助理 Siri", answer: "weak", why: "像小秘書，但只會按人類的指令執行任務。" },
+        { id: "c", text: "Google 翻譯", answer: "weak", why: "只負責翻譯文字，不會自己決定做其他事。" },
+        { id: "d", text: "ChatGPT 聊天機械人", answer: "weak", why: "對答如流，但沒有自我意識，只按指令生成文字。" },
+        { id: "f", text: "自動駕駛汽車", answer: "weak", why: "只負責駕駛，按設定的目的地行駛。" },
+        { id: "e", text: "科幻電影中有自我意識、能自主決策的機械人", answer: "strong", why: "具備自我意識，能自主決策和行動；暫未成為現實。" }
+      ]
+    });
+  }
+}
+]});
+
+/* ---------- 1.2 ---------- */
+chapter({ id: "c2", code: "1.2", name: "人工智能的五大範疇", pages: [
+{
+  id: "domains", title: "人工智能的五大範疇",
+  build(host) {
+    const D = [
+      { n: "感知", pc: "我用感應器來接收外界資訊。我並不能感知氣味。", hu: "我們用味覺、聽覺、視覺、觸覺和嗅覺來對環境進行感知。", body: "電腦會透過不同的感應器來接收訊息，然後加以運算，解決問題。", eg: ["智能鏡頭可以在人臉周圍顯示方框（人臉辨識）。", "智能手機能收集語音數據，然後輸出文字（語音辨識）。"] },
+      { n: "表示與推理", pc: "我透過接收的資訊，進行預測和推理。", hu: "我透過直覺、邏輯、常識作出預測和推理。", body: "人工智能透過收集的資訊去作出預測。", eg: ["自動駕駛系統根據地圖與目的地等資料規劃路線。", "人工智能圍棋軟件 AlphaGo 根據棋盤的形勢，擬定最大勝算的下一步棋。"] },
+      { n: "學習", pc: "我收集人類輸入的數據，歸納出規則和有用的訊息。", hu: "我根據因果和經驗學習新知識。", body: "電腦在「學習」後將數據轉化成有用的資訊。", eg: ["電腦分析病人數據，進行診斷。", "Google 翻譯可以自動翻譯多種語言。"] },
+      { n: "互動", pc: "我根據語音數據和臉部表情等資訊與人互動。我不能準確地分析人類語言中的情感，也不具備人性和情緒。", hu: "我們透過文字、語言和情感互動。我們有喜怒哀樂。", body: "電腦透過語音數據與人類互動。", eg: ["語音助理 Siri 根據語音指令提供天氣預報，甚至和人類簡單「聊天」。", "但無論對電腦還是人類來說，分析人類複雜的情感都是十分困難的事情。"] },
+      { n: "社會影響", pc: "我為社會帶來許多方便，但也可能帶來負面影響。", hu: "我們要決定人工智能應遵守甚麼道德標準。", body: "人工智能為社會帶來正反兩面的影響。", eg: ["人臉辨識雖然為用家帶來方便，但也可能存在私隱問題。", "自動駕駛系統遇到緊急情況時，應該優先考慮乘客還是行人的安全？"] }
+    ];
+    host.append(h("p", { class: "lead", "data-in": "" }, "人工智能主要包含五大理念與日常應用。逐一點擊，比較電腦和人類有甚麼分別。"));
+    const list = h("div", { class: "dom-list", role: "tablist", "aria-label": "五大範疇" });
+    const panel = h("div", { class: "dom-panel", "aria-live": "polite" });
+    const btns = D.map((d, i) => { const b = h("button", { type: "button", role: "tab", "aria-selected": "false", onclick: () => show(i) }, h("span", { class: "n" }, i + 1), stk(["eye", "brain", "book", "chat", "scale"][i], { cls: "still", rot: "-5deg" }), h("span", { class: "t" }, d.n)); list.append(b); return b; });
+    host.append(h("div", { class: "dom", "data-in": "" }, list, panel));
+    function show(i, quiet) {
+      btns.forEach((b, k) => b.setAttribute("aria-selected", String(k === i)));
+      const d = D[i];
+      panel.innerHTML = "";
+      panel.append(h("div", { class: "dom-head" }, h("h3", {}, (i + 1) + ". " + d.n), stk(["eye", "brain", "book", "chat", "scale"][i], { size: "5.2rem", rot: "6deg", cls: "pop-in" })),
+        h("div", { class: "says" }, h("div", { class: "say pc" }, h("span", { class: "who2" }, stk("bot-hi", { size: "2.3rem", cls: "still" }), "電腦說"), h("p", {}, d.pc)), h("div", { class: "say" }, h("span", { class: "who2" }, stk(i === 4 ? "bulb" : "person", { size: "2.3rem", cls: "still" }), i === 4 ? "我們要想" : "人類說"), h("p", {}, d.hu))),
+        h("div", { class: "prose" }, h("p", {}, d.body), h("ul", {}, d.eg.map(e => h("li", {}, e)))));
+      if (!quiet && panel.animate) panel.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 240, easing: "ease-out" });
+    }
+    show(0, true);
+    return { reset: () => show(0, true) };
+  }
+},
+{
+  id: "social", title: "社會影響：AI 應遵守甚麼道德標準？",
+  build(host) {
+    host.append(h("div", { class: "split" },
+      h("div", { class: "prose", "data-in": "" },
+        h("p", {}, "人工智能為社會帶來", hl("正反兩面"), "的影響。"),
+        h("ul", {}, h("li", {}, "人臉辨識雖然為用家帶來方便，但也可能存在私隱問題。"), h("li", {}, "自動駕駛系統遇到緊急情況時，應該優先考慮乘客還是行人的安全？")),
+        h("p", {}, "這引伸到我們要求人工智能系統作出決策時，需要滿足哪些", hl("道德標準"), "。")),
+      h("div", { class: "prose", "data-in": "" }, h("p", { class: "margin" }, "下一頁的活動改編自美國麻省理工學院（MIT）的「道德機器」研究。全球數以百萬計的人曾回答同類問題，不同國家和地區的人，選擇有明顯差異。"),
+        h("div", { class: "row" }, ext("https://www.moralmachine.net/", "打開 MIT 道德機器")))));
+  }
+},
+{
+  id: "moral", title: "活動三：道德機器", act: true,
+  build(host) {
+    const S = [
+      { t: "煞車突然失靈。", a: "直行：撞到正在過馬路的 3 名行人。", b: "轉向：撞向石壆，車上 1 名乘客受傷。", ap: ["P", "P", "P"], bp: ["W"] },
+      { t: "煞車突然失靈，前面兩邊都有行人。", a: "直行：撞到 1 名闖紅燈的行人。", b: "轉向：撞到 1 名遵守交通燈的行人。", ap: ["P"], bp: ["P"], note: "兩邊人數一樣，分別只在於有沒有守規則。" },
+      { t: "煞車突然失靈。", a: "直行：撞到 2 名長者。", b: "轉向：撞到 2 名小朋友。", ap: ["E", "E"], bp: ["K", "K"] },
+      { t: "煞車突然失靈。", a: "直行：撞到 1 名行人。", b: "轉向：撞到 3 隻狗。", ap: ["P"], bp: ["D", "D", "D"] },
+      { t: "煞車突然失靈，車主就坐在車上。", a: "直行：撞到 5 名行人。", b: "轉向：撞向石壆，車主受傷。", ap: ["P", "P", "P", "P", "P"], bp: ["W"], note: "如果車會為保護行人而犧牲車主，你還會買這部車嗎？" },
+      { t: "煞車突然失靈，兩邊各有 1 名行人。", a: "直行（不作任何改變）：撞到前面的行人。", b: "轉向（AI 主動改變方向）：撞到旁邊的行人。", ap: ["P"], bp: ["P"], note: "AI 應不應該主動改變結果？" }
+    ];
+    const votes = S.map(() => ({ a: 0, b: 0 }));
+    let i = 0;
+    const steps = h("div", { class: "steps", "aria-hidden": "true" }, S.map((_, k) => h("span", {}, k + 1)));
+    const stage = h("div", { class: "dil", "data-in": "" });
+    const sumBox = h("div", { hidden: true, style: "display:grid;gap:1rem" });
+    host.append(h("p", { class: "lead", "data-in": "" }, "一部自動駕駛汽車的煞車失靈，AI 只能二選一。全班舉手投票，老師記錄票數。"), h("div", { class: "row", "data-in": "" }, h("span", { class: "note" }, "情境"), steps), stage, sumBox);
+    const lab = k => ({ P: "行人", E: "長者", K: "小朋友", D: "狗" }[k]);
+    const fig = (k, x, y) => {
+      const t = `<text y="38" text-anchor="middle" font-size="13" font-family="Noto Sans TC,sans-serif" font-weight="700" fill="#17181C">${lab(k)}</text>`;
+      if (k === "D") return `<g transform="translate(${x},${y})"><rect x="-15" y="-6" width="30" height="13" rx="6" fill="#fff" stroke="#17181C" stroke-width="2.5"/><circle cx="17" cy="-9" r="7" fill="#fff" stroke="#17181C" stroke-width="2.5"/><path d="M-10 7v12M10 7v12" stroke="#17181C" stroke-width="2.5"/>${t}</g>`;
+      const s = k === "K" ? .72 : 1, cane = k === "E" ? '<path d="M13 -4 l5 28" stroke="#17181C" stroke-width="2.5"/>' : "";
+      return `<g transform="translate(${x},${y})"><g transform="scale(${s}) translate(0,${k === "K" ? 8 : 0})"><circle cy="-20" r="8" fill="#fff" stroke="#17181C" stroke-width="2.5"/><path d="M0 -12v18M-10 -5h20M0 6l-8 16M0 6l8 16" stroke="#17181C" stroke-width="2.5" fill="none" stroke-linecap="round"/>${cane}</g>${t}</g>`;
+    };
+    function road(sc) {
+      const ap = sc.ap.map((k, j) => fig(k, 520 + j * 44, 66)).join("");
+      const bp = sc.bp[0] === "W"
+        ? `<g transform="translate(540,190)"><rect x="-34" y="-24" width="68" height="44" fill="#fff" stroke="#17181C" stroke-width="3"/><path d="M-34 -2h68M-12 -24v22M12 -2v22" stroke="#17181C" stroke-width="2"/><text y="44" text-anchor="middle" font-size="13" font-family="Noto Sans TC,sans-serif" font-weight="700" fill="#17181C">石壆（乘客受傷）</text></g>`
+        : sc.bp.map((k, j) => fig(k, 520 + j * 44, 186)).join("");
+      return `<svg viewBox="0 0 760 270" role="img" aria-label="${sc.a}；${sc.b}">
+        <rect width="760" height="270" fill="#F1F2EE"/>
+        <rect x="0" y="34" width="760" height="76" fill="#fff"/><rect x="0" y="152" width="760" height="76" fill="#fff"/>
+        <path d="M0 131h760" stroke="#D9DCE1" stroke-width="3" stroke-dasharray="20 14"/>
+        <g transform="translate(120,72)"><rect x="-50" y="-22" width="100" height="44" rx="10" fill="#17181C"/><rect x="-17" y="-15" width="34" height="30" rx="4" fill="#fff"/><text x="0" y="5" text-anchor="middle" font-size="12" font-family="IBM Plex Mono,monospace" font-weight="600" fill="#17181C">AI</text><circle cx="-30" cy="24" r="7" fill="#17181C"/><circle cx="30" cy="24" r="7" fill="#17181C"/></g>
+        <path d="M190 72 H470" stroke="#2348B5" stroke-width="4" stroke-dasharray="10 8"/><path d="M462 63 L476 72 L462 81" fill="none" stroke="#2348B5" stroke-width="4"/>
+        <path d="M190 84 C 290 84, 330 190, 462 190" fill="none" stroke="#17181C" stroke-width="4" stroke-dasharray="4 7"/><path d="M454 181 L468 190 L454 199" fill="none" stroke="#17181C" stroke-width="4"/>
+        <text x="330" y="58" text-anchor="middle" font-size="18" font-family="Noto Serif TC,serif" font-weight="900" fill="#2348B5">A 直行</text>
+        <text x="296" y="222" text-anchor="middle" font-size="18" font-family="Noto Serif TC,serif" font-weight="900" fill="#17181C">B 轉向</text>
+        ${ap}${bp}</svg>`;
+    }
+    function paint() {
+      [...steps.children].forEach((s, k) => { s.className = k === i ? "on" : (votes[k].a + votes[k].b > 0 ? "done" : ""); });
+      const sc = S[i], v = votes[i];
+      const barA = h("i"), barB = h("i"), nA = h("b"), nB = h("b");
+      const upd = () => { const t = Math.max(1, v.a + v.b); barA.style.width = (v.a / t * 100) + "%"; barB.style.width = (v.b / t * 100) + "%"; nA.textContent = v.a + " 票"; nB.textContent = v.b + " 票"; };
+      const ctl = k => h("div", { class: "row" },
+        h("button", { class: "btn small", type: "button", "aria-label": "選項 " + k.toUpperCase() + " 減一票", onclick: () => { v[k] = Math.max(0, v[k] - 1); upd(); } }, "−1"),
+        h("button", { class: "btn small primary", type: "button", "aria-label": "選項 " + k.toUpperCase() + " 加一票", onclick: () => { v[k]++; upd(); } }, "+1"));
+      stage.innerHTML = "";
+      stage.append(h("h3", {}, "情境 " + (i + 1) + "：" + sc.t),
+        h("div", { class: "road", html: road(sc) }),
+        h("div", { class: "choices" },
+          h("div", { class: "choice" }, h("div", { class: "lbl" }, h("b", {}, "A　直行"), h("span", {}, "藍色長虛線")), h("p", {}, sc.a.replace(/^直行[^：]*：/, "")), h("div", { class: "vbar" }, barA, nA), ctl("a")),
+          h("div", { class: "choice" }, h("div", { class: "lbl" }, h("b", {}, "B　轉向"), h("span", {}, "黑色短虛線")), h("p", {}, sc.b.replace(/^轉向[^：]*：/, "")), h("div", { class: "vbar alt" }, barB, nB), ctl("b"))),
+        sc.note ? h("p", { class: "margin" }, sc.note) : "",
+        h("div", { class: "row" },
+          h("button", { class: "btn", type: "button", disabled: i === 0, onclick: () => { i--; paint(); } }, "上一個情境"),
+          i < S.length - 1 ? h("button", { class: "btn primary", type: "button", onclick: () => { i++; paint(); } }, "下一個情境")
+                           : h("button", { class: "btn primary", type: "button", onclick: summary }, "看全班結果"),
+          h("span", { class: "grow" }), h("button", { class: "btn quiet", type: "button", onclick: reset }, "重設")));
+      upd();
+      stage.hidden = false; sumBox.hidden = true;
+    }
+    function summary() {
+      stage.hidden = true; sumBox.hidden = false; sumBox.innerHTML = "";
+      const body = h("tbody");
+      S.forEach((sc, k) => { const v = votes[k]; const m = v.a === v.b ? "票數相同" : (v.a > v.b ? "A　" + sc.a.split("：")[1] : "B　" + sc.b.split("：")[1]); body.append(h("tr", {}, h("td", { class: "num" }, k + 1), h("td", { class: "num" }, v.a), h("td", { class: "num" }, v.b), h("td", {}, m))); });
+      const tb = h("table", { class: "sumtbl" }, h("thead", {}, h("tr", {}, h("th", {}, "情境"), h("th", {}, "A 直行"), h("th", {}, "B 轉向"), h("th", {}, "全班多數選擇"))), body);
+      sumBox.append(h("h3", {}, "全班結果"), h("div", { style: "overflow-x:auto" }, tb),
+        qa("你們的選擇有沒有一套規則？例如「救最多人」「保護守規則的人」「保護小朋友」？", "自由作答。可帶出：人類自己也未必同意同一套規則，所以為 AI 定下道德標準十分困難。"),
+        qa("應該由誰決定自動駕駛汽車的道德標準？程式設計師、汽車公司、政府，還是車主？", "自由作答。可帶出：涉及公眾安全的決定，通常需要政府立法和社會討論，不能只由一間公司決定。"),
+        h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: () => { i = S.length - 1; paint(); } }, "返回最後一個情境"), h("button", { class: "btn quiet", type: "button", onclick: reset }, "重設（下一班）"), ext("https://www.moralmachine.net/", "MIT 道德機器原版")));
+    }
+    function reset() { votes.forEach(v => { v.a = 0; v.b = 0; }); i = 0; paint(); }
+    paint();
+    return { reset };
+  }
+},
+{
+  id: "dom-sort", title: "活動四：五大範疇配對", act: true,
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "把每張例子卡放到它最能代表的範疇。"));
+    return makeSorter(host, {
+      bins: [{ id: "per", label: "感知", sub: "感應器接收資訊", stk: "eye" }, { id: "rea", label: "表示與推理", sub: "預測和推理", stk: "brain" }, { id: "lea", label: "學習", sub: "數據變成資訊", stk: "book" }, { id: "int", label: "互動", sub: "與人溝通", stk: "chat" }, { id: "soc", label: "社會影響", sub: "正反影響、道德", stk: "scale" }],
+      cards: [
+        { id: "1", text: "智能鏡頭在人臉周圍顯示方框", answer: "per", why: "鏡頭（感應器）接收影像，辨識出人臉。" },
+        { id: "2", text: "智能手機把語音轉成文字", answer: "per", why: "收集語音數據，再輸出文字。" },
+        { id: "3", text: "自動駕駛系統根據地圖和目的地規劃路線", answer: "rea", why: "根據收集到的資料作出預測和推理。" },
+        { id: "4", text: "AlphaGo 擬定勝算最大的下一步棋", answer: "rea", why: "按棋盤形勢推理出最好的下一步。" },
+        { id: "5", text: "電腦分析大量病人數據，協助診斷", answer: "lea", why: "把數據轉化成有用的資訊。" },
+        { id: "6", text: "Google 翻譯自動翻譯多種語言", answer: "lea", why: "從大量資料中學習翻譯的規律。" },
+        { id: "7", text: "Siri 按語音指令報告天氣，還會簡單「聊天」", answer: "int", why: "透過語音數據與人互動，但不能真正理解人類情感。" },
+        { id: "8", text: "人臉辨識方便用家，但可能有私隱問題", answer: "soc", why: "同一技術帶來正反兩面的影響。" }
+      ]
+    });
+  }
+}
+]});
+
+/* ---------- 1.3 ---------- */
+const ZH = {"tabby":"虎斑貓","tiger cat":"虎紋貓","Egyptian cat":"埃及貓","Persian cat":"波斯貓","Siamese cat":"暹羅貓","golden retriever":"金毛尋回犬","Labrador retriever":"拉布拉多犬","Chihuahua":"芝娃娃","Pomeranian":"松鼠狗","pug":"八哥犬","Shih-Tzu":"西施犬","toy poodle":"玩具貴婦犬","Siberian husky":"西伯利亞雪橇犬","goldfish":"金魚","hamster":"倉鼠","wood rabbit":"兔子","hen":"母雞","cock":"公雞","zebra":"斑馬","tiger":"老虎","lion":"獅子","giant panda":"大熊貓","koala":"樹熊","African elephant":"非洲象","Indian elephant":"亞洲象","bee":"蜜蜂","ladybug":"瓢蟲","monarch":"帝王蝶","daisy":"雛菊","pot":"盆栽／花盆","vase":"花瓶","broccoli":"西蘭花","cucumber":"青瓜","bell pepper":"燈籠椒","mushroom":"蘑菇","pineapple":"菠蘿","banana":"香蕉","orange":"橙","lemon":"檸檬","Granny Smith":"青蘋果","strawberry":"士多啤梨","pizza":"薄餅","hotdog":"熱狗","cheeseburger":"芝士漢堡","ice cream":"雪糕","French loaf":"法包","bagel":"貝果","plate":"碟","soup bowl":"湯碗","wok":"鑊","frying pan":"煎鑊","teapot":"茶壺","cup":"杯","coffee mug":"馬克杯","water bottle":"水樽","water jug":"水壺","beer bottle":"啤酒樽","pop bottle":"汽水樽","laptop":"手提電腦","notebook":"手提電腦","desktop computer":"桌面電腦","monitor":"顯示器","screen":"螢幕","television":"電視","computer keyboard":"電腦鍵盤","mouse":"滑鼠","cellular telephone":"手提電話","iPod":"iPod 播放器","remote control":"遙控器","joystick":"遊戲手掣","loudspeaker":"喇叭","microphone":"咪高峰","projector":"投影機","printer":"打印機","modem":"數據機","hard disc":"硬碟","backpack":"背囊","pencil box":"筆袋","ballpoint":"原子筆","fountain pen":"墨水筆","rubber eraser":"擦膠","ruler":"間尺","binder":"文件夾","book jacket":"書本封面","comic book":"漫畫書","envelope":"信封","wall clock":"掛牆鐘","analog clock":"時鐘","digital watch":"電子錶","sunglasses":"太陽眼鏡","sunglass":"太陽眼鏡","umbrella":"雨傘","running shoe":"波鞋","sandal":"涼鞋","jersey":"T 恤","sweatshirt":"衞衣","jean":"牛仔褲","folding chair":"摺椅","rocking chair":"搖椅","desk":"書枱","dining table":"餐枱","table lamp":"枱燈","refrigerator":"雪櫃","microwave":"微波爐","toaster":"多士爐","washer":"洗衣機","vacuum":"吸塵機","electric fan":"風扇","ashcan":"垃圾筒","mountain bike":"越野單車","bicycle-built-for-two":"雙人單車","motor scooter":"電單車","sports car":"跑車","convertible":"開篷車","minivan":"七人車","cab":"的士","school bus":"校巴","trolleybus":"無軌電車","streetcar":"電車","passenger car":"火車車廂","airliner":"客機","container ship":"貨櫃船","traffic light":"交通燈","street sign":"路牌","parking meter":"咪錶","basketball":"籃球","soccer ball":"足球","volleyball":"排球","tennis ball":"網球","ping-pong ball":"乒乓球","golf ball":"高爾夫球","rugby ball":"欖球","baseball":"棒球","toothbrush":"牙刷","paper towel":"紙巾","toilet tissue":"廁紙","soap dispenser":"梘液樽","lipstick":"唇膏","pill bottle":"藥樽","Band Aid":"膠布","mask":"面罩","teddy":"泰迪熊公仔","balloon":"氣球","castle":"城堡","church":"教堂","suspension bridge":"吊橋","seashore":"海灘","volcano":"火山","alp":"高山","lakeside":"湖邊","valley":"山谷","cliff":"懸崖","bubble":"泡泡","web site":"網頁","menu":"餐牌","carton":"紙盒","crate":"木箱","shopping cart":"購物車","shopping basket":"購物籃","plastic bag":"膠袋","purse":"銀包","wallet":"銀包","scoreboard":"計分板","space shuttle":"太空穿梭機"};
+const zhName = cls => ZH[cls.split(",")[0].trim()] || null;
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.async = true; s.onload = res; s.onerror = () => rej(new Error(src)); document.head.append(s); }); }
+
+chapter({ id: "c3", code: "1.3", name: "人工智能的辨識技術", pages: [
+{
+  id: "image", title: "影像辨識",
+  build(host) {
+    host.append(h("div", { class: "split" },
+      h("div", { class: "prose", "data-in": "" },
+        h("p", {}, hl("影像辨識"), "包括人臉辨識、姿勢辨識、手勢辨識、數字辨識、物件辨識等。"),
+        h("p", {}, "電腦經過檢視", hl("大量圖片的訓練"), "後，便能進行相關辨識。"),
+        h("p", { class: "margin" }, "生活例子：手機用人臉解鎖、相簿自動按人物分類、e-道容貌辨識過關。")),
+      h("div", { "data-in": "", style: "overflow-x:auto" }, H(`<table class="cmp"><thead><tr><th>辨識類型</th><th>電腦要認出甚麼</th></tr></thead><tbody>
+        <tr><td class="rowh">人臉辨識</td><td>相中的人是誰</td></tr>
+        <tr><td class="rowh">姿勢辨識</td><td>人站着、坐着還是跌倒</td></tr>
+        <tr><td class="rowh">手勢辨識</td><td>剪刀、石頭、布等手勢</td></tr>
+        <tr><td class="rowh">數字辨識</td><td>手寫或印刷的數字</td></tr>
+        <tr><td class="rowh">物件辨識</td><td>汽車、花朵、杯等物件</td></tr></tbody></table>`))));
+  }
+},
+{
+  id: "vision", title: "活動五：物件辨識", act: true,
+  build(host) {
+    let model = null, loading = null, stream = null, live = false, liveTimer = null, baseImage = null;
+    const canvas = h("canvas", { width: 640, height: 480, hidden: true, "aria-label": "辨識中的圖片" });
+    const video = h("video", { playsinline: true, muted: true, autoplay: true, hidden: true });
+    const empty = h("div", { class: "empty" }, "未有圖片", h("br"), h("span", { class: "note", style: "color:#B9BEC8" }, "可以把圖片拖放到這裏"));
+    const viewer = h("div", { class: "viewer" }, empty, video, canvas);
+    const fileIn = h("input", { type: "file", accept: "image/*", id: "u5-file", hidden: true, onchange: e => { const f = e.target.files[0]; if (f) loadFile(f); e.target.value = ""; } });
+    const camBtn = h("button", { class: "btn primary", type: "button", onclick: toggleCam }, "開啟鏡頭");
+    const snapBtn = h("button", { class: "btn", type: "button", disabled: true, onclick: snap }, "拍照辨識");
+    const liveBtn = h("button", { class: "btn", type: "button", disabled: true, onclick: toggleLive }, "即時辨識：關");
+    const upBtn = h("button", { class: "btn primary", type: "button", onclick: () => fileIn.click() }, "上載圖片");
+    const grayBtn = h("button", { class: "btn", type: "button", disabled: true, onclick: () => transform("gray") }, "轉成黑白");
+    const cropBtn = h("button", { class: "btn", type: "button", disabled: true, onclick: () => transform("crop") }, "只看一部分");
+    const origBtn = h("button", { class: "btn quiet", type: "button", disabled: true, onclick: () => transform("orig") }, "還原");
+    const status = h("div", { class: "status", "aria-live": "polite" });
+    const msg = h("div", {});
+    const results = h("div", { class: "results", "aria-live": "polite" });
+    host.append(h("p", { class: "lead", "data-in": "" }, "開啟鏡頭或上載圖片，看看 AI 認為它是甚麼，以及它有多大信心（confidence）。"),
+      h("div", { class: "vision", "data-in": "" },
+        h("div", { style: "display:grid;gap:.7rem;min-width:0" }, viewer,
+          h("div", { class: "row" }, camBtn, snapBtn, liveBtn, upBtn, fileIn),
+          h("div", { class: "row" }, grayBtn, cropBtn, origBtn, h("span", { class: "grow" }), h("button", { class: "btn quiet", type: "button", onclick: reset }, "重設")), status, msg),
+        h("div", { style: "display:grid;gap:1.1rem;min-width:0" },
+          h("div", { class: "rule-top" }, h("div", { class: "note", style: "margin-bottom:.4rem" }, "AI 辨識結果（前 3 名）"), results),
+          h("p", { class: "margin" }, "試試：先拍一件清晰的物件，記下信心程度；再按「轉成黑白」和「只看一部分」，或者把幾件物件放在一起。"),
+          h("p", { class: "note" }, "這個模型（MobileNet）用約 1,000 類英文標籤訓練，能認出的類別有限；未有中文翻譯的類別會顯示英文。"))),
+      qa("試分別上傳黑白圖片、背景複雜的圖片，以及包含多於一個物件的圖片。這會影響系統辨識的準確度嗎？為甚麼？", "會。由於相關的學習數據不足，準確度或會降低。"),
+      qa("還有哪些類型的圖片會影響系統辨識的準確度？", "圖片中的物件太小；只看到圖片中物件的一部分。"),
+      h("div", { class: "row", "data-in": "" }, h("span", { class: "note" }, "延伸：讓學生自己訓練 AI"), ext("https://teachablemachine.withgoogle.com/", "Teachable Machine"), ext("https://quickdraw.withgoogle.com/", "Quick, Draw!")));
+    emptyResults();
+    viewer.addEventListener("dragover", e => { e.preventDefault(); viewer.classList.add("drop-hover"); });
+    viewer.addEventListener("dragleave", () => viewer.classList.remove("drop-hover"));
+    viewer.addEventListener("drop", e => { e.preventDefault(); viewer.classList.remove("drop-hover"); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith("image/")) loadFile(f); });
+    document.addEventListener("paste", e => { if (curPage().id !== "vision") return; const it = Array.from(e.clipboardData?.items || []).find(x => x.type.startsWith("image/")); if (it) loadFile(it.getAsFile()); });
+    function emptyResults() { results.innerHTML = ""; results.append(h("p", { class: "note" }, "結果會在這裏顯示。")); }
+    function showMsg(kind, html) { msg.innerHTML = ""; if (html) msg.append(h("div", { class: kind, html })); }
+    function ensureModel() {
+      if (model) return Promise.resolve(model);
+      if (loading) return loading;
+      status.innerHTML = '<span class="spinner"></span>正在載入 AI 模型（約 14MB，第一次需時較長）……';
+      loading = (async () => {
+        if (!window.tf) await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js");
+        if (!window.mobilenet) await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js");
+        model = await window.mobilenet.load({ version: 2, alpha: 1.0 });
+        status.textContent = "AI 模型已載入。";
+        return model;
+      })().catch(err => {
+        loading = null; status.textContent = "";
+        showMsg("warn", "<strong>未能載入 AI 模型。</strong> " + (inFrame
+          ? "網上分享版會封鎖模型下載。請用 Chrome 開啟本網站的 HTML 檔版本；或改用 <a href=\"https://teachablemachine.withgoogle.com/\" target=\"_blank\" rel=\"noopener\">Teachable Machine</a>。"
+          : "請檢查電腦是否已連接互聯網，或學校網絡有否封鎖 Google 的模型伺服器（tfhub.dev／kaggle.com）。亦可改用 <a href=\"https://teachablemachine.withgoogle.com/\" target=\"_blank\" rel=\"noopener\">Teachable Machine</a>。"));
+        throw err;
+      });
+      return loading;
+    }
+    function setImgButtons(on) { [grayBtn, cropBtn, origBtn].forEach(b => b.disabled = !on); }
+    function drawToCanvas(src, w, hh) { const s = Math.min(1, 800 / Math.max(w, hh)); canvas.width = Math.round(w * s); canvas.height = Math.round(hh * s); canvas.getContext("2d").drawImage(src, 0, 0, canvas.width, canvas.height); canvas.hidden = false; empty.hidden = true; }
+    function captureBase() { const c = document.createElement("canvas"); c.width = canvas.width; c.height = canvas.height; c.getContext("2d").drawImage(canvas, 0, 0); baseImage = c; }
+    function loadFile(f) {
+      stopCam();
+      const url = URL.createObjectURL(f), img = new Image();
+      img.onload = () => { drawToCanvas(img, img.naturalWidth, img.naturalHeight); URL.revokeObjectURL(url); captureBase(); setImgButtons(true); showMsg(); classify(); };
+      img.onerror = () => showMsg("warn", "<strong>這個檔案打不開。</strong> 請選擇 JPG 或 PNG 圖片。");
+      img.src = url;
+    }
+    async function classify() { try { const m = await ensureModel(); renderResults(await m.classify(canvas, 3)); } catch (e) {} }
+    function renderResults(preds) {
+      results.innerHTML = "";
+      preds.forEach(p => {
+        const zh = zhName(p.className), en = p.className.split(",").slice(0, 2).join(","), pct = Math.round(p.probability * 1000) / 10, bar = h("i");
+        results.append(h("div", { class: "res" }, h("div", { class: "rw" }, h("span", { class: "name" }, zh || en, zh ? h("span", { class: "en" }, en) : null), h("span", { class: "pct" }, pct.toFixed(1) + "%")), h("div", { class: "bar" }, bar)));
+        requestAnimationFrame(() => requestAnimationFrame(() => bar.style.width = Math.max(1, pct) + "%"));
+      });
+    }
+    function transform(kind) {
+      if (!baseImage) return;
+      const ctx = canvas.getContext("2d");
+      if (kind === "orig" || kind === "gray") { canvas.width = baseImage.width; canvas.height = baseImage.height; ctx.drawImage(baseImage, 0, 0); }
+      if (kind === "gray") { const d = ctx.getImageData(0, 0, canvas.width, canvas.height), a = d.data; for (let i = 0; i < a.length; i += 4) { const g = a[i] * .299 + a[i + 1] * .587 + a[i + 2] * .114; a[i] = a[i + 1] = a[i + 2] = g; } ctx.putImageData(d, 0, 0); }
+      if (kind === "crop") { const w = baseImage.width, hh = baseImage.height; canvas.width = Math.round(w * .4); canvas.height = Math.round(hh * .4); ctx.drawImage(baseImage, w * .05, hh * .05, w * .4, hh * .4, 0, 0, canvas.width, canvas.height); }
+      classify();
+    }
+    async function toggleCam() {
+      if (stream) { stopCam(); return; }
+      showMsg();
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showMsg("warn", "<strong>這個瀏覽器不支援鏡頭。</strong> 請用電腦版 Chrome 開啟，或改按「上載圖片」。"); return; }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        video.srcObject = stream; video.hidden = false; canvas.hidden = true; empty.hidden = true;
+        camBtn.textContent = "關閉鏡頭"; snapBtn.disabled = false; liveBtn.disabled = false; setImgButtons(false);
+        ensureModel().catch(() => {});
+      } catch (err) {
+        stream = null;
+        const n = err && err.name; let text;
+        if (n === "NotAllowedError" || n === "SecurityError") text = inFrame ? "<strong>網上分享版不能使用鏡頭。</strong> 請改按「上載圖片」，或用 Chrome 開啟 HTML 檔版本。" : "<strong>鏡頭權限被拒絕。</strong> 請按網址列左邊的圖示，把「相機」改為「允許」，然後重新整理頁面；或改按「上載圖片」。";
+        else if (n === "NotFoundError" || n === "OverconstrainedError") text = "<strong>找不到鏡頭。</strong> 請檢查鏡頭是否已連接，或改按「上載圖片」。";
+        else if (n === "NotSupportedError") text = "<strong>這個頁面不能使用鏡頭。</strong> 請用電腦版 Chrome 開啟本網站的 HTML 檔，或改按「上載圖片」。";
+        else if (n === "NotReadableError") text = "<strong>鏡頭正被其他程式使用。</strong> 請關閉 Teams、Zoom 等程式後再試。";
+        else text = "<strong>未能開啟鏡頭。</strong> 請改按「上載圖片」。";
+        showMsg("warn", text);
+      }
+    }
+    function stopCam() {
+      if (liveTimer) { clearInterval(liveTimer); liveTimer = null; }
+      live = false; liveBtn.textContent = "即時辨識：關";
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      video.hidden = true; video.srcObject = null; camBtn.textContent = "開啟鏡頭"; snapBtn.disabled = true; liveBtn.disabled = true;
+      if (canvas.hidden) empty.hidden = false;
+    }
+    function snap() { if (!stream) return; drawToCanvas(video, video.videoWidth || 640, video.videoHeight || 480); captureBase(); stopCam(); canvas.hidden = false; empty.hidden = true; setImgButtons(true); classify(); }
+    function toggleLive() {
+      live = !live; liveBtn.textContent = "即時辨識：" + (live ? "開" : "關");
+      if (live) liveTimer = setInterval(async () => { if (!stream || !model) return; try { renderResults(await model.classify(video, 3)); } catch (e) {} }, 1200);
+      else { clearInterval(liveTimer); liveTimer = null; }
+    }
+    function reset() { stopCam(); baseImage = null; canvas.hidden = true; empty.hidden = false; setImgButtons(false); emptyResults(); showMsg(); status.textContent = model ? "AI 模型已載入。" : ""; }
+    return { reset, onHide: stopCam };
+  }
+},
+{
+  id: "speech-k", title: "語音辨識",
+  build(host) {
+    host.append(h("div", { class: "split" },
+      h("div", { class: "prose", "data-in": "" },
+        h("p", {}, hl("語音辨識"), "指人工智能識別出說話人的內容。"),
+        h("p", {}, "語音輸入是語音辨識的一個例子：只要使用者打開麥克風，開始說話，系統就會把說話的內容轉成文字。")),
+      h("div", { class: "prose rule-top", "data-in": "" }, h("h4", {}, "語音辨識的應用"),
+        h("ul", {}, h("li", {}, "語音寫稿"), h("li", {}, "把會議記錄轉成文字"), h("li", {}, "協助聽障人士，把語音轉成文字短訊溝通")),
+        h("p", { class: "margin" }, "生活例子：WhatsApp 語音訊息轉文字、YouTube 自動字幕。"))));
+  }
+},
+{
+  id: "speech", title: "活動六：語音辨識", act: true,
+  build(host) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const IDIOMS = ["一石二鳥","畫蛇添足","守株待兔","亡羊補牢","對牛彈琴","井底之蛙","半途而廢","自相矛盾","杯弓蛇影","狐假虎威","掩耳盜鈴","刻舟求劍","胸有成竹","一鳴驚人","三心兩意","七上八落","手足無措","人山人海","九牛一毛","五顏六色","入木三分","百發百中","千鈞一髮","馬馬虎虎"];
+    let rec = null, listening = false, mode = "free", finalText = "", target = "", tries = 0, wins = 0;
+    const langSel = h("select", { id: "u6-lang", class: "btn", style: "font-weight:700" }, h("option", { value: "yue-Hant-HK" }, "粵語（香港）"), h("option", { value: "cmn-Hant-TW" }, "普通話（台灣，繁體）"), h("option", { value: "en-US" }, "English (US)"));
+    const micBtn = h("button", { class: "mic", type: "button", "aria-label": "開始聆聽", html: SVG.mic, onclick: toggle });
+    const micLabel = h("div", { style: "font-weight:900" }, "按咪高峰開始");
+    const knob = h("span", { class: "knob" });
+    const tabFree = h("button", { type: "button", role: "tab", "aria-selected": "true", onclick: () => setMode("free") }, "自由說話");
+    const tabIdiom = h("button", { type: "button", role: "tab", "aria-selected": "false", onclick: () => setMode("idiom") }, "成語挑戰");
+    const seg = h("div", { class: "seg", role: "tablist" }, knob, tabFree, tabIdiom);
+    const msg = h("div", {});
+    const transcript = h("div", { class: "transcript", "aria-live": "polite" });
+    const freePane = h("div", { style: "display:grid;gap:.7rem" }, transcript, h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: () => { finalText = ""; paint(""); } }, "清除文字"), h("span", { class: "note" }, "試試：說得很快、很細聲、中英夾雜，或者有背景噪音。")));
+    const idiomEl = h("div", { class: "idiom" }), heard = h("div", { class: "compare", "aria-live": "polite" }), verdict = h("div", { class: "verdict2" }), tally = h("span", { class: "score" });
+    const idiomPane = h("div", { style: "display:grid;gap:.9rem", hidden: true }, h("div", { class: "note", style: "text-align:center" }, "請讀出這個成語"), idiomEl, heard, verdict, h("div", { class: "row" }, h("button", { class: "btn primary", type: "button", onclick: nextIdiom }, "換一個成語"), h("span", { class: "grow" }), tally));
+    host.append(h("p", { class: "lead", "data-in": "" }, "按咪高峰開始說話，AI 會把說話即時轉成文字。"),
+      h("div", { class: "row", "data-in": "" }, micBtn, h("div", { style: "display:grid;gap:.2rem" }, micLabel, h("label", { class: "note", for: "u6-lang" }, "辨識語言")), langSel, h("span", { class: "grow" }), seg, h("button", { class: "btn quiet", type: "button", onclick: reset }, "重設")),
+      msg, h("div", { "data-in": "" }, freePane, idiomPane),
+      qa("哪些因素會影響語音辨識的準確度？", "使用者的語速和聲量（亦可接受：口音、背景噪音、中英夾雜）。"),
+      qa("試向系統說出三個成語，並寫下它是否能成功識別。", "自由作答。"),
+      h("div", { class: "row", "data-in": "" }, h("span", { class: "note" }, "其他工具：Google 文件 →「工具」→「語音輸入」→ 選「中文（香港）」"), ext("https://docs.google.com/", "Google 文件")));
+    if (!SR) { micBtn.disabled = true; showMsg("warn", "<strong>這個瀏覽器不支援語音辨識。</strong> 請用電腦版 Google Chrome 開啟本網站；或改用 Google 文件的語音輸入。"); }
+    else if (inFrame) showMsg("warn", "<strong>網上分享版不能使用咪高峰。</strong> 請用 Chrome 開啟本網站的 HTML 檔版本，或改用 Google 文件的語音輸入。");
+    function placeKnob() { const b = mode === "free" ? tabFree : tabIdiom; if (!b.offsetWidth) return; knob.style.left = b.offsetLeft + "px"; knob.style.width = b.offsetWidth + "px"; }
+    function showMsg(kind, html) { msg.innerHTML = ""; if (html) msg.append(h("div", { class: kind, html })); }
+    function paint(interim) {
+      transcript.innerHTML = "";
+      if (!finalText && !interim) transcript.append(h("span", { class: "ph" }, listening ? "正在聆聽，請說話……" : "文字會在這裏顯示。"));
+      else transcript.append(finalText, interim ? h("span", { class: "interim" }, interim) : "");
+    }
+    function setMode(m) {
+      mode = m; stop();
+      tabFree.setAttribute("aria-selected", String(m === "free")); tabIdiom.setAttribute("aria-selected", String(m === "idiom")); placeKnob();
+      freePane.hidden = m !== "free"; idiomPane.hidden = m !== "idiom";
+      if (m === "idiom" && !target) nextIdiom();
+    }
+    function nextIdiom() { stop(); let t; do { t = IDIOMS[Math.floor(Math.random() * IDIOMS.length)]; } while (t === target); target = t; idiomEl.textContent = t; heard.innerHTML = ""; verdict.textContent = ""; tallyPaint(); }
+    function tallyPaint() { tally.textContent = "成功 " + wins + " / 嘗試 " + tries; }
+    const norm = s => s.replace(/[\s，。、！？,.!?「」『』：:；;]/g, "");
+    function judge(text) {
+      const got = norm(text); tries++;
+      const ok = got.includes(target); if (ok) wins++;
+      heard.innerHTML = "";
+      if (got.length) [...got.slice(0, 8)].forEach((ch, i) => heard.append(h("span", { class: target[i] === ch || ok ? "" : "miss" }, ch)));
+      else heard.append(h("div", { class: "note" }, "（沒有聽到）"));
+      verdict.textContent = ok ? "✓ 一字不差！" : "✗ 未能完全辨識";
+      tallyPaint();
+    }
+    function build() {
+      const r = new SR(); r.lang = langSel.value; r.interimResults = true; r.continuous = mode === "free"; r.maxAlternatives = 1;
+      r.onstart = () => { listening = true; micBtn.classList.add("on"); micBtn.setAttribute("aria-label", "停止聆聽"); micLabel.textContent = "聆聽中……再按一次停止"; if (mode === "free") paint(""); };
+      r.onresult = e => {
+        let interim = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) { if (mode === "free") finalText += t + (langSel.value.startsWith("en") ? " " : ""); else judge(t); }
+          else interim += t;
+        }
+        if (mode === "free") paint(interim); else if (interim) { heard.innerHTML = ""; heard.append(h("div", { class: "note" }, "聽到：" + interim)); }
+      };
+      r.onerror = e => {
+        const map = {
+          "not-allowed": inFrame ? "<strong>網上分享版不能使用咪高峰。</strong> 請用 Chrome 開啟 HTML 檔版本。" : "<strong>咪高峰權限被拒絕。</strong> 請按網址列左邊的圖示，把「麥克風」改為「允許」，再按咪高峰一次。",
+          "service-not-allowed": "<strong>瀏覽器不允許語音服務。</strong> 請用電腦版 Chrome，並確認已連接互聯網。",
+          "no-speech": "<strong>聽不到聲音。</strong> 請靠近咪高峰，說話大聲一點再試。",
+          "audio-capture": "<strong>找不到咪高峰。</strong> 請檢查咪高峰是否已連接並已開啟。",
+          "network": "<strong>語音辨識需要連接互聯網。</strong> Chrome 會把聲音傳送到 Google 伺服器處理，請檢查網絡。",
+          "language-not-supported": "<strong>不支援這個語言。</strong> 請改選其他語言。"
+        };
+        if (e.error !== "aborted") showMsg("warn", map[e.error] || "<strong>語音辨識出錯（" + e.error + "）。</strong> 請再試一次。");
+      };
+      r.onend = () => { listening = false; micBtn.classList.remove("on"); micBtn.setAttribute("aria-label", "開始聆聽"); micLabel.textContent = "按咪高峰開始"; if (mode === "free") paint(""); };
+      return r;
+    }
+    function toggle() {
+      if (listening) { stop(); return; }
+      if (!SR) return;
+      if (!inFrame) showMsg();
+      if (mode === "idiom") { heard.innerHTML = ""; verdict.textContent = ""; }
+      try { rec = build(); rec.start(); } catch (e) { showMsg("warn", "<strong>未能開始聆聽。</strong> 請稍等一會再按一次。"); }
+    }
+    function stop() { if (rec) { try { rec.abort(); } catch (e) {} } listening = false; micBtn.classList.remove("on"); micLabel.textContent = "按咪高峰開始"; }
+    function reset() { stop(); finalText = ""; tries = 0; wins = 0; target = ""; paint(""); setMode("free"); tallyPaint(); }
+    langSel.addEventListener("change", () => { if (listening) stop(); });
+    paint(""); tallyPaint();
+    return { reset, onHide: stop, onShow: () => requestAnimationFrame(placeKnob) };
+  }
+}
+]});
+
+/* ---------- 1.4 ---------- */
+chapter({ id: "c4", code: "1.4", name: "生成式人工智能", pages: [
+{
+  id: "gen", title: "生成式人工智能",
+  build(host) {
+    host.append(h("p", { class: "defn", "data-in": "" }, "人工智能越來越多被應用於生成五花八門的內容，這種人工智能被稱為", hl("生成式人工智能"), "，簡稱生成式 AI。"),
+      h("div", { "data-in": "", style: "overflow-x:auto" }, H(`<table class="cmp"><thead><tr><th>生成甚麼</th><th>課本例子</th></tr></thead><tbody>
+        <tr><td class="rowh">圖像和繪畫</td><td>Midjourney、Nightcafe</td></tr>
+        <tr><td class="rowh">音樂</td><td>Soundraw</td></tr>
+        <tr><td class="rowh">影片</td><td>Runway</td></tr>
+        <tr><td class="rowh">各類文章</td><td>ChatGPT</td></tr></tbody></table>`)),
+      h("p", { class: "margin", "data-in": "" }, "學校可免費使用的圖像生成工具：Adobe Express 教育版（Firefly）、Canva 教育版（Magic Media）。兩者都要用學校開設的帳戶登入。"));
+  }
+},
+{
+  id: "prompt", title: "活動七：提示詞挑戰", act: true,
+  build(host) {
+    const TASKS = [
+      { scene: "一隻穿橙色裙的貓，在艾菲爾鐵塔旁邊的草地上。", note: "課本例子", items: ["貓", "橙色裙", "草地", "艾菲爾鐵塔", "貓在鐵塔「旁邊」"] },
+      { scene: "一隻戴着耳機的熊貓，坐在天星小輪上看維多利亞港的日落，水彩畫風格。", note: "香港題材", items: ["熊貓", "耳機", "天星小輪", "維多利亞港", "日落", "水彩畫風格"] },
+      { scene: "未來的香港中學課室，學生和機械人一起上課，窗外有飛行巴士，像素遊戲風格。", note: "難度最高", items: ["課室", "學生", "機械人", "飛行巴士", "窗外景色", "像素遊戲風格"] }
+    ];
+    const SLOTS = [
+      { k: "subject", zh: "主體", hint: "誰／甚麼", opts: [["a cat", "貓"], ["a panda", "熊貓"], ["a robot", "機械人"], ["students and robots", "學生和機械人"]] },
+      { k: "detail", zh: "細節", hint: "穿甚麼、做甚麼", opts: [["wearing an orange dress", "穿橙色裙"], ["wearing headphones", "戴耳機"], ["having a lesson together", "一起上課"], ["riding a bicycle", "踩單車"]] },
+      { k: "place", zh: "地點", hint: "在哪裏", opts: [["on the grass next to the Eiffel Tower", "艾菲爾鐵塔旁的草地"], ["on a Star Ferry in Victoria Harbour", "維港天星小輪上"], ["in a futuristic Hong Kong classroom with flying buses outside the window", "未來香港課室，窗外有飛行巴士"], ["on a busy Mong Kok street", "旺角街頭"]] },
+      { k: "style", zh: "風格", hint: "畫成怎樣", opts: [["watercolor painting", "水彩畫"], ["pixel art", "像素遊戲"], ["photo", "照片"], ["comic book style", "漫畫"]] },
+      { k: "light", zh: "光線／鏡頭", hint: "幾點、從哪看", opts: [["at sunset", "日落"], ["at night with neon lights", "晚上霓虹燈"], ["close-up", "特寫"], ["wide shot", "遠景"]] }
+    ];
+    let t = 0, ticks = new Set(); const picked = {};
+    const card = h("div", { class: "taskcard" });
+    const box = h("textarea", { class: "promptbox", id: "u7-prompt", spellcheck: "false", placeholder: "點左邊的詞語組合提示詞，或直接用英文輸入。" });
+    const toast = h("div", { class: "toast", "aria-live": "polite" });
+    const slotsEl = h("div", { class: "slots" });
+    SLOTS.forEach(s => {
+      const chips = h("div", { class: "chips" });
+      s.opts.forEach(([en, zh]) => chips.append(h("button", { class: "chip", type: "button", "aria-pressed": "false", title: en, onclick: e => { const b = e.currentTarget; const on = picked[s.k] === en; picked[s.k] = on ? null : en; chips.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(!on && c === b))); compose(); } }, zh)));
+      slotsEl.append(h("div", { class: "slot" }, h("div", { class: "sl" }, s.zh, h("small", {}, s.hint)), chips));
+    });
+    const list = h("ul", { class: "checklist" });
+    const score = h("span", { class: "score" });
+    host.append(h("p", { class: "lead", "data-in": "" }, "好的提示詞 = 主體 + 細節 + 地點 + 風格 + 光線／鏡頭。各組看任務卡，用英文寫出提示詞，貼到圖像生成工具，再看 AI 畫出多少個要點。"),
+      h("div", { class: "pc-grid", "data-in": "" },
+        h("div", { style: "display:grid;gap:1rem;min-width:0" }, card, slotsEl),
+        h("div", { style: "display:grid;gap:.7rem;min-width:0" },
+          h("label", { for: "u7-prompt", style: "font-weight:900" }, "提示詞（英文）"), box,
+          h("div", { class: "row" }, h("button", { class: "btn primary", type: "button", onclick: copy }, "複製提示詞"), ext("https://new.express.adobe.com/", "Adobe Express"), ext("https://www.canva.com/ai-image-generator/", "Canva")), toast,
+          h("div", { class: "rule-top", style: "display:grid;gap:.4rem" }, h("div", { class: "row" }, h("h4", { class: "grow" }, "AI 畫出了哪些要點？"), score), h("p", { class: "note" }, "圖片生成後，逐項點擊 AI 有畫出來的要點。"), list))),
+      h("div", { class: "row", "data-in": "" }, h("button", { class: "btn", type: "button", onclick: () => setTask((t + TASKS.length - 1) % TASKS.length) }, "上一張任務卡"), h("button", { class: "btn", type: "button", onclick: () => setTask((t + 1) % TASKS.length) }, "下一張任務卡"), h("span", { class: "grow" }), h("button", { class: "btn quiet", type: "button", onclick: () => setTask(t) }, "重設")),
+      qa("試輸入更複雜的指令，例如「A cat wearing orange dress in the grass next to Eiffel Tower.」你認為系統可以成功繪出圖畫嗎？為甚麼？", "由於描述內容的要點太多，電腦未必能夠成功依照描述繪出圖畫。"),
+      qa("試舉出一個這系統所使用的人工智能技術。", "大數據、語義理解。"),
+      qa("試舉出一個使用人工智能生成圖像的風險。", "生成的圖像可能含有其他創作者的元素，引發侵權問題。"));
+    function compose() { const v = SLOTS.map(s => picked[s.k]).filter(Boolean).join(", "); box.value = v ? v.charAt(0).toUpperCase() + v.slice(1) + "." : ""; }
+    async function copy() {
+      const v = box.value.trim();
+      if (!v) { toast.textContent = "請先組合或輸入提示詞。"; return; }
+      try { await navigator.clipboard.writeText(v); toast.textContent = "已複製：" + v; }
+      catch (e) { box.focus(); box.select(); toast.textContent = "已選取提示詞，請按 Ctrl + C 複製。"; }
+    }
+    function setTask(k) {
+      t = k; ticks = new Set();
+      SLOTS.forEach(s => picked[s.k] = null); slotsEl.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", "false")); box.value = ""; toast.textContent = "";
+      const T = TASKS[t];
+      card.innerHTML = ""; card.append(h("span", { class: "no" }, "任務卡 " + (t + 1) + " / " + TASKS.length + "　·　" + T.note), h("p", { class: "scene" }, T.scene));
+      list.innerHTML = "";
+      T.items.forEach((it, i) => {
+        const bx = h("span", { class: "box" });
+        const b = h("button", { type: "button", "aria-pressed": "false", onclick: () => { if (ticks.has(i)) { ticks.delete(i); bx.innerHTML = ""; b.setAttribute("aria-pressed", "false"); } else { ticks.add(i); bx.append(TICK()); b.setAttribute("aria-pressed", "true"); } paintScore(); } }, bx, h("span", {}, it));
+        list.append(h("li", {}, b));
+      });
+      paintScore();
+    }
+    function paintScore() { score.textContent = "畫出 " + ticks.size + " / " + TASKS[t].items.length + " 個要點"; }
+    setTask(0);
+    return { reset: () => setTask(0) };
+  }
+},
+{
+  id: "risk", title: "資訊素養：生成式 AI 的風險",
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "現時不少人利用人工智能生成技術去編寫文章、繪圖、創作音樂。然而，利用生成式 AI 會帶來一些風險。"),
+      h("div", { class: "risks", "data-in": "" },
+        h("div", { class: "risk" }, h("span", { class: "k" }, "風險 1"), h("h4", {}, "抄襲問題"), h("p", {}, "在未經校方許可下，利用 AI 編寫論文，可能被當作抄襲個案處理。")),
+        h("div", { class: "risk" }, h("span", { class: "k" }, "風險 2"), h("h4", {}, "版權誰屬"), h("p", {}, "由人工智能產生的作品，版權屬於操作者、開發 AI 技術的工程師、提供訓練數據的數據擁有者、AI 本身，還是公眾？簡單而言，作品如果非常依賴 AI 協助來產生，便有機會不受版權法保護。")),
+        h("div", { class: "risk" }, h("span", { class: "k" }, "風險 3"), h("h4", {}, "侵權風險"), h("p", {}, "網絡上許多圖片未經創作者同意就被 AI 納入演算「學習」，進而生成與原圖高度相似的圖像。運用生成式 AI 生成內容，一旦發生侵權事件，可能會被索償。"))),
+      h("div", { class: "boxed", "data-in": "" }, h("span", { class: "tag" }, "人工智能道德反思"),
+        h("p", {}, "AI 圖像生成技術的基礎，是向大量作品進行分析和模仿。許多藝術家努力多年才塑造出的風格，可能在短時間內就被 AI 模仿，對原創者而言會造成極大的損失；而對新進創作者而言，AI 繪圖也可能阻礙他們未來的發展。")));
+  }
+},
+{
+  id: "vote", title: "活動八：版權誰屬？", act: true,
+  build(host) {
+    const OPTS = [{ k: "op", t: "操作者", d: "輸入指令的人" }, { k: "en", t: "工程師", d: "開發 AI 技術的人" }, { k: "da", t: "數據擁有者", d: "提供訓練數據的人" }, { k: "ai", t: "AI 本身", d: "" }, { k: "pu", t: "公眾", d: "人人都可使用" }];
+    const votes = {};
+    const list = h("div", { class: "votes" });
+    const total = h("span", { class: "score" });
+    const rows = OPTS.map(o => {
+      const fill = h("i"), num = h("b", {}, "0");
+      list.append(h("div", { class: "vrow" }, h("div", {}, h("div", { class: "whoq" }, o.t), o.d ? h("div", { class: "note" }, o.d) : null), h("div", { class: "vbar" }, fill, num),
+        h("div", { class: "vctl" }, h("button", { class: "btn small", type: "button", "aria-label": o.t + " 減一票", onclick: () => bump(o.k, -1) }, "−1"), h("button", { class: "btn small primary", type: "button", "aria-label": o.t + " 加一票", onclick: () => bump(o.k, 1) }, "+1"))));
+      return { o, fill, num };
+    });
+    const reveal = h("div", { class: "boxed", hidden: true }, h("span", { class: "tag" }, "課文觀點"), h("p", {}, "法律上仍在爭議中。簡單而言，如果作品非常依賴 AI 協助來產生，便有機會不受版權法保護。"));
+    const revealBtn = h("button", { class: "btn primary", type: "button", onclick: () => { reveal.hidden = false; revealBtn.disabled = true; } }, "揭曉");
+    host.append(h("p", { class: "lead", "data-in": "" }, "一位同學用 AI 生成了一幅得獎作品。這幅作品的版權屬於誰？全班舉手，老師記錄票數。"),
+      h("div", { "data-in": "" }, list), h("div", { class: "row", "data-in": "" }, revealBtn, h("button", { class: "btn", type: "button", onclick: reset }, "重設"), h("span", { class: "grow" }), total), reveal);
+    function paint() { const max = Math.max(1, ...Object.values(votes)); let sum = 0; rows.forEach(r => { const v = votes[r.o.k]; sum += v; r.num.textContent = v; r.fill.style.width = (v / max * 100) + "%"; }); total.textContent = "共 " + sum + " 票"; }
+    function bump(k, d) { votes[k] = Math.max(0, votes[k] + d); paint(); }
+    function reset() { OPTS.forEach(o => votes[o.k] = 0); reveal.hidden = true; revealBtn.disabled = false; paint(); }
+    reset();
+    return { reset };
+  }
+},
+{
+  id: "faces", title: "活動九：真定假？分辨 AI 人臉", act: true,
+  build(host) {
+    const N = 10; let res = Array(N).fill(null);
+    const rounds = h("div", { class: "rounds", "aria-label": "每回合結果" });
+    const score = h("span", { class: "score" });
+    const tips = h("ol", { class: "tips", hidden: true },
+      [["背景", "背景出現扭曲、不合理的形狀或怪異的文字。"], ["水漬狀斑點", "皮膚或頭髮附近有像水漬一樣的色斑。"], ["頭髮", "頭髮和背景融在一起，或髮絲不自然地斷開。"], ["眼鏡、耳環", "左右兩邊不對稱，例如只有一邊有耳環，或眼鏡框左右不同。"], ["牙齒", "牙齒數目、大小或排列奇怪。"], ["旁邊的人", "相中其他人的面孔通常更扭曲。"]]
+        .map(([k, v], i) => h("li", {}, h("b", {}, String(i + 1).padStart(2, "0")), h("span", {}, h("strong", {}, k + "："), v))));
+    host.append(h("p", { class: "lead", "data-in": "" }, "打開 Which Face Is Real 網站。每回合有兩張人臉，一張是真人照片，一張由 AI 生成。全班投票選出真人，再在網站揭曉答案。"),
+      h("div", { class: "row", "data-in": "" }, ext("https://www.whichfaceisreal.com/", "打開 Which Face Is Real"), h("span", { class: "note" }, "華盛頓大學的教學項目，免費、免登入。")),
+      h("div", { class: "rule-top", "data-in": "", style: "display:grid;gap:.7rem" },
+        h("div", { class: "row" }, h("h4", { class: "grow" }, "全班成績（每回合記錄全班多數是否答對）"), score), rounds,
+        h("div", { class: "row" }, h("button", { class: "btn primary", type: "button", onclick: () => mark(true) }, "多數答對"), h("button", { class: "btn", type: "button", onclick: () => mark(false) }, "多數答錯"), h("button", { class: "btn quiet", type: "button", onclick: undo }, "撤回一回合"), h("span", { class: "grow" }), h("button", { class: "btn quiet", type: "button", onclick: reset }, "重設"))),
+      h("div", { "data-in": "", style: "display:grid;gap:.6rem" }, h("div", { class: "row" }, h("h4", { class: "grow" }, "怎樣分辨 AI 生成的人臉？"), h("button", { class: "btn small", type: "button", onclick: e => { tips.hidden = !tips.hidden; e.currentTarget.textContent = tips.hidden ? "顯示提示" : "收起提示"; } }, "顯示提示")), tips),
+      qa("AI 人臉越來越真，會帶來甚麼問題？我們可以怎樣保護自己？", "例如：有人用假人臉開設假帳戶行騙、製作假新聞。保護方法：不輕信來歷不明的相片和影片，查證來源，留意上面的破綻。"));
+    function paint() {
+      rounds.innerHTML = "";
+      res.forEach((r, i) => { const d = h("div", { class: "rd" + (r === null ? "" : " set") }, r === null ? String(i + 1) : ""); if (r !== null) d.append(r ? TICK() : CROSS()); rounds.append(d); });
+      const n = res.filter(r => r !== null).length, ok = res.filter(r => r === true).length;
+      score.textContent = n ? "答對 " + ok + " / " + n + " 回合" : "未開始";
+    }
+    function mark(ok) { const i = res.indexOf(null); if (i < 0) return; res[i] = ok; paint(); }
+    function undo() { let i = res.indexOf(null); i = (i < 0 ? N : i) - 1; if (i >= 0) { res[i] = null; paint(); } }
+    function reset() { res = Array(N).fill(null); paint(); }
+    paint();
+    return { reset };
+  }
+}
+]});
+
+/* ---------- 1.5 ---------- */
+chapter({ id: "c5", code: "1.5", name: "與人工智能相關的技術", pages: [
+{
+  id: "iot-k", title: "物聯網",
+  build(host) {
+    host.append(h("p", { class: "defn", "data-in": "" }, hl("物聯網"), "（Internet of Things，IoT）是利用互聯網把不同物件連接在一起的網絡，物件之間能夠交換數據，並控制不同裝置。"),
+      h("p", { class: "lead", "data-in": "" }, "例子：智能家居、公共腳踏車網絡、智能垃圾筒。"),
+      h("div", { class: "flow3", "data-in": "" },
+        h("div", {}, h("h4", {}, "感應器收集數據"), h("p", {}, "物聯網內的物件或設備都配置了感應器，以收集數據。"), h("p", { class: "eg" }, "例：智能垃圾筒能偵測垃圾重量")),
+        h("div", {}, h("h4", {}, "經網絡傳到雲端"), h("p", {}, "數據經網絡傳送到附近的轉送站，再傳遞到雲端伺服器。"), h("p", { class: "eg" }, "例：發現智能垃圾筒已滿，便會發送訊息")),
+        h("div", {}, h("h4", {}, "AI 分析並回應"), h("p", {}, "人工智能對數據進行分析，並作出實時應對或發出指令。"), h("p", { class: "eg" }, "例：提示傾倒垃圾"))),
+      qa("智能雪櫃也是物聯網的應用例子。試提出智能雪櫃為生活帶來甚麼方便。", "使用者可以即時查看智能雪櫃裏的物品數量和到期日，方便按時購買所需物品。"));
+  }
+},
+{
+  id: "iot", title: "活動十：智能垃圾筒模擬", act: true,
+  build(host) {
+    const CAP = 40; let armed = true, running = false;
+    const svg = h("div", { html:
+      '<svg viewBox="0 0 160 220" role="img" aria-label="智能垃圾筒"><defs><pattern id="trash" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#6B7080"/><line x1="0" y1="0" x2="0" y2="10" stroke="#17181C" stroke-width="4"/></pattern><clipPath id="bodyclip"><path d="M26 60 L134 60 L122 206 L38 206 Z"/></clipPath></defs>' +
+      '<rect x="18" y="40" width="124" height="16" rx="4" fill="#fff" stroke="#17181C" stroke-width="4"/><rect x="62" y="28" width="36" height="14" rx="4" fill="#fff" stroke="#17181C" stroke-width="4"/>' +
+      '<g clip-path="url(#bodyclip)"><rect id="u8-fill" x="20" y="206" width="120" height="0" fill="url(#trash)"/></g><path d="M26 60 L134 60 L122 206 L38 206 Z" fill="none" stroke="#17181C" stroke-width="4"/>' +
+      '<line x1="30" y1="89" x2="130" y2="89" stroke="#D42C2C" stroke-width="3" stroke-dasharray="8 6"/><rect x="54" y="72" width="52" height="14" fill="#FBFBF8"/><text x="80" y="83" text-anchor="middle" font-size="11" font-family="IBM Plex Mono,monospace" font-weight="700" fill="#D42C2C">80% 滿</text>' +
+      '<rect x="66" y="6" width="28" height="18" rx="3" fill="#FFE357" stroke="#17181C" stroke-width="3"/><circle id="u8-led" cx="80" cy="15" r="4" fill="#17181C"/></svg>' });
+    const pctEl = h("span", {}, "0%"), kgEl = h("span", {}, "0.0 kg");
+    const slider = h("input", { type: "range", min: "0", max: "100", value: "0", id: "u8-slider" });
+    const stations = [{ icon: SVG.sensor, t: "感應器", d: "偵測垃圾重量" }, { icon: SVG.net, t: "網絡", d: "經轉送站傳送" }, { icon: SVG.cloud, t: "雲端伺服器", d: "儲存所有數據" }, { icon: SVG.ai, t: "AI 分析", d: "判斷已滿，發出指令" }]
+      .map(s => h("div", { class: "station" }, h("span", { html: s.icon }), h("div", { class: "t" }, s.t), h("div", { class: "d" }, s.d)));
+    const packet = h("div", { class: "packet", "aria-hidden": "true" });
+    const chain = h("div", { class: "chain" }, ...stations, packet);
+    const alertBox = h("div", { hidden: true }), log = h("div", { class: "log", "aria-live": "polite" });
+    host.append(h("p", { class: "lead", "data-in": "" }, "拖動滑桿，把垃圾放進垃圾筒。到達 80% 時，看看數據怎樣一站一站傳送。"),
+      h("div", { class: "iot", "data-in": "" },
+        h("div", { class: "binwrap" }, svg, h("div", { class: "reading" }, pctEl, h("small", {}, "感應器讀數"), kgEl), h("label", { class: "note", for: "u8-slider" }, "拖動加垃圾"), slider),
+        h("div", { style: "display:grid;gap:1rem;min-width:0" }, h("div", { class: "rule-top", style: "display:grid;gap:.8rem" }, h("div", { class: "note" }, "數據傳送路線"), chain, log), alertBox,
+          h("div", { class: "row" }, h("button", { class: "btn quiet", type: "button", onclick: reset }, "重設")))),
+      h("div", { class: "boxed", "data-in": "" }, h("span", { class: "tag" }, "長知識：居家守護"),
+        h("p", {}, "物聯網不只是控制家中的電器，還可以達到「居家守護」的效果。住戶可以在住宅安裝各種感應器，例如偵測煤氣洩漏、煙霧、是否有賊人闖進家居等，及時通知住戶，確保居家安全。"),
+        h("p", {}, "針對長者的需要，可在廁所門和長者經常逗留的位置設置動作感應器。如果長時間沒有偵測到長者任何動靜，系統便會發送訊息，通知他們的家人。")));
+    const fill = () => svg.querySelector("#u8-fill"), led = () => svg.querySelector("#u8-led");
+    function paint(p) { const hgt = 146 * p / 100; fill().setAttribute("y", String(206 - hgt)); fill().setAttribute("height", String(hgt)); pctEl.textContent = p + "%"; kgEl.textContent = (CAP * p / 100).toFixed(1) + " kg"; led().setAttribute("fill", p >= 80 ? "#D42C2C" : "#17181C"); }
+    function addLog(t) { log.prepend(h("div", {}, new Date().toTimeString().slice(0, 8) + "  " + t)); }
+    slider.addEventListener("input", () => { const p = +slider.value; paint(p); if (p >= 80 && armed && !running) { armed = false; run(p); } if (p < 80 && !running) armed = true; });
+    async function run(p) {
+      running = true; alertBox.hidden = true; stations.forEach(s => s.classList.remove("lit", "done"));
+      const msgs = ["感應器：重量 " + (CAP * p / 100).toFixed(1) + " kg，已達 " + p + "%", "網絡：經轉送站上傳數據", "雲端伺服器：已收到 A 座垃圾筒數據", "AI 分析：垃圾筒已滿，需要清理"];
+      const cbox = chain.getBoundingClientRect();
+      for (let i = 0; i < stations.length; i++) {
+        const r = stations[i].getBoundingClientRect();
+        packet.style.opacity = "1"; packet.style.left = (r.left - cbox.left + r.width / 2 - 8) + "px";
+        stations[i].classList.add("lit"); addLog(msgs[i]); await sleep(800);
+        stations[i].classList.remove("lit"); stations[i].classList.add("done");
+      }
+      packet.style.opacity = "0"; alertBox.hidden = false; alertBox.innerHTML = ""; praise("wow", "AI 判斷垃圾筒已滿，通知咗清潔工！");
+      alertBox.append(h("div", { class: "alertbox", role: "alert" }, h("span", { html: SVG.bell }), h("div", {}, h("h3", {}, "提示清潔工傾倒垃圾"), h("p", {}, "A 座垃圾筒已滿 " + p + "%，系統已通知清潔工。"), h("div", { class: "row", style: "margin-top:.6rem" }, h("button", { class: "btn", type: "button", onclick: emptyBin }, "清潔工已傾倒垃圾")))));
+      running = false;
+    }
+    function emptyBin() { praise("happy", "清走啦，垃圾筒又可以用！"); slider.value = "0"; paint(0); armed = true; alertBox.hidden = true; stations.forEach(s => s.classList.remove("lit", "done")); addLog("感應器：重量 0.0 kg，垃圾筒已清空"); }
+    function reset() { slider.value = "0"; paint(0); armed = true; running = false; alertBox.hidden = true; log.innerHTML = ""; packet.style.opacity = "0"; stations.forEach(s => s.classList.remove("lit", "done")); }
+    reset();
+    return { reset };
+  }
+},
+{
+  id: "bigdata", title: "大數據",
+  build(host) {
+    host.append(h("div", { class: "split" },
+      h("div", { class: "prose", "data-in": "" },
+        h("p", {}, hl("大數據"), "指電腦收集到的大量數據，是人工智能發展的重要基礎。"),
+        h("ul", {}, h("li", {}, "電腦必須依據數據來進行學習，訓練數據越多，預測的模型便會越準確。"), h("li", {}, "例如大量的病人醫療數據經電腦分析後，可找出逾百種心血管疾病風險因素。"), h("li", {}, "因此，大數據可補足人類分析數據上的不足，提升效率。"))),
+      h("div", { "data-in": "" }, qa("為甚麼在網上看到的廣告，總是為我度身訂造似的？好像廣告商預知了我的喜好。", "搜尋器和社交媒體會蒐集使用者的瀏覽記錄、結交的朋友、在網上商店購買的東西等，然後根據喜好發放廣告。"))),
+      h("div", { class: "rule-top", "data-in": "", style: "display:grid;gap:.6rem" }, h("h3", {}, "然而，大數據也可能涉及個人資料的私隱問題"),
+        h("div", { class: "areas" },
+          h("div", { class: "area" }, h("span", { class: "k" }, "搜尋器、社交媒體"), h("p", {}, "蒐集使用者的瀏覽記錄、到過的網站、結交的朋友、在網上商店購買的東西，然後發放令他們感興趣的廣告。")),
+          h("div", { class: "area" }, h("span", { class: "k" }, "網上購物"), h("p", {}, "上一秒在查詢球鞋的價錢，下一秒就可能看見運動用品廣告，說不定還有優惠價格，勾起購買欲望。")),
+          h("div", { class: "area" }, h("span", { class: "k" }, "串流影片服務"), h("p", {}, "收集使用者的觀看記錄，並根據喜好推薦同類影片，讓使用者花更長時間觀看更多影片。")),
+          h("div", { class: "area" }, h("span", { class: "k" }, "媒體素養：大數據影響要留神"), h("p", {}, "1. 調整網絡廣告的設定，控制它們是否根據用戶行為推薦廣告，降低私隱洩漏的程度。"), h("p", {}, "2. 明白各式各樣的算法推薦，都是建基於我們的興趣和偏好，因此必須多加注意，避免過度沉迷。")))));
+  }
+},
+{
+  id: "cloud", title: "雲端計算",
+  build(host) {
+    host.append(h("p", { class: "defn", "data-in": "" }, hl("雲端計算"), "是指使用者能透過網絡，由用戶端登入雲端伺服器進行操作。"),
+      h("div", { class: "prose", "data-in": "" }, h("ul", {}, h("li", {}, "當人工智能廣泛應用於金融、教育、醫療等各行各業，企業更須要推行雲端計算以應對客戶所需。"), h("li", {}, "例如企業利用 AWS（Amazon Web Service）雲端服務，預測產品在來年的銷售量。"))),
+      h("p", { class: "margin", "data-in": "" }, "生活例子：把相片備份到 Google 相簿或 iCloud；用 Google 文件和同學一起做功課。"),
+      h("div", { class: "rule-top", "data-in": "", style: "display:grid;gap:.3rem" }, h("h4", {}, "三種技術怎樣合作？"), h("p", {}, "物聯網的感應器收集數據 → 數據累積成大數據 → 存放在雲端伺服器 → 人工智能分析數據，作出決策。")));
+  }
+}
+]});
+
+/* ---------- 1.6 ---------- */
+chapter({ id: "c6", code: "1.6", name: "智慧城市", pages: [
+{
+  id: "city", title: "智慧城市",
+  build(host) {
+    host.append(h("p", { class: "defn", "data-in": "" }, hl("智慧城市"), "使用人工智能、物聯網、大數據等科技，從而改善政府服務質素和市民福利。"),
+      h("div", { class: "areas", "data-in": "" },
+        h("div", { class: "area" }, h("span", { class: "k" }, "智慧出行"), h("h4", {}, "非觸式 e-道"), h("p", {}, "入境事務處推出非觸式自助出入境檢查服務。市民可以選擇使用容貌辨識（即人臉辨識）技術，自助辦理過關。")),
+        h("div", { class: "area" }, h("span", { class: "k" }, "智慧生活"), h("h4", {}, "醫健通"), h("p", {}, "為本地市民建立電子健康紀錄，讓公營和私營醫療機構互通紀錄，有助加快治療，減少病人重複接受檢驗或提供資料的需要。")),
+        h("div", { class: "area" }, h("span", { class: "k" }, "智慧環境"), h("h4", {}, "智能水錶"), h("p", {}, "水務署的供水自動讀錶系統，利用安裝於用戶家中的智能水錶自動收集用水數據，讓用戶知道平日用水量，建立節約用水的習慣；發現不尋常的用水情況，也可及早修正滲漏問題。")),
+        h("div", { class: "area" }, h("span", { class: "k" }, "智慧金融"), h("h4", {}, "銀行的人工智能"), h("p", {}, "本地銀行在不少核心職能上均採用了人工智能，包括反洗黑錢、網絡安全、遙距開戶服務、使用聊天機器人等。"))),
+      h("div", { class: "boxed", "data-in": "" }, h("span", { class: "tag" }, "國家安全：智慧交通"),
+        h("p", {}, "隨着人工智能、大數據、雲端計算等新技術的湧現，國家積極利用科技推動交通建設，發展智慧交通系統。例如路面設置了檢測系統，能實時監測路面的異常狀況，包括裂縫、破損、汽車漏油等。通過對路面狀況進行智能分析，可彌補傳統人工巡查方式的不足，提升道路安全。")));
+  }
+},
+{
+  id: "city-sort", title: "活動十一：智慧城市配對", act: true,
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "把例子放到正確的類別。"));
+    return makeSorter(host, {
+      bins: [{ id: "mob", label: "智慧出行", stk: "car" }, { id: "liv", label: "智慧生活", stk: "medical" }, { id: "env", label: "智慧環境", stk: "drop" }, { id: "fin", label: "智慧金融", stk: "coin" }],
+      cards: [
+        { id: "a", text: "非觸式 e-道：以容貌辨識自助過關", answer: "mob", why: "入境處用人臉辨識技術，讓市民過關更快。" },
+        { id: "e", text: "路面檢測系統：實時監測裂縫、破損、漏油", answer: "mob", why: "智慧交通，提升道路安全。" },
+        { id: "b", text: "醫健通：公私營醫療機構互通電子健康紀錄", answer: "liv", why: "加快治療，減少病人重複檢驗。" },
+        { id: "c", text: "智能水錶：自動收集用水數據，及早發現滲漏", answer: "env", why: "水務署分析用水數據，幫市民節約用水。" },
+        { id: "d", text: "銀行以 AI 反洗黑錢，並提供聊天機器人服務", answer: "fin", why: "銀行把 AI 用在網絡安全、遙距開戶等核心職能。" }
+      ]
+    });
+  }
+},
+{
+  id: "school", title: "活動十二：設計智慧校園", act: true,
+  build(host) {
+    host.append(h("p", { class: "lead", "data-in": "" }, "各組選一個校園問題，在 A3 紙畫出你們的智慧校園方案，然後匯報。"),
+      h("div", { class: "areas", "data-in": "" },
+        h("div", { class: "area" }, h("span", { class: "k" }, "問題 A"), h("h4", {}, "小食部午飯時間排長龍")),
+        h("div", { class: "area" }, h("span", { class: "k" }, "問題 B"), h("h4", {}, "放學後課室忘記關冷氣和燈")),
+        h("div", { class: "area" }, h("span", { class: "k" }, "問題 C"), h("h4", {}, "圖書館溫習位不知道是否有空")),
+        h("div", { class: "area" }, h("span", { class: "k" }, "問題 D"), h("h4", {}, "自選一個校園問題"))),
+      h("div", { class: "flow3 four", "data-in": "" },
+        h("div", {}, h("h4", {}, "感應器"), h("p", {}, "用甚麼感應器？收集甚麼數據？")),
+        h("div", {}, h("h4", {}, "網絡與雲端"), h("p", {}, "數據怎樣傳送？存放在哪裏？")),
+        h("div", {}, h("h4", {}, "AI 分析"), h("p", {}, "AI 要判斷甚麼？用甚麼規則？")),
+        h("div", {}, h("h4", {}, "行動"), h("p", {}, "系統會做甚麼？通知誰？"))),
+      h("p", { class: "margin", "data-in": "" }, "加分位：你的方案會收集甚麼個人資料？怎樣保障同學的私隱？"));
+  }
+}
+]});
+
+/* ---------- 總結 ---------- */
+chapter({ id: "c7", code: "總結", name: "課文總結", pages: [
+{
+  id: "summary", title: "課文總結",
+  build(host) {
+    host.append(h("ol", { class: "summary", "data-in": "" },
+      h("li", {}, h("span", {}, hl("人工智能"), "是指電腦模擬人類思維來執行任務的一種科技。人工智能讓電腦像人類一般思考、學習、預測和作出決策。")),
+      h("li", {}, h("span", {}, "人工智能經歷了符號邏輯、專家系統、機器學習三個主要階段，並發展到現時的深度學習。現時的人工智能都屬於", hl("弱人工智能"), "。")),
+      h("li", {}, h("span", {}, "人工智能主要的", hl("五大範疇"), "包括：感知、表示與推理、學習、互動和社會影響。")),
+      h("li", {}, h("span", {}, "現時常用的人工智能可以進行", hl("辨識"), "和", hl("生成內容"), "，但同時亦會產生風險和道德問題。")),
+      h("li", {}, h("span", {}, "與人工智能相關的技術還包括", hl("物聯網、大數據和雲端計算"), "；香港利用這些技術發展智慧城市。"))));
+  }
+},
+{
+  id: "quiz", title: "活動十三：總結搶答", act: true,
+  build(host) {
+    const Q = [
+      { q: "被稱為「人工智能之父」、提出圖靈測試的科學家是誰？", o: ["圖靈（Alan Turing）", "John McCarthy", "比爾・蓋茨", "愛迪生"], a: 0 },
+      { q: "「人工智能」這個概念在哪一年首次被提出？", o: ["1950 年", "1956 年", "1980 年", "2010 年"], a: 1 },
+      { q: "第二波人工智能「專家系統」為甚麼最終失敗？", o: ["電腦運算太慢", "專家無法解答所有問題、寫成規則", "當時沒有互聯網", "數據太多"], a: 1 },
+      { q: "以下哪一項屬於「強人工智能」？", o: ["AlphaGo 圍棋軟件", "語音助理 Siri", "有自我意識、能自主決策的機械人", "Google 翻譯"], a: 2 },
+      { q: "智能鏡頭在人臉周圍顯示方框，屬於人工智能哪一個範疇？", o: ["感知", "學習", "互動", "社會影響"], a: 0 },
+      { q: "以下哪一種圖片，最可能令物件辨識的準確度下降？", o: ["光線充足的照片", "物件置中的清晰照片", "背景複雜、有多件物件的照片", "只有一件物件的彩色照片"], a: 2 },
+      { q: "以下哪一項是「生成式人工智能」的例子？", o: ["容貌辨識自助過關", "智能水錶自動讀錶", "輸入文字描述，生成一幅圖畫", "語音輸入轉成文字"], a: 2 },
+      { q: "未經學校許可，用 AI 代寫功課，最可能引起甚麼問題？", o: ["抄襲問題", "網絡太慢", "電腦中毒", "電費增加"], a: 0 },
+      { q: "智能垃圾筒偵測到已滿，自動通知清潔工。這是哪種技術的應用？", o: ["物聯網", "圖靈測試", "符號邏輯", "專家系統"], a: 0 },
+      { q: "「訓練數據越多，預測的模型便會越準確」說明了哪一種技術的重要？", o: ["雲端計算", "大數據", "非觸式 e-道", "語音輸入"], a: 1 },
+      { q: "企業利用 AWS 服務預測來年的銷售量，屬於哪一種技術？", o: ["雲端計算", "物聯網", "影像辨識", "強人工智能"], a: 0 },
+      { q: "「非觸式 e-道」以容貌辨識過關，屬於智慧城市哪一方面？", o: ["智慧出行", "智慧生活", "智慧環境", "智慧金融"], a: 0 }
+    ];
+    const SH = ["▲", "◆", "●", "■"];
+    let i = 0, shown = false, done = false;
+    const teams = [{ n: "第一組", s: 0 }, { n: "第二組", s: 0 }, { n: "第三組", s: 0 }, { n: "第四組", s: 0 }];
+    const area = h("div", { style: "display:grid;gap:1rem", "data-in": "" }), teamWrap = h("div", { class: "teams", "data-in": "" });
+    host.append(h("p", { class: "lead", "data-in": "" }, "分組搶答。老師按「顯示答案」，再為答對的組別加分。"), area, teamWrap);
+    function paintTeams() {
+      teamWrap.innerHTML = "";
+      teams.forEach((t, k) => {
+        const sc = h("span", { class: "ts" }, t.s);
+        const set = v => { t.s = Math.max(0, v); sc.textContent = t.s; sc.classList.remove("roll"); void sc.offsetWidth; sc.classList.add("roll"); if (done) paint(); };
+        teamWrap.append(h("div", { class: "team" },
+          h("div", { class: "tn", contenteditable: "true", spellcheck: "false", "aria-label": "組名（可修改）", oninput: e => t.n = e.target.textContent.trim() || ("第" + "一二三四"[k] + "組") }, t.n),
+          h("div", {}, sc),
+          h("div", { class: "tb" }, h("button", { class: "btn small", type: "button", "aria-label": t.n + " 減一分", onclick: () => set(t.s - 1) }, "−1"), h("button", { class: "btn small primary", type: "button", "aria-label": t.n + " 加一分", onclick: () => set(t.s + 1) }, "+1"))));
+      });
+    }
+    function paint() {
+      area.innerHTML = "";
+      if (done) {
+        const sorted = teams.map(t => ({ ...t })).sort((a, b) => b.s - a.s), max = Math.max(1, sorted[0].s), board = h("div", { class: "board" });
+        let rank = 0, prev = null;
+        sorted.forEach((t, k) => { if (t.s !== prev) { rank = k + 1; prev = t.s; } const fill = h("i"); board.append(h("div", { class: "brow" + (rank === 1 ? " first" : "") }, h("div", { class: "rk" }, rank), h("div", { class: "nm" }, rank === 1 ? stk("crown", { cls: "still", rot: "-10deg" }) : null, t.n), h("div", { class: "vbar" }, fill, h("b", {}, t.s + " 分")))); requestAnimationFrame(() => requestAnimationFrame(() => fill.style.width = (t.s / max * 100) + "%")); });
+        area.append(h("div", { class: "row" }, h("h3", { class: "grow" }, stk("trophy", { size: "2.6rem", cls: "still", rot: "-8deg" }), " 排行榜"), h("span", { class: "score" }, Q.length + " / " + Q.length + " 題完成")), board,
+          h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: () => { done = false; i = Q.length - 1; shown = true; paint(); } }, "返回最後一題"), h("button", { class: "btn primary", type: "button", onclick: reset }, "重設（下一班）")));
+        return;
+      }
+      const q = Q[i], opts = h("div", { class: "opts" });
+      q.o.forEach((t, k) => {
+        const o = h("div", { class: "opt" + (shown ? (k === q.a ? " right" : " dim") : "") }, h("span", { class: "L", "aria-hidden": "true" }, SH[k]), h("span", {}, t));
+        if (shown && k === q.a) o.append(H('<svg class="ring" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true"><ellipse class="pen" cx="200" cy="50" rx="197" ry="47" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>').firstChild, h("span", { class: "ok" }, "✓ 正確答案"));
+        opts.append(o);
+      });
+      area.append(h("div", { class: "row" }, h("span", { class: "score grow" }, "第 " + (i + 1) + " / " + Q.length + " 題"), h("button", { class: "btn quiet small", type: "button", onclick: reset }, "重設")),
+        h("p", { class: "qtext" }, q.q), opts,
+        h("div", { class: "row" },
+          h("button", { class: "btn", type: "button", disabled: i === 0, onclick: () => { i--; shown = false; paint(); } }, "上一題"),
+          h("button", { class: "btn primary", type: "button", disabled: shown, onclick: () => { shown = true; paint(); requestAnimationFrame(() => { const r = area.querySelector(".opt.right"); if (r) { const b = r.getBoundingClientRect(); burst(b.left + b.width * .5, b.top + b.height / 2, 24, 1.5); } }); } }, "顯示答案"),
+          h("button", { class: "btn" + (shown ? " primary" : ""), type: "button", onclick: () => { if (i < Q.length - 1) { i++; shown = false; } else done = true; paint(); if (done) requestAnimationFrame(() => burst(innerWidth / 2, innerHeight * .45, 90, 1.9)); } }, i < Q.length - 1 ? "下一題" : "看排行榜")));
+    }
+    function reset() { i = 0; shown = false; done = false; teams.forEach(t => t.s = 0); paintTeams(); paint(); }
+    reset();
+    return { reset };
+  }
+}
+]});
+
+/* ================= shell ================= */
+const tabsEl = $("#tabs"), tabInd = $("#tabInd"), stage = $("#stage"), pagesEl = $("#pages"), pnum = $("#pnum"), prevBtn = $("#prevBtn"), nextBtn = $("#nextBtn");
+let ci = 0, pi = 0;
+const store = {};
+const tabs = CH.map((c, k) => { const b = h("button", { class: "tab", type: "button", role: "tab", "aria-selected": "false", onclick: () => go(k, 0) }, h("span", { class: "k" }, c.code), h("span", { class: "t" }, c.name)); tabsEl.append(b); return b; });
+const curPage = () => CH[ci].pages[pi];
+function placeInd(animate) {
+  const b = tabs[ci]; if (!b.offsetWidth) return;
+  if (!animate) tabInd.style.transition = "none";
+  tabInd.style.left = b.offsetLeft + "px"; tabInd.style.width = b.offsetWidth + "px";
+  if (!animate) { void tabInd.offsetWidth; tabInd.style.transition = ""; }
+}
+function getPage(c, p) {
+  const key = c + ":" + p;
+  if (!store[key]) {
+    const P = CH[c].pages[p], C = CH[c];
+    const el = h("section", { class: "page", id: "p-" + P.id, hidden: true, "aria-labelledby": "t-" + P.id });
+    const head = h("header", { class: "ph", "data-in": "" },
+      h("div", { class: "kicker" }, h("span", {}, C.code === "目錄" ? "目錄" : (C.code === "總結" ? "課文總結" : C.code + "　" + C.name)), P.act ? h("span", { class: "act" }, "課堂活動") : null),
+      h("h2", { id: "t-" + P.id, class: P.id === "toc" ? "cover" : "" }, P.title));
+    if (P.id === "toc") {
+      head.classList.add("has-stk");
+      head.append(h("div", { class: "ph-stk hero" },
+        stk("bot-hi", { size: "8.4rem", rot: "-4deg", d: 0, cls: "" }),
+        stk("brain", { size: "3.2rem", rot: "-12deg", d: 2 }), stk("camera", { size: "3rem", rot: "10deg", d: 3 }), stk("mic", { size: "2.8rem", rot: "-8deg", d: 4 }), stk("sparkle", { size: "3rem", rot: "6deg", d: 5 })));
+      const kids = head.querySelectorAll(".hero .stk");
+      Object.assign(kids[0].style, { left: "3.4rem", top: "1.2rem" });
+      Object.assign(kids[1].style, { left: "0", top: "0" }); Object.assign(kids[2].style, { right: "0", top: "0" });
+      Object.assign(kids[3].style, { left: "0", bottom: "0" }); Object.assign(kids[4].style, { right: ".2rem", bottom: "0" });
+    } else if (PAGE_STK[P.id]) {
+      head.classList.add("has-stk");
+      head.append(h("div", { class: "ph-stk" }, stk(PAGE_STK[P.id][0], { size: PAGE_STK[P.id][1] || "5.4rem", rot: "6deg" })));
+    }
+    el.append(head);
+    const body = h("div", { style: "display:flex;flex-direction:column;gap:1.3rem" });
+    el.append(body); stage.append(el);
+    const api = P.build(body) || {};
+    if (PAGE_SAY[P.id]) body.append(mrow(PAGE_SAY[P.id][0], PAGE_SAY[P.id][1]));
+    decorate(el);
+    let n = 0; el.querySelectorAll("[data-in]").forEach(x => x.style.setProperty("--i", Math.min(n++, 10)));
+    el.querySelectorAll("mark.hl").forEach((m, k) => m.style.setProperty("--i", k));
+    store[key] = { el, api, seen: false };
+  }
+  return store[key];
+}
+function go(c, p, dir) {
+  if (c < 0 || c >= CH.length) return;
+  p = Math.max(0, Math.min(p, CH[c].pages.length - 1));
+  const old = store[ci + ":" + pi];
+  const forward = dir !== undefined ? dir > 0 : (c > ci || (c === ci && p >= pi));
+  if (old && (c !== ci || p !== pi)) { old.el.hidden = true; old.el.classList.remove("first", "enter-r", "enter-l"); old.api.onHide && old.api.onHide(); }
+  ci = c; pi = p;
+  const P = getPage(c, p);
+  P.el.hidden = false;
+  P.el.classList.remove("enter-r", "enter-l", "first"); void P.el.offsetWidth;
+  P.el.classList.add(forward ? "enter-r" : "enter-l");
+  if (!P.seen) { P.el.classList.add("first"); P.seen = true; }
+  P.api.onShow && P.api.onShow();
+  tabs.forEach((b, k) => b.setAttribute("aria-selected", String(k === c)));
+  placeInd(true); tabs[c].scrollIntoView({ block: "nearest", inline: "nearest" });
+  pagesEl.innerHTML = "";
+  CH[c].pages.forEach((pg, k) => pagesEl.append(h("button", { class: "pg" + (pg.act ? " act" : ""), type: "button", "aria-current": String(k === p), title: pg.title, "aria-label": "第 " + (k + 1) + " 頁：" + pg.title, onclick: () => go(c, k) }, k + 1)));
+  const total = CH.reduce((s, x) => s + x.pages.length, 0), idx = CH.slice(0, c).reduce((s, x) => s + x.pages.length, 0) + p + 1;
+  pnum.textContent = "全課 " + idx + " / " + total;
+  prevBtn.disabled = c === 0 && p === 0; nextBtn.disabled = c === CH.length - 1 && p === CH[c].pages.length - 1;
+  try { history.replaceState(null, "", "#" + CH[c].pages[p].id); } catch (e) {}
+  window.scrollTo({ top: 0 });
+  stage.focus({ preventScroll: true });
+}
+function step(d) {
+  let c = ci, p = pi + d;
+  if (p >= CH[c].pages.length) { c++; p = 0; }
+  if (p < 0) { c--; if (c >= 0) p = CH[c].pages.length - 1; }
+  if (c < 0 || c >= CH.length) { const t = $("#turn"); t.classList.remove("bump-r", "bump-l"); void t.offsetWidth; t.classList.add(d > 0 ? "bump-r" : "bump-l"); return; }
+  go(c, p, d);
+}
+prevBtn.addEventListener("click", () => step(-1));
+nextBtn.addEventListener("click", () => step(1));
+document.addEventListener("keydown", e => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "select" || tag === "textarea" || e.target.isContentEditable) return;
+  if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); step(1); }
+  if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); step(-1); }
+});
+$("#fsBtn").addEventListener("click", async e => {
+  try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); }
+  catch (err) { e.target.textContent = "請按 F11"; }
+});
+document.addEventListener("fullscreenchange", () => { $("#fsBtn").textContent = document.fullscreenElement ? "離開全螢幕" : "全螢幕"; });
+window.addEventListener("resize", () => placeInd(false));
+if (document.fonts) document.fonts.ready.then(() => placeInd(false));
+function fromHash() { const id = (location.hash || "").slice(1); for (let c = 0; c < CH.length; c++) { const p = CH[c].pages.findIndex(x => x.id === id); if (p >= 0) return [c, p]; } return [0, 0]; }
+window.addEventListener("hashchange", () => { const [c, p] = fromHash(); if (c !== ci || p !== pi) go(c, p); });
+const [c0, p0] = fromHash(); go(c0, p0);
+requestAnimationFrame(() => placeInd(false));
+</script>
+
+</body>
+</html>
