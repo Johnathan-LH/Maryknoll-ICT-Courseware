@@ -20,7 +20,9 @@ Google Sites 頁面
 ### Google 試算表
 
 - 名稱：ICT課件清單（工作表「課件清單」）
-- 編輯連結：（設定完成後填入）
+- 編輯連結：https://docs.google.com/spreadsheets/d/1ZSUPRPEnqDmyp7HqULfLzuHEdcaYvLPVqKcAZr1v8io/edit
+- Apps Script 專案：ICT課件庫上傳系統（試算表 → 擴充功能 → Apps Script）
+- 網頁應用程式網址：https://script.google.com/macros/s/AKfycbx1dysUi686POjxx-5Y-1NMHP8oBo4QibSaLkWkj1ka6nHV3rZPrrhUGM_5dgO3vFkh/exec
 - 第一行欄名固定，**不可更改**（Apps Script 按欄名找欄，次序可調但不建議）：
 
 | 欄名 | 說明 |
