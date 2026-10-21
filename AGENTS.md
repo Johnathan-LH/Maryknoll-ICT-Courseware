@@ -53,6 +53,8 @@ Google Sites 頁面
 F1/ … F6/              中一至中六課件
 index.html             課件目錄頁 + 上傳表單（勿刪）
 apps-script/Code.gs    Apps Script 程式碼副本
+ict-sync.tsv           ICT 課件與 Teacher 倉庫的檔案對照表
+tools/check-ict-sync.sh  檢查兩邊 ICT 課件是否一致
 AGENTS.md / CLAUDE.md / README.md / CHANGELOG.md
 ```
 
@@ -80,9 +82,27 @@ AGENTS.md / CLAUDE.md / README.md / CHANGELOG.md
 ### 不要做的事
 - 不要把課件清單寫死在 index.html 裏，也不要加入自動產生 index.html 的腳本或 GitHub Actions。
 - 不要更改試算表第一行欄名。
-- 不要修改另一個倉庫 Johnathan-LH/Teacher。
+- 只在同步 ICT 課件時改動 Johnathan-LH/Teacher 的 `ICT/`、試算表 ICT 行、AGENTS.md 及 CHANGELOG.md；不要改動其數學課件或 index.html。
 
-## 4. 更新記錄（必須）
+## 4. ICT 課件同步（Teacher ⇄ Maryknoll-ICT-Courseware）
+
+ICT 課件同時放在兩個網站，**內容必須保持一致**：
+- 個人網站：https://github.com/Johnathan-LH/Teacher （`ICT/F1/`…`ICT/F6/`，試算表「課件清單」，科目＝ICT）
+- 學校網站：https://github.com/Johnathan-LH/Maryknoll-ICT-Courseware （`F1/`…`F6/`，試算表「ICT課件清單」）
+
+檔案對照表：Maryknoll-ICT-Courseware 倉庫的 `ict-sync.tsv`（兩邊檔名可以不同，以此表為準）。
+
+**每次新增或修改任何一個 ICT 課件時（不論先改哪一邊）：**
+1. 把同一份 HTML 寫到兩個倉庫的對應路徑，兩邊檔案必須完全相同。
+2. 新課件：在 `ict-sync.tsv` 加一行；兩個試算表各加一行（Teacher 試算表：科目 ICT、年級、課題、課件名稱、連結、簡介、標籤；ICT課件清單：年級、單元、課題、課件名稱、連結、簡介、標籤、上傳者、更新日期）。
+3. 改名或移動：同時更新兩邊檔案、兩個試算表的「連結」及 `ict-sync.tsv`。
+4. 兩個倉庫的 `CHANGELOG.md` 都要記錄（註明「已同步」）。
+5. 完成後在 Maryknoll-ICT-Courseware 倉庫執行 `bash tools/check-ict-sync.sh <Teacher 路徑> .`，全部顯示 ✓ 才算完成。
+6. 下架或刪除只在教師明確要求時做，並問清楚是兩邊一起還是只處理一邊。
+
+同事經學校網站「上傳課件」上載的檔案**不會自動**出現在 Teacher。維護時如果檢查腳本列出「Maryknoll 有、對照表沒有」的課件，先問教師是否要複製到 Teacher，不要自行加入。
+
+## 5. 更新記錄（必須）
 
 每次改動倉庫、試算表或 Apps Script 後，在 `CHANGELOG.md` **最上方**加一條記錄：
 
