@@ -197,7 +197,9 @@ function writeRow_(values, rowIndex) {
   CFG.HEADERS.forEach(function (h) {
     if (idx[h] >= 0) current[idx[h]] = noFormula_(values[h]);
   });
-  sh.getRange(target, 1, 1, width).setValues([current]);
+  const range = sh.getRange(target, 1, 1, width);
+  range.setNumberFormat('@');            // 純文字，避免日期、數字被自動轉換
+  range.setValues([current]);
 }
 
 /* ============================================================
