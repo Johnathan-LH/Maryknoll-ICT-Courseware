@@ -17,6 +17,7 @@
   --num:"Baloo 2","Chiron GoRound TC",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background-color:var(--bg);color:var(--ink);font-family:var(--round);font-size:16px;line-height:1.6;
@@ -235,27 +236,18 @@ dialog:not([open]){display:none}
       <div class="field">
         <label for="fTitle">課件名稱<span class="req">必填 · 亦用作檔名</span></label>
         <input id="fTitle" maxlength="80" placeholder="例如：網絡拓撲互動演示" required>
-        <span class="hint">選擇檔案後會自動填入網頁標題，可再修改。將儲存為：</span>
+        <span class="hint">選擇檔案後會自動填入，可再修改。將儲存為：</span>
         <span class="pathbox" id="pathPreview">—</span>
-      </div>
-      <div class="field">
-        <label for="fDesc">簡介</label>
-        <textarea id="fDesc" maxlength="300" placeholder="一兩句介紹課件內容（可留空）"></textarea>
       </div>
       <div class="grid2">
         <div class="field">
-          <label for="fTags">標籤</label>
-          <input id="fTags" maxlength="120" placeholder="例如：互動,練習">
-          <span class="hint">多個標籤用逗號分隔</span>
+          <label for="fName">上傳者姓名<span class="req">可留空</span></label>
+          <input id="fName" maxlength="40" autocomplete="name" placeholder="例如：陳老師">
         </div>
         <div class="field">
-          <label for="fName">上傳者姓名<span class="req">必填</span></label>
-          <input id="fName" maxlength="40" autocomplete="name" placeholder="例如：陳老師" required>
+          <label for="fPw">教師密碼<span class="req">必填</span></label>
+          <input id="fPw" type="password" autocomplete="current-password" required>
         </div>
-      </div>
-      <div class="field">
-        <label for="fPw">教師密碼<span class="req">必填</span></label>
-        <input id="fPw" type="password" autocomplete="current-password" required>
       </div>
       <label class="check" id="rememberWrap">
         <input type="checkbox" id="fRemember">
@@ -423,7 +415,8 @@ async function load(){
     return;
   }
   try {
-    const res = await fetch(CONFIG.API_URL + "?action=list&t=" + Date.now(), { cache: "no-store" });
+    const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 30000);
+    const res = await fetch(CONFIG.API_URL + "?action=list&t=" + Date.now(), { cache: "no-store", signal: ctrl.signal }).finally(() => clearTimeout(timer));
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     if (!data.ok) throw new Error(data.message || "讀取失敗");
@@ -439,7 +432,7 @@ async function load(){
       $("#stats").insertAdjacentHTML("beforeend", `<span class="stat offline">⚠️ 未能連線，顯示的可能不是最新清單</span>`);
       return;
     }
-    $("#list").innerHTML = `<div class="empty"><span class="big">😵</span>未能讀取課件清單。<br>請檢查網絡，稍後重新整理此頁。</div>`;
+    $("#list").innerHTML = `<div class="empty"><span class="big">😵</span>未能讀取課件清單。<br>請檢查網絡後再試。<br><button class="btn" type="button" onclick="location.reload()">↻ 重新載入</button></div>`;
   }
 }
 
@@ -448,15 +441,14 @@ async function load(){
    ============================================================ */
 const dlg = $("#dlg"), form = $("#upForm"), statusBox = $("#status");
 const F = { grade: $("#fGrade"), unitSel: $("#fUnitSel"), unitTxt: $("#fUnitTxt"), topic: $("#fTopic"), file: $("#fFile"),
-  title: $("#fTitle"), desc: $("#fDesc"), tags: $("#fTags"), name: $("#fName"), pw: $("#fPw"), remember: $("#fRemember") };
+  title: $("#fTitle"), name: $("#fName"), pw: $("#fPw"), remember: $("#fRemember") };
 let busy = false, pending = null;
 
 let inIframe = true;
 try { inIframe = window.self !== window.top; } catch (e) {}
 if (inIframe){
   $("#iframeNote").hidden = false;
-  const u = new URL(location.href); u.searchParams.set("upload", "1");
-  $("#newTab").href = u.toString();
+  $("#newTab").href = CONFIG.BASE_URL + "?upload=1";   // 後備：在新分頁開啟 GitHub Pages 上的同一頁
 }
 if (!store.ok()){
   F.remember.disabled = true;
@@ -586,7 +578,6 @@ function validate(){
   const fe = checkFile(f); if (fe) return fe;
   if (!F.title.value.trim()) return "請填寫課件名稱。";
   if (!safeName(F.title.value)) return "課件名稱不可只有符號，請加入文字。";
-  if (!F.name.value.trim()) return "請填寫上傳者姓名。";
   if (!F.pw.value) return "請輸入教師密碼。";
   return "";
 }
@@ -609,7 +600,7 @@ async function startUpload(overwrite){
     }
     const payload = {
       grade: F.grade.value, unit: getUnit(), topic: F.topic.value.trim(), title: F.title.value.trim(),
-      desc: F.desc.value.trim(), tags: F.tags.value.trim(), uploader: F.name.value.trim(), password: F.pw.value,
+      desc: "", tags: "", uploader: F.name.value.trim() || "未署名", password: F.pw.value,
       filename: f.name, content: pending.content, overwrite
     };
     if (!overwrite){
@@ -625,7 +616,7 @@ async function startUpload(overwrite){
       if (r.code === "BAD_PASSWORD" || r.code === "LOCKED"){ F.pw.value = ""; store.del(K.cred); }
       return;
     }
-    if (F.remember.checked && !F.remember.disabled) store.set(K.cred, JSON.stringify({ name: payload.uploader, pw: payload.password }));
+    if (F.remember.checked && !F.remember.disabled) store.set(K.cred, JSON.stringify({ name: F.name.value.trim(), pw: payload.password }));
     else store.del(K.cred);
     showProgress(3);
     await load();
@@ -634,7 +625,7 @@ async function startUpload(overwrite){
        <div style="margin-top:6px">網站需要 <b>1–3 分鐘</b> 處理。如果打開網址顯示「404」，請稍等一會，再重新整理便會出現。</div>
        <div class="actions" style="margin-top:10px"><button class="btn ghost" type="button" id="againBtn">再上傳一個</button></div>`);
     pending = null;
-    F.file.value = ""; F.title.value = ""; F.desc.value = ""; F.tags.value = ""; updatePath();
+    F.file.value = ""; F.title.value = ""; updatePath();
     $("#againBtn").addEventListener("click", () => { clearStatus(); F.file.focus(); });
   } catch (err){
     showStatus("err", "上傳失敗", `<div>${esc(err.message)}</div>`);
