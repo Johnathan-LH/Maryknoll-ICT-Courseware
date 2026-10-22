@@ -47,6 +47,7 @@ Google Sites 頁面
 - 指令碼屬性（Script Properties）：`GITHUB_TOKEN`、`UPLOAD_PASSWORD`。**絕不可把 token 或密碼寫入任何檔案、commit 或試算表。**
 - 部署為網頁應用程式：執行身分「我」，存取權「任何人」。網址寫在 index.html 的 `CONFIG.API_URL`。
 - 上傳規則：只接受 .html/.htm、5MB 以下；檔名＝課件名稱（保留中文，移除 `/ \ : * ? " < > | # % ..` 等）；路徑 `F{年級數字}/{課件名稱}.html`；同名時前端先問「是否更新？」，確認後帶 sha 覆蓋，並更新試算表中「連結」相同的那一行。
+- 刪除：doPost `action: "delete"`（同一個教師密碼及錯誤鎖定），按 年級＋課題＋課件名稱＋連結 找出試算表那一行並刪除；連結是本倉庫 F1–F6 的檔案、且沒有其他行用到時，用 Contents API DELETE 刪除檔案。`?action=list` 回傳 `canDelete: true`，網頁才會顯示刪除按鈕。經網站刪除同步課件（ict-sync.tsv 內）時，Teacher 那份不會自動刪除。
 - 連續密碼錯誤 5 次（全站共用計數）會暫停上傳 15 分鐘；管理員可在編輯器執行 `unlockUploads()` 立即解除。執行 `checkToken()` 可檢查 token 是否有效及到期日。
 
 ## 2. 資料夾規則

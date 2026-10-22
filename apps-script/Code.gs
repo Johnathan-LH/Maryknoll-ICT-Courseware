@@ -34,7 +34,7 @@ function doGet(e) {
   try {
     const p = (e && e.parameter) || {};
     const action = p.action || 'list';
-    if (action === 'list') return json_({ ok: true, courses: readCourses_() });
+    if (action === 'list') return json_({ ok: true, canDelete: true, courses: readCourses_() });
     if (action === 'exists') {
       const grade = String(p.grade || '');
       const title = safeName_(p.title);
@@ -72,6 +72,12 @@ function doPost(e) {
       return json_({ ok: false, code: 'BAD_PASSWORD', message: left > 0 ? '教師密碼不正確（尚餘 ' + left + ' 次機會）。' : '密碼錯誤次數過多，上傳功能暫停 15 分鐘。' });
     }
     clearFails_();
+
+    // 刪除課件（同一個教師密碼）
+    if (d.action === 'delete') {
+      if (!lock.tryLock(30000)) return json_({ ok: false, code: 'BUSY', message: '系統忙碌中，請稍後再試。' });
+      return deleteCourse_(d, token);
+    }
 
     // 2. 欄位
     const grade = String(d.grade || '').trim();
@@ -200,6 +206,51 @@ function writeRow_(values, rowIndex) {
   const range = sh.getRange(target, 1, 1, width);
   range.setNumberFormat('@');            // 純文字，避免日期、數字被自動轉換
   range.setValues([current]);
+}
+
+/**
+ * 刪除課件：在試算表找出 年級＋課題＋課件名稱＋連結 都相同的那一行並刪除；
+ * 連結是本倉庫的 F1–F6 檔案、而且沒有其他行用到它，就一併從 GitHub 刪除檔案。
+ */
+function deleteCourse_(d, token) {
+  const sh = sheet_();
+  const idx = headerIndex_(sh);
+  const last = sh.getLastRow();
+  const notFound = json_({ ok: false, code: 'NOT_FOUND', message: '找不到這個課件，可能已被刪除。請重新整理網頁。' });
+  if (last < 2) return notFound;
+  const rows = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getDisplayValues();
+  const g = function (r, h) { return idx[h] >= 0 ? String(r[idx[h]] || '').trim() : ''; };
+  const want = {
+    grade: String(d.grade || '').trim(), topic: String(d.topic || '').trim(),
+    title: String(d.title || '').trim(), link: normLink_(d.link)
+  };
+  let hit = -1;
+  for (let i = 0; i < rows.length; i++) {
+    if (g(rows[i], '年級') === want.grade && g(rows[i], '課題') === want.topic &&
+        g(rows[i], '課件名稱') === want.title && normLink_(g(rows[i], '連結')) === want.link) { hit = i; break; }
+  }
+  if (hit < 0) return notFound;
+
+  let fileDeleted = false;
+  const link = want.link;
+  if (link && !/^https?:\/\//i.test(link) && /^F[1-6]\/[^\/]+\.html?$/i.test(link)) {
+    const usedElsewhere = rows.some(function (r, i) { return i !== hit && normLink_(g(r, '連結')).toLowerCase() === link.toLowerCase(); });
+    if (!usedElsewhere) {
+      const sha = githubSha_(link, token);
+      if (sha) {
+        const who = clean_(d.uploader, 40) || '未署名';
+        const res = UrlFetchApp.fetch(apiUrl_(link), {
+          method: 'delete', contentType: 'application/json', headers: ghHeaders_(token), muteHttpExceptions: true,
+          payload: JSON.stringify({ message: '刪除：' + want.grade + '「' + (want.title || want.topic) + '」（操作者：' + who + '）', sha: sha, branch: CFG.BRANCH })
+        });
+        const code = res.getResponseCode();
+        if (code !== 200) return json_({ ok: false, code: 'GITHUB_' + code, message: githubError_(code) });
+        fileDeleted = true;
+      }
+    }
+  }
+  sh.deleteRow(hit + 2);
+  return json_({ ok: true, fileDeleted: fileDeleted, title: want.title || want.topic });
 }
 
 /* ============================================================

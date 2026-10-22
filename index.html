@@ -96,6 +96,10 @@ main{display:flex;flex-direction:column;gap:32px}
 .tag{font-size:12.5px;font-weight:600;padding:1px 10px;border-radius:99px;background:var(--c-soft);color:var(--c-deep)}
 .meta{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:auto;padding-top:4px}
 .card .btn{align-self:flex-start;font-size:15px;padding:7px 18px;min-height:40px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card .btn.del{background:#fff;color:#a3122e;border:2px solid #a3122e;box-shadow:0 3px 0 #a3122e;font-size:14px;padding:5px 14px;min-height:36px}
+.card .btn.del:hover{box-shadow:0 5px 0 #a3122e}
+.delname{font-size:18px;font-weight:800;overflow-wrap:anywhere}
 .card.soon{background:transparent;border:3px dashed var(--muted);box-shadow:none}
 .soon-lbl{align-self:flex-start;font-weight:800;font-size:14px;border:2px solid var(--ink);border-radius:99px;padding:2px 12px;background:#fff}
 .nolink{font-size:14px;font-weight:600;color:var(--muted)}
@@ -270,6 +274,37 @@ dialog:not([open]){display:none}
   </form>
 </dialog>
 
+<!-- ============ 刪除確認 ============ -->
+<dialog id="delDlg" aria-labelledby="delTitle">
+  <form id="delForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="delTitle">🗑 刪除課件</h2>
+      <button class="x" type="button" id="delClose" aria-label="關閉">✕</button>
+    </div>
+    <div class="dlg-body">
+      <div>確定要刪除以下課件嗎？</div>
+      <div class="delname" id="delName"></div>
+      <div class="hint" id="delInfo"></div>
+      <div class="status ask show"><strong>⚠ 刪除後不能在網站上復原</strong>課件檔案和目錄中的記錄都會刪除。</div>
+      <div class="grid2">
+        <div class="field">
+          <label for="dName">你的姓名<span class="req">可留空</span></label>
+          <input id="dName" maxlength="40" autocomplete="name" placeholder="例如：陳老師">
+        </div>
+        <div class="field">
+          <label for="dPw">教師密碼<span class="req">必填</span></label>
+          <input id="dPw" type="password" autocomplete="current-password" required>
+        </div>
+      </div>
+      <div class="status" id="delStatus" role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="delCancel">取消</button>
+        <button class="btn warn" type="submit" id="delGo">🗑 確定刪除</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
 <script>
 /* ============================================================
    設定（只需設定一次）
@@ -328,7 +363,7 @@ const unitLabel = u => { const p = unitParts(u); return p.code ? `<span class="u
 function toCourses(list){
   return (list || []).map(r => ({
     grade: (r.grade || "").trim(), unit: (r.unit || "").trim(), topic: (r.topic || "").trim(), title: (r.title || "").trim(),
-    url: fullUrl((r.link || "").trim()), desc: (r.desc || "").trim(), tags: splitTags(r.tags),
+    link: (r.link || "").trim(), url: fullUrl((r.link || "").trim()), desc: (r.desc || "").trim(), tags: splitTags(r.tags),
     uploader: (r.uploader || "").trim(), updated: (r.updated || "").trim()
   })).filter(c => c.grade && (c.title || c.topic));
 }
@@ -386,12 +421,16 @@ function render(){
   }).join("");
 }
 
+let CAN_DELETE = false;
+const delBtn = c => CAN_DELETE ? `<button class="btn del" type="button" data-del="${COURSES.indexOf(c)}" aria-label="刪除 ${esc(c.title || c.topic)}">🗑 刪除</button>` : "";
+
 function card(c){
   if (!c.title){
     return `<article class="card soon">
       <span class="topic">課題：<b>${esc(c.topic)}</b></span>
       <span class="soon-lbl">⏳ 課件準備中</span>
       ${c.desc ? `<span class="d">${esc(c.desc)}</span>` : ""}
+      ${delBtn(c)}
     </article>`;
   }
   const date = c.updated ? c.updated.slice(0, 10) : "";
@@ -401,7 +440,10 @@ function card(c){
     ${c.desc ? `<span class="d">${esc(c.desc)}</span>` : ""}
     ${c.tags.length ? `<span class="tags">${c.tags.map(x => `<span class="tag">#${esc(x)}</span>`).join("")}</span>` : ""}
     <span class="meta">${c.uploader ? `<span>👤 ${esc(c.uploader)}</span>` : ""}${date ? `<span>📅 ${esc(date)}</span>` : ""}</span>
-    ${/^https?:\/\//i.test(c.url) ? `<a class="btn" href="${esc(withVersion(c.url, c.updated))}" target="_blank" rel="noopener">▶ 開始學習</a>` : `<span class="nolink">（未有連結）</span>`}
+    <span class="acts">
+      ${/^https?:\/\//i.test(c.url) ? `<a class="btn" href="${esc(withVersion(c.url, c.updated))}" target="_blank" rel="noopener">▶ 開始學習</a>` : `<span class="nolink">（未有連結）</span>`}
+      ${delBtn(c)}
+    </span>
   </article>`;
 }
 
@@ -426,6 +468,7 @@ async function load(){
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     if (!data.ok) throw new Error(data.message || "讀取失敗");
+    CAN_DELETE = data.canDelete === true;
     COURSES = toCourses(data.courses);
     store.set(K.list, JSON.stringify(data.courses));
     render();
@@ -705,6 +748,61 @@ function askOverwrite(path, uploader){
   $("#yesBtn").addEventListener("click", () => startUpload(true));
   $("#noBtn").addEventListener("click", () => { clearStatus(); F.file.value = ""; updatePath(); showStatus("ask", "請先改檔案名稱", "<div>請在電腦把 HTML 檔案改一個新名稱，然後重新選擇檔案再上傳。</div>"); });
 }
+
+/* ============================================================
+   刪除
+   ============================================================ */
+const delDlg = $("#delDlg"), delStatus = $("#delStatus");
+let delTarget = null, delBusy = false;
+function delShow(kind, title, html){ delStatus.className = "status show " + kind; delStatus.innerHTML = `<strong>${esc(title)}</strong>${html || ""}`; }
+function openDelete(c){
+  delTarget = c; delStatus.className = "status"; delStatus.innerHTML = "";
+  $("#delName").textContent = c.title || `（課題：${c.topic}，課件準備中）`;
+  $("#delInfo").textContent = [c.grade, c.unit, c.topic && "課題：" + c.topic, c.link].filter(Boolean).join(" · ");
+  let cred = null;
+  try { cred = JSON.parse(store.get(K.cred) || "null"); } catch (e) {}
+  $("#dName").value = (cred && cred.name) || F.name.value || "";
+  $("#dPw").value = (cred && cred.pw) || F.pw.value || "";
+  if (typeof delDlg.showModal === "function"){ try { delDlg.showModal(); } catch (e) { delDlg.setAttribute("open", ""); } }
+  else delDlg.setAttribute("open", "");
+  $("#dPw").focus();
+}
+function closeDelete(){ if (delBusy) return; if (typeof delDlg.close === "function") delDlg.close(); else delDlg.removeAttribute("open"); }
+$("#delClose").addEventListener("click", closeDelete);
+$("#delCancel").addEventListener("click", closeDelete);
+delDlg.addEventListener("cancel", e => { if (delBusy) e.preventDefault(); });
+$("#list").addEventListener("click", e => {
+  const b = e.target.closest("[data-del]"); if (!b) return;
+  const c = COURSES[Number(b.dataset.del)]; if (c) openDelete(c);
+});
+$("#delForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (delBusy || !delTarget) return;
+  if (!$("#dPw").value){ delShow("err", "未能刪除", "<div>請輸入教師密碼。</div>"); return; }
+  delBusy = true;
+  $("#delForm").querySelectorAll("input,button").forEach(el => el.disabled = true);
+  $("#delGo").textContent = "刪除中…";
+  delShow("busy", "刪除中，請稍候…", `<div class="bar"><i></i></div>`);
+  try {
+    const r = await api("POST", null, { action: "delete", grade: delTarget.grade, topic: delTarget.topic, title: delTarget.title,
+      link: delTarget.link, uploader: $("#dName").value.trim(), password: $("#dPw").value });
+    if (!r.ok){
+      delShow("err", "未能刪除", `<div>${esc(r.message || "發生未知錯誤。")}</div>`);
+      if (r.code === "BAD_PASSWORD" || r.code === "LOCKED") $("#dPw").value = "";
+      return;
+    }
+    await load();
+    delShow("ok", "✔ 已刪除", `<div>「${esc(r.title)}」已從課件庫刪除${r.fileDeleted ? "，檔案亦已刪除" : ""}。</div>`);
+    delTarget = null;
+    setTimeout(() => { delBusy = false; closeDelete(); }, 1800);
+  } catch (err){
+    delShow("err", "未能刪除", `<div>${esc(err.message)}</div>`);
+  } finally {
+    if (delTarget){ delBusy = false; }
+    $("#delForm").querySelectorAll("input,button").forEach(el => el.disabled = false);
+    $("#delGo").textContent = "🗑 確定刪除";
+  }
+});
 
 load().then(() => { if (new URLSearchParams(location.search).get("upload") === "1") openUpload(); });
 </script>
