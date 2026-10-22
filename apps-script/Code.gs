@@ -132,8 +132,9 @@ function doPost(e) {
       '更新日期': Utilities.formatDate(new Date(), CFG.TZ, 'yyyy-MM-dd HH:mm')
     };
     writeRow_(values, row ? row.rowIndex : 0);
+    const courses = publishCatalog_(token);
 
-    return json_({ ok: true, updated: !!sha || !!row, path: path, url: CFG.PAGES_BASE + encPath_(path) });
+    return json_({ ok: true, updated: !!sha || !!row, path: path, url: CFG.PAGES_BASE + encPath_(path), courses: courses });
   } catch (err) {
     return json_({ ok: false, code: 'SERVER', message: '伺服器錯誤：' + err.message });
   } finally {
@@ -250,7 +251,34 @@ function deleteCourse_(d, token) {
     }
   }
   sh.deleteRow(hit + 2);
-  return json_({ ok: true, fileDeleted: fileDeleted, title: want.title || want.topic });
+  const courses = publishCatalog_(token);
+  return json_({ ok: true, fileDeleted: fileDeleted, title: want.title || want.topic, courses: courses });
+}
+
+/**
+ * 把最新課件清單存成網站上的 courses.json（GitHub Pages 讀取約 0.5 秒，比經 Apps Script 快很多）。
+ * 失敗不影響上傳／刪除；網頁仍會在背景向 Apps Script 核對最新清單。回傳清單供網頁即時更新。
+ */
+function publishCatalog_(token) {
+  const courses = readCourses_();
+  try {
+    const path = 'courses.json';
+    const content = JSON.stringify({ ok: true, canDelete: true, generated: Utilities.formatDate(new Date(), CFG.TZ, 'yyyy-MM-dd HH:mm:ss'), courses: courses }, null, 1);
+    const body = { message: '更新課件清單 courses.json（自動）', content: Utilities.base64Encode(content, Utilities.Charset.UTF_8), branch: CFG.BRANCH };
+    const sha = githubSha_(path, token);
+    if (sha) body.sha = sha;
+    UrlFetchApp.fetch(apiUrl_(path), { method: 'put', contentType: 'application/json', payload: JSON.stringify(body), headers: ghHeaders_(token), muteHttpExceptions: true });
+  } catch (err) {
+    console.warn('courses.json 未能更新：' + err.message);
+  }
+  return courses;
+}
+
+/** 管理員工具：手動在試算表改了資料後，可執行這個函式立即更新網站上的 courses.json */
+function publishCatalogNow() {
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  const n = publishCatalog_(token).length;
+  Logger.log('✅ 已更新 courses.json（' + n + ' 個項目）');
 }
 
 /* ============================================================

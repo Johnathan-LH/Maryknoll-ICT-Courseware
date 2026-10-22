@@ -14,7 +14,9 @@ Google Sites 頁面
 ```
 
 - **課件清單的唯一資料來源是 Google 試算表**，不是資料夾結構。index.html 不會掃描倉庫。
-- index.html 透過 Apps Script 讀取清單（不用「發佈到網路」CSV），因為 CSV 約 5 分鐘才更新，同事上傳後會以為失敗；讀取失敗時，頁面會顯示該瀏覽器上次快取的清單。
+- 載入清單（快 → 準）：先顯示瀏覽器上次的清單 → 讀取網站上的 `courses.json`（約 0.5 秒）→ 背景向 Apps Script `?action=list` 讀取試算表最新內容（3–20 秒），有分別才更新畫面。
+- `courses.json` 由 Apps Script `publishCatalog_()` 在每次上傳／刪除後自動寫入倉庫，**不要手動編輯**。在試算表手動改了資料，網頁的背景核對會顯示最新內容；如想 courses.json 也即時更新，在 Apps Script 執行 `publishCatalogNow()`。
+- 上傳和刪除的回應都附帶最新清單（`courses`），網頁直接用來更新，不再額外讀取。上傳不再先另外檢查同名，由上傳請求本身回傳 `EXISTS`。
 - GitHub Pages 從 `main` 分支根目錄發佈，推送後約 1–3 分鐘生效。
 - index.html 也可以原封不動放在學校校網（所有網址均為完整網址）。在 iframe 內選檔受限時，表單的後備按鈕會開啟 GitHub Pages 上的同一頁（`?upload=1` 會自動打開上傳表單）。
 - 上傳成功後，表單每 5 秒檢查 GitHub Pages 是否已發佈該檔案，發佈後才顯示「打開課件」；目錄頁的課件連結加上 `?v=更新日期`，避免瀏覽器沿用舊版或之前的 404。

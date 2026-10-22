@@ -457,32 +457,75 @@ $("#units").addEventListener("click", e => {
 });
 $("#q").addEventListener("input", e => { state.q = e.target.value.trim(); if (COURSES.length) render(); });
 
+/** 用一份清單更新畫面（內容沒變就不重畫，避免閃動） */
+let shownKey = "";
+function applyList(list, canDelete){
+  const key = JSON.stringify(list) + "|" + !!canDelete;
+  if (key === shownKey) return;
+  shownKey = key;
+  CAN_DELETE = canDelete === true;
+  COURSES = toCourses(list);
+  render();
+}
+function setNote(html){
+  const old = document.getElementById("syncNote"); if (old) old.remove();
+  if (html) $("#stats").insertAdjacentHTML("beforeend", `<span class="stat offline" id="syncNote">${html}</span>`);
+}
+async function getJSON(url, ms){
+  const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { cache: "no-store", signal: ctrl.signal });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || "讀取失敗");
+    return data;
+  } finally { clearTimeout(timer); }
+}
+
+/**
+ * 載入清單（快 → 準）：
+ * 1. 立即顯示這部電腦上次的清單（如有）
+ * 2. 讀取網站上的 courses.json（約 0.5 秒；每次上傳／刪除時自動更新）
+ * 3. 背景向 Apps Script 讀取試算表最新內容（較慢，3–20 秒），有分別才更新畫面
+ */
 async function load(){
   if (!CONFIG.API_URL){
     $("#list").innerHTML = `<div class="empty"><span class="big">🔌</span>還未連接課件清單。請把 Apps Script 網址貼到程式碼的 <code>API_URL</code>。</div>`;
     return;
   }
+  let shown = false, live = false;
   try {
-    const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 30000);
-    const res = await fetch(CONFIG.API_URL + "?action=list&t=" + Date.now(), { cache: "no-store", signal: ctrl.signal }).finally(() => clearTimeout(timer));
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message || "讀取失敗");
-    CAN_DELETE = data.canDelete === true;
-    COURSES = toCourses(data.courses);
-    store.set(K.list, JSON.stringify(data.courses));
-    render();
-  } catch (err){
-    // 讀取失敗時，改用上次成功讀到的清單（存在這部電腦的瀏覽器）
-    let cached = null;
-    try { cached = JSON.parse(store.get(K.list) || "null"); } catch (e) {}
-    if (cached){
-      COURSES = toCourses(cached); render();
-      $("#stats").insertAdjacentHTML("beforeend", `<span class="stat offline">⚠️ 未能連線，顯示的可能不是最新清單</span>`);
-      return;
-    }
-    $("#list").innerHTML = `<div class="empty"><span class="big">😵</span>未能讀取課件清單。<br>請檢查網絡後再試。<br><button class="btn" type="button" onclick="location.reload()">↻ 重新載入</button></div>`;
+    const c = JSON.parse(store.get(K.list) || "null");
+    if (c && Array.isArray(c.courses)){ applyList(c.courses, c.canDelete); shown = true; }
+  } catch (e) {}
+
+  const fromSite = getJSON(CONFIG.BASE_URL + "courses.json?t=" + Date.now(), 10000)
+    .then(d => { if (!live){ applyList(d.courses, d.canDelete); shown = true; } })
+    .catch(() => {});
+  const fromSheet = getJSON(CONFIG.API_URL + "?action=list&t=" + Date.now(), 45000)
+    .then(d => {
+      live = true;
+      applyList(d.courses, d.canDelete);
+      store.set(K.list, JSON.stringify({ courses: d.courses, canDelete: d.canDelete }));
+      setNote("");
+    })
+    .catch(() => { if (shown) setNote("⚠️ 未能連線核對，顯示的可能不是最新清單"); });
+
+  // 有任何一份清單就先返回（畫面已顯示），Apps Script 繼續在背景核對
+  await Promise.race([fromSite.then(() => { if (!shown) return fromSheet; }), fromSheet]);
+  if (!shown && !live){
+    await Promise.allSettled([fromSite, fromSheet]);
+    if (!shown && !live)
+      $("#list").innerHTML = `<div class="empty"><span class="big">😵</span>未能讀取課件清單。<br>請檢查網絡後再試。<br><button class="btn" type="button" onclick="location.reload()">↻ 重新載入</button></div>`;
   }
+}
+
+/** 上傳／刪除成功後，直接用回傳的清單更新畫面，不用再讀一次 */
+function useReturnedList(r){
+  if (!r || !Array.isArray(r.courses)) return false;
+  applyList(r.courses, true);
+  store.set(K.list, JSON.stringify({ courses: r.courses, canDelete: true }));
+  return true;
 }
 
 /* ============================================================
@@ -577,7 +620,7 @@ function showStatus(kind, title, html){
   statusBox.innerHTML = `<strong>${esc(title)}</strong>${html || ""}`;
   statusBox.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
-const STEPS = ["讀取檔案", "檢查是否有同名課件", "上傳到網站（約 5–20 秒）", "更新課件清單"];
+const STEPS = ["讀取檔案", "上傳到網站（約 5–20 秒）", "更新課件清單"];
 function showProgress(i){
   showStatus("busy", "上傳中，請不要關閉此視窗…",
     `<ol class="steps">${STEPS.map((s, k) => `<li class="${k < i ? "done" : k === i ? "now" : ""}">${s}</li>`).join("")}</ol><div class="bar"><i></i></div>`);
@@ -667,12 +710,7 @@ async function startUpload(overwrite){
       desc: "", tags: "", uploader: F.name.value.trim() || "未署名", password: F.pw.value,
       filename: f.name, content: pending.content, overwrite
     };
-    if (!overwrite){
-      showProgress(1);
-      const chk = await api("GET", { action: "exists", grade: payload.grade, title: payload.title });
-      if (chk.ok && chk.exists){ askOverwrite(chk.path, chk.uploader); return; }
-    }
-    showProgress(2);
+    showProgress(1);
     const r = await api("POST", null, payload);
     if (!r.ok){
       if (r.code === "EXISTS"){ askOverwrite(r.path, r.uploader); return; }
@@ -682,8 +720,8 @@ async function startUpload(overwrite){
     }
     if (F.remember.checked && !F.remember.disabled) store.set(K.cred, JSON.stringify({ name: F.name.value.trim(), pw: payload.password }));
     else store.del(K.cred);
-    showProgress(3);
-    await load();
+    showProgress(2);
+    if (!useReturnedList(r)) load();
     const wasFixed = pending && pending.fixed;
     const stamp = Date.now();
     const openUrl = r.url + "?v=" + stamp;
@@ -791,7 +829,7 @@ $("#delForm").addEventListener("submit", async e => {
       if (r.code === "BAD_PASSWORD" || r.code === "LOCKED") $("#dPw").value = "";
       return;
     }
-    await load();
+    if (!useReturnedList(r)) load();
     delShow("ok", "✔ 已刪除", `<div>「${esc(r.title)}」已從課件庫刪除${r.fileDeleted ? "，檔案亦已刪除" : ""}。</div>`);
     delTarget = null;
     setTimeout(() => { delBusy = false; closeDelete(); }, 1800);
