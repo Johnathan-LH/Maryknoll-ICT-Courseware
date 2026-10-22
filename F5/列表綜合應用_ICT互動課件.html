@@ -1,0 +1,264 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5.2 列表綜合應用｜ICT互動課件</title>
+<style>
+:root{--navy:#1e2a4a;--blue:#1597d0;--yellow:#ffd23f;--purple:#7c6cf0;--pink:#f06a9b;--ok:#16a34a;--bad:#e5484d;--bg:#f3f7fc}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Nunito","Microsoft JhengHei","PingFang TC",sans-serif;color:var(--navy);line-height:1.7;background:var(--bg);background-image:radial-gradient(#cdd8e6 1.2px,transparent 1.2px);background-size:22px 22px}
+.hero{max-width:1100px;margin:20px auto 0;border-radius:30px;padding:34px 40px;position:relative;overflow:hidden;background:linear-gradient(110deg,#bfe6ff,#dcd6ff 60%,#fbe0ec);box-shadow:0 10px 0 #d9e0ea}
+.hero .badge{display:inline-block;background:#fff;color:var(--purple);border-radius:99px;padding:4px 16px;font-weight:700;letter-spacing:.5px;font-size:14px}
+.hero h1{font-size:clamp(30px,5vw,54px);margin:10px 0 4px;font-weight:900}
+.hero p{margin:0 0 16px;color:#4a5878}
+.pill{display:inline-block;background:#fff;border-radius:99px;padding:8px 18px;margin-right:8px;font-weight:800;box-shadow:0 3px 0 #c9d3e2}
+.pill b{color:var(--blue)}
+.deco{position:absolute;font-family:Consolas,monospace;font-weight:900;opacity:.35;font-size:30px}
+.robot{position:absolute;right:46px;top:50%;transform:translateY(-50%);width:170px;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(calc(-50% - 10px))}}
+.bar{height:14px;background:#fff;border-radius:99px;overflow:hidden;margin-top:14px;max-width:420px;box-shadow:inset 0 2px 3px #0001}.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--yellow),#ffb703);transition:.5s;border-radius:99px}
+#pt{font-weight:700;color:#4a5878;font-size:14px}
+nav{position:sticky;top:0;z-index:5;max-width:1100px;margin:18px auto 0;padding:10px 4px;display:flex;gap:10px;overflow-x:auto;background:var(--bg)}
+nav a{flex:none;background:#fff;color:var(--navy);text-decoration:none;font-weight:800;padding:9px 18px;border-radius:99px;border:2px solid #e3e9f2;box-shadow:0 3px 0 #dbe3ee;transition:.15s}
+nav a:hover,nav a.on{background:var(--yellow);border-color:var(--navy);box-shadow:0 3px 0 var(--navy)}
+main{max-width:1100px;margin:auto;padding:10px 4px 30px}
+section{background:#fff;border:2px solid #e3e9f2;border-radius:24px;margin:30px 0;box-shadow:0 6px 0 #dfe6ef;scroll-margin-top:80px;overflow:visible}
+.sh{display:flex;align-items:center;gap:14px;padding:22px 26px 6px}
+.sh b{background:var(--blue);color:#fff;font-size:24px;font-weight:900;border-radius:16px;padding:6px 18px;transform:rotate(-3deg);box-shadow:0 5px 0 #0d6e9a}
+.sh h2{margin:0;font-size:26px;font-weight:900}
+.sb{padding:6px 26px 24px}
+.part{display:inline-block;font-weight:900;margin:18px 0 8px;font-size:16px;background:#eef3ff;color:var(--purple);padding:4px 14px;border-radius:99px}
+.know{background:linear-gradient(120deg,#eaf7ff,#f2efff);border-radius:16px;padding:14px 18px;font-size:16.5px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0 8px}.tbl td{vertical-align:top;padding:0}.tbl td:first-child{width:92px;font-weight:900;color:#fff;background:var(--purple);border-radius:14px 0 0 14px;text-align:center;padding-top:14px}
+.tbl pre{margin:0;border-radius:0 14px 14px 0}
+pre,.code{background:#1e2a4a;color:#e9f3ff;border-radius:14px;padding:14px 16px;font-family:Consolas,monospace;font-size:15px;overflow-x:auto;white-space:pre;margin:6px 0}
+.arr{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}.arr>div{text-align:center;font-family:Consolas;min-width:52px;font-weight:700}.arr .v{background:#e6f5fd;border:2px solid var(--blue);border-radius:10px;padding:4px 6px}.arr .i{font-size:12px;color:#8a97ad}
+.tip{background:#fff8dc;border:2px dashed #ffc94d;padding:10px 16px;border-radius:14px;margin:12px 0}
+.q{border:2px solid #e3e9f2;border-radius:20px;padding:16px 20px;margin:16px 0;background:#fcfdff;transition:.2s}.q.done{border-color:#86efac;background:#f3fdf6}
+.q h4{margin:0 0 8px;font-size:17px;font-weight:900}.q h4::before{content:"🎯 "}
+.q input{font-family:Consolas;font-size:15px;width:9em;border:none;border-radius:6px;background:#33426a;color:var(--yellow);padding:3px 6px;text-align:center;outline:2px dashed #ffd23f88}
+.q input.ok{outline-color:#4ade80;color:#4ade80}.q input.no{outline-color:#f87171;color:#fca5a5;animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.opts button.o{text-align:left;padding:12px 16px;border:2px solid #e3e9f2;background:#fff;border-radius:16px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #dfe6ef;transition:.12s}
+.opts button.o:hover{transform:translateY(-2px);border-color:var(--blue)}
+.opts button.o.ok{background:#dcfce7;border-color:var(--ok);box-shadow:0 4px 0 var(--ok)}.opts button.o.no{background:#fee2e2;border-color:var(--bad);animation:shake .3s}
+.bank{display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:#f3f6ff;border:2px dashed #b9c4ff;border-radius:16px;min-height:54px;margin:8px 0}
+.tk{background:var(--yellow);color:var(--navy);border-radius:10px;padding:5px 12px;font-family:Consolas;font-weight:700;cursor:grab;user-select:none;box-shadow:0 3px 0 #d9a400}
+.slot{display:inline-block;min-width:110px;min-height:32px;border:2px dashed #ffd23f;border-radius:10px;vertical-align:middle;padding:1px;text-align:center}.slot.ok{border:2px solid #4ade80}.slot.no{border:2px solid #f87171}
+.btns button{font:inherit;font-weight:900;border:0;border-radius:99px;padding:8px 18px;margin:10px 8px 0 0;cursor:pointer;transition:.12s}
+.btns button:active{transform:translateY(3px);box-shadow:none}
+.c{background:var(--navy);color:#fff;box-shadow:0 4px 0 #0c1428}.a{background:#fff;color:var(--purple);border:2px solid var(--purple)!important;box-shadow:0 4px 0 #c9c2ff}.r{background:#eef1f6;color:#5b6884;box-shadow:0 4px 0 #d3dae6}
+.fb{font-weight:900;margin-top:8px;min-height:1.5em;font-size:16px}.fb.ok{color:var(--ok)}.fb.no{color:var(--bad)}
+.ans{display:none;background:#f2efff;border-radius:14px;padding:10px 14px;margin-top:10px;font-weight:700}.ans.show{display:block}
+#G .sh b{background:var(--pink);box-shadow:0 5px 0 #b8396a}
+.confetti{position:fixed;top:-20px;font-size:22px;pointer-events:none;z-index:99;animation:fall 1.6s linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
+footer{text-align:center;color:#7d8aa3;padding:20px;font-size:14px;font-weight:700}
+@media(max-width:760px){.robot{display:none}.hero{padding:24px;margin:10px}.sb,.sh{padding-left:16px;padding-right:16px}}
+</style></head><body>
+<div class="hero"><span class="deco" style="left:30px;top:8px">&lt;/&gt;</span><span class="deco" style="left:44%;top:14px">01</span><span class="deco" style="left:36%;bottom:10px">if</span><span class="deco" style="left:58%;bottom:20px;color:#f06a9b">{ }</span>
+<span class="badge">Maryknoll Secondary School</span><h1>5.2 列表綜合應用</h1><p>中五｜D 計算思維與程式編寫｜邊玩邊學 Python 列表演算法！</p>
+<span class="pill"><b>7</b> 個單元</span><span class="pill"><b id="qn">0</b> 條互動題</span>
+<div class="bar"><div id="bar"></div></div><span id="pt"></span>
+<svg class="robot" viewBox="0 0 200 210"><circle cx="100" cy="12" r="8" fill="#ffd23f"/><rect x="97" y="18" width="6" height="16" fill="#1597d0"/><rect x="18" y="32" width="164" height="128" rx="26" fill="#1597d0"/><rect x="34" y="46" width="132" height="98" rx="16" fill="#fff"/><text x="48" y="74" font-family="Consolas" font-size="17" font-weight="700" fill="#7c6cf0">[0,1,2]</text><circle cx="80" cy="100" r="9" fill="#1e2a4a"/><circle cx="120" cy="100" r="9" fill="#1e2a4a"/><path d="M78 120 Q100 136 122 120" stroke="#1e2a4a" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="85" y="160" width="30" height="18" fill="#9fc8e8"/><rect x="50" y="176" width="100" height="14" rx="7" fill="#9fc8e8"/></svg></div>
+<nav><a href="#A">A 點算項目</a><a href="#B">B 最大／最小值</a><a href="#C">C 檢查排序</a><a href="#D">D 加入／刪除</a><a href="#E">E 調動項目</a><a href="#F">擴闊視野</a><a href="#G">挑戰題</a></nav>
+<main>
+
+<section id="A"><div class="sh"><b>A</b><h2>點算項目</h2></div><div class="sb">
+<div class="part">📘 解說</div><div class="know">想知道列表中「有多少個項目符合條件」，就用一個計數變量 <code>count</code>：先設為 0，再用 <code>for</code> 迴圈逐一檢查，符合條件便加 1。</div>
+<div class="part">🧠 知識重點</div>
+<table class="tbl"><tr><td>偽代碼</td><td><pre>count ← 0
+設 k 由 0 至 N-1
+    如果 the_list[k] > bound 則
+        count ← count + 1
+輸出 count</pre></td></tr><tr><td>Python</td><td><pre>count = 0
+N = len(the_list)
+for k in range(0, N):
+    if the_list[k] > bound:
+        count = count + 1
+print(count)</pre></td></tr></table>
+<div class="tip">💡 可點算：高於某數、低於某數、等於某值的項目數目。比較大小只適用於整數／浮點數。</div>
+<div class="part">✏️ 互動練習</div>
+<div class="arr" data-arr="87,45,79,100,50,35,90,100,60,80" data-name="mark"></div>
+<div class="q" data-type="fill"><h4>A1　找出多少位同學取得 100 分</h4>
+<div class="code">found = <input data-a="0">
+for i in range(0, <input data-a="10|len(mark)">):
+    if mark[i] <input data-a="==" style="width:4em"> 100:
+        found = <input data-a="found+1">
+print(found)</div></div>
+<div class="q" data-type="mc" data-a="1"><h4>A2　上題程式輸出甚麼？</h4><div class="opts"><button class="o">1</button><button class="o">2</button><button class="o">100</button></div></div>
+<div class="q" data-type="drag"><h4>A3　拖放：列印需要補測同學（不及格 &lt; 50）的學號</h4>
+<div class="bank"><span class="tk">mark[i] &lt; 50</span><span class="tk">print(i+1)</span><span class="tk">mark[i] &gt; 50</span><span class="tk">print(i)</span></div>
+<div class="code">for i in range(0, 10):
+    if <span class="slot" data-a="mark[i] < 50"></span>:
+        <span class="slot" data-a="print(i+1)"></span></div></div>
+</div></section>
+
+<section id="B"><div class="sh"><b>B</b><h2>找出最大或最小的值</h2></div><div class="sb">
+<div class="part">📘 解說</div><div class="know">先用一個變量暫存列表<strong>第一個項目</strong>，再逐一與其餘項目比較；發現更大（或更小）的值，便更新該變量。</div>
+<div class="part">🧠 知識重點</div>
+<table class="tbl"><tr><td>Python</td><td><pre>largest = the_list[0]
+N = len(the_list)
+for i in range(1, N):
+    if the_list[i] > largest:
+        largest = the_list[i]
+print(largest)</pre></td></tr></table>
+<div class="tip">🤔 試想想：為何迴圈由索引 1 開始？因為索引 0 已作為起始值，無需與自己比較。<br>要記錄「誰」最低分，可另設 <code>lowest_no</code> 儲存索引，學號 = 索引 + 1。</div>
+<div class="part">✏️ 互動練習</div>
+<div class="arr" data-arr="19.9,24.9,19.4,20.9,23.0" data-name="price"></div>
+<div class="q" data-type="fill"><h4>B1　找出最低價及最高價，計算可省多少錢</h4>
+<div class="code">lowest = <input data-a="price[0]">
+highest = <input data-a="price[0]">
+for i in range(1, 5):
+    if price[i] <input data-a="<" style="width:4em"> lowest:
+        lowest = price[i]
+    if price[i] <input data-a=">" style="width:4em"> highest:
+        highest = price[i]
+difference = <input data-a="highest-lowest" style="width:12em">
+print("You save $", difference)</div></div>
+<div class="q" data-type="mc" data-a="2"><h4>B2　最低價在哪一個索引？</h4><div class="opts"><button class="o">0</button><button class="o">1</button><button class="o">2</button><button class="o">4</button></div></div>
+<div class="q" data-type="fill"><h4>B3　找出最低分同學的學號（mark 見 A 部）</h4>
+<div class="code">lowest_mark = mark[0]
+lowest_no = <input data-a="0">
+for i in range(1, 10):
+    if mark[i] < lowest_mark:
+        lowest_mark = mark[i]
+        lowest_no = <input data-a="i">
+print("Student no.", <input data-a="lowest_no+1" style="width:11em">)</div></div>
+</div></section>
+
+<section id="C"><div class="sh"><b>C</b><h2>檢查列表中的值是否按次序排列</h2></div><div class="sb">
+<div class="part">📘 解說</div><div class="know">用<strong>旗標（Flag）</strong>記錄檢查結果。先假設 <code>sorted_list = True</code>，逐對比較相鄰項目；只要有一對次序錯誤，就設為 <code>False</code>。旗標只有「是／否」，應用布爾數據類型。</div>
+<div class="part">🧠 知識重點</div>
+<table class="tbl"><tr><td>Python</td><td><pre>sorted_list = True
+N = len(the_list)
+for k in range(0, N-1):
+    if the_list[k] > the_list[k+1]:
+        sorted_list = False
+print(sorted_list)</pre></td></tr></table>
+<div class="tip">⚠️ 迴圈只到 N-2（range(0, N-1)），因為要比較 k 與 k+1，否則會超出範圍。</div>
+<div class="part">✏️ 互動練習</div>
+<div class="q" data-type="fill"><h4>C1　排行榜分數應由高至低，完成檢查程式</h4>
+<div class="arr" data-arr="99.8,99.5,98,97.9,97.6,95.3,95.2,93.4,92.1,90.5" data-name="score"></div>
+<div class="code">sorted_list = <input data-a="True">
+for k in range(0, <input data-a="9">):
+    if score[k+1] <input data-a=">" style="width:4em"> score[k]:
+        sorted_list = <input data-a="False"></div></div>
+<div class="q" data-type="mc" data-a="0"><h4>C2　[1, 6, 7, 5, 4] 用「由小至大」程式檢查，結果是？</h4><div class="opts"><button class="o">False</button><button class="o">True</button><button class="o">程式出錯</button></div></div>
+<div class="q" data-type="mc" data-a="1"><h4>C3　為何旗標應使用布爾數據類型？</h4><div class="opts"><button class="o">可以儲存小數</button><button class="o">結果只有「是」或「否」</button><button class="o">可以令迴圈更快</button></div></div>
+</div></section>
+
+<section id="D"><div class="sh"><b>D</b><h2>加入或刪除列表中的項目</h2></div><div class="sb">
+<div class="part">📘 解說</div><div class="know"><strong>刪除</strong>索引 P：P 之後的項目逐一<strong>向前</strong>移一格（由前至後處理）。<br><strong>加入</strong>到索引 P：先加長列表，再把項目逐一<strong>向後</strong>移一格（由尾至前處理），最後放入新項目。</div>
+<div class="part">🧠 知識重點</div>
+<table class="tbl"><tr><td>刪除</td><td><pre>N = len(the_list)
+for k in range(P, N-1):
+    the_list[k] = the_list[k+1]
+N = N - 1</pre></td></tr><tr><td>加入</td><td><pre>the_list = the_list + [0]
+N = len(the_list)
+for k in range(N-1, P, -1):
+    the_list[k] = the_list[k-1]
+the_list[P] = new_data</pre></td></tr></table>
+<div class="tip">💡 加入時若由前往後搬，後面的資料會被覆蓋，所以必須由尾開始。</div>
+<div class="part">✏️ 互動練習</div>
+<div class="arr" data-arr="3001,4001,5001,2001,2002,3002,2003,4002,2004,2005" data-name="wait"></div>
+<div class="q" data-type="fill"><h4>D1　VIP 號碼 9001 加入索引 4</h4>
+<div class="code">wait = wait + [0]
+for k in range(<input data-a="10">, 4, <input data-a="-1" style="width:4em">):
+    wait[k] = wait[<input data-a="k-1">]
+wait[<input data-a="4" style="width:4em">] = 9001</div></div>
+<div class="q" data-type="drag"><h4>D2　拖放：從 eca_code 刪除索引 1 的 "Paul"</h4>
+<div class="arr" data-arr="Tony,Paul,Kelly,Wendy,Jack" data-name="eca_code"></div>
+<div class="bank"><span class="tk">range(1, 4)</span><span class="tk">k+1</span><span class="tk">range(4, 1, -1)</span><span class="tk">k-1</span><span class="tk">4</span></div>
+<div class="code">for k in <span class="slot" data-a="range(1, 4)"></span>:
+    eca_code[k] = eca_code[<span class="slot" data-a="k+1"></span>]
+eca_code[<span class="slot" data-a="4"></span>] = ""</div></div>
+<div class="q" data-type="mc" data-a="2"><h4>D3　加入項目時為何 range 的步長是 -1？</h4><div class="opts"><button class="o">令列表縮短</button><button class="o">令程式更易讀</button><button class="o">由尾至前搬動，避免資料被覆蓋</button></div></div>
+</div></section>
+
+<section id="E"><div class="sh"><b>E</b><h2>調動列表中的項目</h2></div><div class="sb">
+<div class="part">📘 解說</div><div class="know">把索引 P 的項目調到第一位：先用 <code>temp</code> 暫存它，P 前的項目逐一向後移，最後把 <code>temp</code> 放到索引 0。</div>
+<div class="part">🧠 知識重點</div>
+<table class="tbl"><tr><td>Python</td><td><pre>temp = the_list[P]
+for k in range(P, 0, -1):
+    the_list[k] = the_list[k-1]
+the_list[0] = temp</pre></td></tr></table>
+<div class="part">✏️ 互動練習</div>
+<div class="arr" data-arr="2A,3B,1C,4E,5A" data-name="show"></div>
+<div class="q" data-type="fill"><h4>E1　4E 班（索引 3）提早表演，調到最前</h4>
+<div class="code">temp = <input data-a="show[3]">
+for k in range(<input data-a="3" style="width:4em">, <input data-a="0" style="width:4em">, -1):
+    show[k] = show[<input data-a="k-1">]
+<input data-a="show[0]"> = temp</div></div>
+<div class="q" data-type="mc" data-a="3"><h4>E2　執行後 show 的內容是？</h4><div class="opts"><button class="o">["4E","3B","1C","2A","5A"]</button><button class="o">["2A","3B","1C","4E","5A"]</button><button class="o">["4E","4E","4E","4E","5A"]</button><button class="o">["4E","2A","3B","1C","5A"]</button></div></div>
+</div></section>
+
+<section id="F"><div class="sh"><b>+</b><h2>擴闊視野：列表內置函數</h2></div><div class="sb">
+<div class="part">🧠 知識重點</div>
+<pre>the_list = [12, 8, -6, 40, 23]
+sum(the_list)        # 77
+the_list.index(40)   # 3
+max(the_list)        # 40
+min(the_list)        # -6
+the_list.insert(2, 1234)  # 在索引 2 加入
+the_list.pop(2)      # 刪除索引 2</pre>
+<div class="part">✏️ 互動練習</div>
+<div class="q" data-type="drag"><h4>F1　拖放配對：nums = [5, 9, 2, 7] 的輸出</h4>
+<div class="bank"><span class="tk">23</span><span class="tk">9</span><span class="tk">2</span><span class="tk">1</span></div>
+<div class="code">sum(nums)       → <span class="slot" data-a="23"></span>
+max(nums)       → <span class="slot" data-a="9"></span>
+min(nums)       → <span class="slot" data-a="2"></span>
+nums.index(9)   → <span class="slot" data-a="1"></span></div></div>
+<div class="q" data-type="mc" data-a="0"><h4>F2　a = [1, 2, 3]，執行 a.insert(1, 99) 後？</h4><div class="opts"><button class="o">[1, 99, 2, 3]</button><button class="o">[99, 1, 2, 3]</button><button class="o">[1, 2, 99, 3]</button></div></div>
+</div></section>
+
+<section id="G"><div class="sh" style="background:var(--pink)"><b>★</b><h2>挑戰題：最長連勝紀錄</h2></div><div class="sb">
+<div class="part">📘 解說</div><div class="know">用 <code>count</code> 計算目前連勝；勝出 "W" 時加 1 並與最高紀錄 <code>winstreak</code> 比較；輸了 "L" 便把 <code>count</code> 重設為 0。</div>
+<div class="part">✏️ 互動練習</div>
+<div class="q" data-type="fill"><h4>G1　完成程式</h4>
+<div class="code">winlose = ["W","L","W","W","W","L","W","W","W","W","L","W","W"]
+winstreak = 0
+count = 0
+for i in range(0, len(winlose)):
+    if winlose[i] == "W":
+        count = <input data-a="count+1">
+        if count <input data-a=">" style="width:4em"> winstreak:
+            winstreak = <input data-a="count">
+    if winlose[i] == "L":
+        count = <input data-a="0" style="width:4em">
+print("The longest winning streak is", winstreak)</div></div>
+<div class="q" data-type="mc" data-a="2"><h4>G2　程式輸出的連勝數是？</h4><div class="opts"><button class="o">2</button><button class="o">3</button><button class="o">4</button><button class="o">9</button></div></div>
+</div></section>
+</main><footer>瑪利諾中學 電腦科／資訊及通訊科技科｜ICT 互動課件庫</footer>
+<script>
+const GOOD=["答對了！做得好 🎉","正確！你掌握得很好 👍","Excellent！繼續努力 🌟","完全正確 💯"];
+const TRY=["差少少，再試一次 💪","未正確，想一想再試 🤔","唔緊要，再嘗試吓！"];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const norm=s=>s.replace(/\s+/g,"").replace(/'/g,'"').toLowerCase();
+document.querySelectorAll(".arr").forEach(d=>{d.innerHTML=`<div style="min-width:auto;padding:6px 8px 0 0;font-family:Consolas">${d.dataset.name}</div>`+d.dataset.arr.split(",").map((v,i)=>`<div><div class="v">${isNaN(v)?'"'+v+'"':v}</div><div class="i">${i}</div></div>`).join("")});
+const qs=[...document.querySelectorAll(".q")],done=new Set();
+function prog(){document.getElementById("bar").style.width=done.size/qs.length*100+"%";document.getElementById("pt").textContent=`已完成 ${done.size} / ${qs.length} 題`}
+let fb=function(q,ok){const f=q.querySelector(".fb");f.className="fb "+(ok?"ok":"no");f.textContent=ok?pick(GOOD):pick(TRY);if(ok){done.add(q);prog()}};
+let drag=null;
+qs.forEach(q=>{const t=q.dataset.type;
+ const b=document.createElement("div");b.className="btns";
+ b.innerHTML=(t!=="mc"?'<button class="c">檢查答案</button>':'')+'<button class="a">顯示答案</button>'+(t!=="mc"?'<button class="r">重設</button>':'');
+ q.append(b);const f=document.createElement("div");f.className="fb";q.append(f);const an=document.createElement("div");an.className="ans";q.append(an);
+ if(t==="fill"){const ins=[...q.querySelectorAll("input")];an.innerHTML="答案："+ins.map(i=>"<code>"+i.dataset.a.split("|")[0].replace(/</g,"&lt;")+"</code>").join("　");
+  ins.forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")q.querySelector(".c").click()}));
+  q.querySelector(".c").onclick=()=>{let all=true;ins.forEach(i=>{const ok=i.dataset.a.split("|").some(a=>norm(a)===norm(i.value));i.className=ok?"ok":"no";if(!ok)all=false});fb(q,all)};
+  q.querySelector(".r").onclick=()=>{ins.forEach(i=>{i.value="";i.className=""});f.textContent=""}}
+ if(t==="mc"){const os=[...q.querySelectorAll(".o")],a=+q.dataset.a;an.innerHTML="答案："+os[a].textContent;
+  os.forEach((o,k)=>o.onclick=()=>{os.forEach(x=>x.classList.remove("no"));if(k===a){o.classList.add("ok");fb(q,true)}else{o.classList.add("no");fb(q,false)}})}
+ if(t==="drag"){const bank=q.querySelector(".bank"),slots=[...q.querySelectorAll(".slot")];an.innerHTML="答案："+slots.map(s=>"<code>"+s.dataset.a.replace(/</g,"&lt;")+"</code>").join("　");
+  q.querySelectorAll(".tk").forEach(k=>{k.draggable=true;k.ondragstart=()=>drag=k;
+   k.onclick=()=>{const e=slots.find(s=>!s.children.length);if(k.parentElement===bank&&e)e.append(k);else bank.append(k)}});
+  [bank,...slots].forEach(z=>{z.ondragover=e=>e.preventDefault();z.ondrop=e=>{e.preventDefault();if(!drag||!q.contains(drag))return;if(z!==bank&&z.children.length)bank.append(z.children[0]);z.append(drag)}});
+  q.querySelector(".c").onclick=()=>{let all=true;slots.forEach(s=>{const ok=s.textContent.trim()===s.dataset.a;s.classList.toggle("ok",ok);s.classList.toggle("no",!ok);if(!ok)all=false});fb(q,all)};
+  q.querySelector(".r").onclick=()=>{slots.forEach(s=>{s.className="slot";[...s.children].forEach(c=>bank.append(c))});f.textContent=""}}
+ q.querySelector(".a").onclick=()=>an.classList.toggle("show");
+});prog();
+
+document.getElementById("qn").textContent=qs.length;
+function party(){for(let i=0;i<14;i++){const e=document.createElement("span");e.className="confetti";e.textContent=pick(["🎉","⭐","✨","💯","🐍"]);e.style.left=Math.random()*100+"vw";e.style.animationDelay=Math.random()*.4+"s";document.body.append(e);setTimeout(()=>e.remove(),2200)}}
+const _fb=fb;fb=function(q,ok){_fb(q,ok);if(ok){q.classList.add("done");party()}};
+const secs=[...document.querySelectorAll("section")],links=[...document.querySelectorAll("nav a")];
+addEventListener("scroll",()=>{let c=0;secs.forEach((s,i)=>{if(s.getBoundingClientRect().top<140)c=i});links.forEach((l,i)=>l.classList.toggle("on",i===c))});
+</script></body></html>
