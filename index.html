@@ -550,13 +550,32 @@ function setBusy(b){
   if (!b && !store.ok()) F.remember.disabled = true;
 }
 
-function readBase64(file){
+function readBase64(blob){
   return new Promise((ok, fail) => {
     const r = new FileReader();
     r.onload = () => ok(String(r.result).replace(/^data:[^,]*,/, ""));
     r.onerror = () => fail(new Error("未能讀取檔案，請重新選擇。"));
-    r.readAsDataURL(file);
+    r.readAsDataURL(blob);
   });
+}
+
+/**
+ * 修正「AI 網頁工具」匯出的單頁程式：它們只在網址是網站根目錄「/」時顯示主頁，
+ * 放在 F3/xxx.html 這類網址會顯示自己的「404 Page Not Found」。
+ * 做法：把「找不到路徑」時的後備頁面改為主頁。檔案不符合這個格式就原封不動。
+ */
+function fixSpaRouting(html){
+  const re = /(path:"\/",component:([\w$]+)\}\)(?:,[\w$.]+\([\w$]+,\{(?:"data-loc":"[^"]*",)?path:"[^"]*",component:[\w$]+\}\))*,[\w$.]+\([\w$]+,\{(?:"data-loc":"[^"]*",)?)component:([\w$]+)\}\)/;
+  const m = re.exec(html);
+  if (!m || m[2] === m[3]) return { html, fixed: false };
+  return { html: html.replace(m[0], m[1] + "component:" + m[2] + "})"), fixed: true };
+}
+
+async function prepareFile(file){
+  const text = await file.text();
+  const r = fixSpaRouting(text);
+  const blob = r.fixed ? new Blob([r.html], { type: "text/html" }) : file;
+  return { content: await readBase64(blob), fixed: r.fixed };
 }
 
 async function api(method, params, body){
@@ -603,7 +622,7 @@ async function startUpload(overwrite){
     const f = F.file.files[0];
     if (!pending || pending.file !== f){
       showProgress(0);
-      pending = { file: f, content: await readBase64(f) };
+      pending = { file: f, ...(await prepareFile(f)) };
     }
     const payload = {
       grade: F.grade.value, unit: getUnit(), topic: F.topic.value.trim(), title: F.title.value.trim(),
@@ -627,10 +646,12 @@ async function startUpload(overwrite){
     else store.del(K.cred);
     showProgress(3);
     await load();
+    const wasFixed = pending && pending.fixed;
     const stamp = Date.now();
     const openUrl = r.url + "?v=" + stamp;
     showStatus("ok", r.updated ? "✔ 已更新課件" : "✔ 上傳成功",
-      `<div id="liveMsg">⏳ 網站正在發佈這個課件（通常 1 分鐘內），完成後下面會出現「打開課件」按鈕，不用重新整理。</div>
+      `${wasFixed ? `<div style="margin-bottom:6px">🔧 這個檔案由 AI 網頁工具製作，放在網站上原本會顯示「404」，系統已自動修正。</div>` : ""}
+       <div id="liveMsg">⏳ 網站正在發佈這個課件（通常 1 分鐘內），完成後下面會出現「打開課件」按鈕，不用重新整理。</div>
        <div class="actions" style="margin-top:10px;justify-content:flex-start">
          <a class="btn" id="openNew" href="${esc(openUrl)}" target="_blank" rel="noopener" hidden>▶ 打開課件</a>
          <button class="btn ghost" type="button" id="againBtn">再上傳一個</button>
