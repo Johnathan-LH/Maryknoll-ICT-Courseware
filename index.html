@@ -237,13 +237,11 @@ dialog:not([open]){display:none}
         <input id="fFile" type="file" accept=".html,.htm,text/html" required>
       </div>
       <div class="field">
-        <span class="fl">課件名稱<span class="req">自動取自檔案名稱</span></span>
+        <span class="fl">課件名稱<span class="req">自動使用檔案名稱</span></span>
         <div class="titlerow">
-          <b id="titleShow">—（選擇檔案後自動填入）</b>
-          <button class="btn ghost small" type="button" id="renameBtn" hidden>✎ 改名</button>
+          <b id="titleShow">—（選擇檔案後自動顯示）</b>
         </div>
-        <label for="fTitle" class="sr">課件名稱</label>
-        <input id="fTitle" maxlength="80" placeholder="輸入新的課件名稱" hidden>
+        <span class="hint">課件名稱＝HTML 檔案名稱。想用其他名稱，請先在電腦把檔案改名再選擇。</span>
         <span class="hint">將儲存為：</span>
         <span class="pathbox" id="pathPreview">—</span>
       </div>
@@ -449,7 +447,7 @@ async function load(){
    ============================================================ */
 const dlg = $("#dlg"), form = $("#upForm"), statusBox = $("#status");
 const F = { grade: $("#fGrade"), unitSel: $("#fUnitSel"), unitTxt: $("#fUnitTxt"), topic: $("#fTopic"), file: $("#fFile"),
-  title: $("#fTitle"), name: $("#fName"), pw: $("#fPw"), remember: $("#fRemember") };
+  name: $("#fName"), pw: $("#fPw"), remember: $("#fRemember") };
 let busy = false, pending = null;
 
 let inIframe = true;
@@ -475,14 +473,16 @@ const folderOf = g => "F" + (CONFIG.grades.indexOf(g) + 1);
 const isDse = g => CONFIG.dseGrades.includes(g);
 const getUnit = () => (isDse(F.grade.value) ? F.unitSel.value : F.unitTxt.value).trim();
 
+/** 課件名稱一律取自目前所選的 HTML 檔案名稱（去掉 .html） */
+function fileTitle(){
+  const f = F.file.files && F.file.files[0];
+  return f ? f.name.replace(/\.html?$/i, "").replace(/\s+/g, " ").trim().slice(0, 80) : "";
+}
 function updatePath(){
-  const t = safeName(F.title.value);
-  $("#titleShow").textContent = F.title.value.trim() || "—（選擇檔案後自動填入）";
-  $("#renameBtn").hidden = !F.title.value.trim() || !F.title.hidden;
+  const title = fileTitle(), t = safeName(title);
+  $("#titleShow").textContent = title || "—（選擇檔案後自動顯示）";
   $("#pathPreview").textContent = F.grade.value && t ? `${folderOf(F.grade.value)}/${t}.html` : "—（請先選年級及選擇檔案）";
 }
-function resetTitle(){ F.title.value = ""; F.title.hidden = true; updatePath(); }
-$("#renameBtn").addEventListener("click", () => { F.title.hidden = false; updatePath(); F.title.focus(); F.title.select(); });
 function updateGrade(){
   const g = F.grade.value, dse = isDse(g) || !g;
   F.unitSel.hidden = !dse; F.unitTxt.hidden = dse;
@@ -493,16 +493,12 @@ function updateGrade(){
   updatePath();
 }
 F.grade.addEventListener("change", updateGrade);
-F.title.addEventListener("input", () => { updatePath(); pending = null; });
 
 F.file.addEventListener("change", async () => {
   pending = null; clearStatus();
   const f = F.file.files[0]; if (!f) return;
   const err = checkFile(f);
   if (err){ showStatus("err", "檔案不符合要求", err); return; }
-  // 課件名稱直接用檔案名稱（去掉 .html），不用人手輸入
-  F.title.value = f.name.replace(/\.html?$/i, "").replace(/\s+/g, " ").trim().slice(0, 80);
-  F.title.hidden = true;
   updatePath();
 });
 
@@ -602,8 +598,7 @@ function validate(){
   const f = F.file.files[0];
   if (!f) return "請選擇 HTML 檔案。";
   const fe = checkFile(f); if (fe) return fe;
-  if (!F.title.value.trim()) return "請填寫課件名稱。";
-  if (!safeName(F.title.value)) return "課件名稱不可只有符號，請加入文字。";
+  if (!safeName(fileTitle())) return "檔案名稱不可只有符號，請先在電腦把檔案改名（例如「網絡拓撲.html」）再選擇。";
   if (!F.pw.value) return "請輸入教師密碼。";
   return "";
 }
@@ -625,7 +620,7 @@ async function startUpload(overwrite){
       pending = { file: f, ...(await prepareFile(f)) };
     }
     const payload = {
-      grade: F.grade.value, unit: getUnit(), topic: F.topic.value.trim(), title: F.title.value.trim(),
+      grade: F.grade.value, unit: getUnit(), topic: F.topic.value.trim(), title: fileTitle(),
       desc: "", tags: "", uploader: F.name.value.trim() || "未署名", password: F.pw.value,
       filename: f.name, content: pending.content, overwrite
     };
@@ -657,7 +652,7 @@ async function startUpload(overwrite){
          <button class="btn ghost" type="button" id="againBtn">再上傳一個</button>
        </div>`);
     pending = null;
-    F.file.value = ""; resetTitle();
+    F.file.value = ""; updatePath();
     $("#againBtn").addEventListener("click", () => { clearStatus(); F.file.focus(); });
     waitUntilLive(r.url, stamp, openUrl);
   } catch (err){
@@ -704,11 +699,11 @@ function askOverwrite(path, uploader){
     `<div>檔案「${esc(path)}」已經存在${uploader ? `（原上傳者：<b>${esc(uploader)}</b>）` : ""}。</div>
      <div>選擇「是，更新」會以你的檔案取代舊版本，並更新試算表原有那一行。</div>
      <div class="actions" style="margin-top:10px">
-       <button class="btn ghost ask-btn" type="button" id="noBtn">不要，改名</button>
+       <button class="btn ghost ask-btn" type="button" id="noBtn">不要，我會改檔名</button>
        <button class="btn warn ask-btn" type="button" id="yesBtn">是，更新</button>
      </div>`);
   $("#yesBtn").addEventListener("click", () => startUpload(true));
-  $("#noBtn").addEventListener("click", () => { clearStatus(); F.title.hidden = false; updatePath(); F.title.focus(); F.title.select(); });
+  $("#noBtn").addEventListener("click", () => { clearStatus(); F.file.value = ""; updatePath(); showStatus("ask", "請先改檔案名稱", "<div>請在電腦把 HTML 檔案改一個新名稱，然後重新選擇檔案再上傳。</div>"); });
 }
 
 load().then(() => { if (new URLSearchParams(location.search).get("upload") === "1") openUpload(); });
