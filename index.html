@@ -120,6 +120,8 @@ dialog:not([open]){display:none}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--c);outline:none}
 .hint{font-size:13px;color:var(--muted)}
 .pathbox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:var(--bg);border-radius:10px;padding:6px 10px;overflow-wrap:anywhere}
+.titlerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:17px;overflow-wrap:anywhere}
+.btn.small{font-size:14px;padding:4px 14px;min-height:36px}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
 .check input{width:22px;height:22px;margin-top:2px;flex:0 0 auto}
 .fallback{border:2px dashed var(--muted);border-radius:14px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
@@ -132,6 +134,7 @@ dialog:not([open]){display:none}
 .status.ask{border-color:#9a6a00;background:#fff7dc}
 .status strong{display:block;font-size:16px;margin-bottom:4px}
 .status a{color:var(--c-deep);font-weight:800;overflow-wrap:anywhere}
+.status a.btn{color:#fff}
 .steps{list-style:none;margin:6px 0 0;padding:0;font-size:14px}
 .steps li::before{content:"○ ";font-weight:800}
 .steps li.done::before{content:"✔ "}
@@ -234,9 +237,14 @@ dialog:not([open]){display:none}
         <input id="fFile" type="file" accept=".html,.htm,text/html" required>
       </div>
       <div class="field">
-        <label for="fTitle">課件名稱<span class="req">必填 · 亦用作檔名</span></label>
-        <input id="fTitle" maxlength="80" placeholder="例如：網絡拓撲互動演示" required>
-        <span class="hint">選擇檔案後會自動填入，可再修改。將儲存為：</span>
+        <span class="fl">課件名稱<span class="req">自動取自檔案名稱</span></span>
+        <div class="titlerow">
+          <b id="titleShow">—（選擇檔案後自動填入）</b>
+          <button class="btn ghost small" type="button" id="renameBtn" hidden>✎ 改名</button>
+        </div>
+        <label for="fTitle" class="sr">課件名稱</label>
+        <input id="fTitle" maxlength="80" placeholder="輸入新的課件名稱" hidden>
+        <span class="hint">將儲存為：</span>
         <span class="pathbox" id="pathPreview">—</span>
       </div>
       <div class="grid2">
@@ -395,7 +403,7 @@ function card(c){
     ${c.desc ? `<span class="d">${esc(c.desc)}</span>` : ""}
     ${c.tags.length ? `<span class="tags">${c.tags.map(x => `<span class="tag">#${esc(x)}</span>`).join("")}</span>` : ""}
     <span class="meta">${c.uploader ? `<span>👤 ${esc(c.uploader)}</span>` : ""}${date ? `<span>📅 ${esc(date)}</span>` : ""}</span>
-    ${/^https?:\/\//i.test(c.url) ? `<a class="btn" href="${esc(c.url)}" target="_blank" rel="noopener">▶ 開始學習</a>` : `<span class="nolink">（未有連結）</span>`}
+    ${/^https?:\/\//i.test(c.url) ? `<a class="btn" href="${esc(withVersion(c.url, c.updated))}" target="_blank" rel="noopener">▶ 開始學習</a>` : `<span class="nolink">（未有連結）</span>`}
   </article>`;
 }
 
@@ -469,8 +477,12 @@ const getUnit = () => (isDse(F.grade.value) ? F.unitSel.value : F.unitTxt.value)
 
 function updatePath(){
   const t = safeName(F.title.value);
-  $("#pathPreview").textContent = F.grade.value && t ? `${folderOf(F.grade.value)}/${t}.html` : "—（請先選年級及填課件名稱）";
+  $("#titleShow").textContent = F.title.value.trim() || "—（選擇檔案後自動填入）";
+  $("#renameBtn").hidden = !F.title.value.trim() || !F.title.hidden;
+  $("#pathPreview").textContent = F.grade.value && t ? `${folderOf(F.grade.value)}/${t}.html` : "—（請先選年級及選擇檔案）";
 }
+function resetTitle(){ F.title.value = ""; F.title.hidden = true; updatePath(); }
+$("#renameBtn").addEventListener("click", () => { F.title.hidden = false; updatePath(); F.title.focus(); F.title.select(); });
 function updateGrade(){
   const g = F.grade.value, dse = isDse(g) || !g;
   F.unitSel.hidden = !dse; F.unitTxt.hidden = dse;
@@ -488,15 +500,10 @@ F.file.addEventListener("change", async () => {
   const f = F.file.files[0]; if (!f) return;
   const err = checkFile(f);
   if (err){ showStatus("err", "檔案不符合要求", err); return; }
-  if (!F.title.value.trim()){
-    try {
-      const head = await f.slice(0, 65536).text();
-      const m = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(head);
-      if (m){ const ta = document.createElement("textarea"); ta.innerHTML = m[1]; F.title.value = ta.value.replace(/\s+/g, " ").trim().slice(0, 80); }
-      else F.title.value = f.name.replace(/\.html?$/i, "");
-    } catch (e) { F.title.value = f.name.replace(/\.html?$/i, ""); }
-    updatePath();
-  }
+  // 課件名稱直接用檔案名稱（去掉 .html），不用人手輸入
+  F.title.value = f.name.replace(/\.html?$/i, "").replace(/\s+/g, " ").trim().slice(0, 80);
+  F.title.hidden = true;
+  updatePath();
 });
 
 function checkFile(f){
@@ -620,13 +627,18 @@ async function startUpload(overwrite){
     else store.del(K.cred);
     showProgress(3);
     await load();
+    const stamp = Date.now();
+    const openUrl = r.url + "?v=" + stamp;
     showStatus("ok", r.updated ? "✔ 已更新課件" : "✔ 上傳成功",
-      `<div>課件網址：<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></div>
-       <div style="margin-top:6px">網站需要 <b>1–3 分鐘</b> 處理。如果打開網址顯示「404」，請稍等一會，再重新整理便會出現。</div>
-       <div class="actions" style="margin-top:10px"><button class="btn ghost" type="button" id="againBtn">再上傳一個</button></div>`);
+      `<div id="liveMsg">⏳ 網站正在發佈這個課件（通常 1 分鐘內），完成後下面會出現「打開課件」按鈕，不用重新整理。</div>
+       <div class="actions" style="margin-top:10px;justify-content:flex-start">
+         <a class="btn" id="openNew" href="${esc(openUrl)}" target="_blank" rel="noopener" hidden>▶ 打開課件</a>
+         <button class="btn ghost" type="button" id="againBtn">再上傳一個</button>
+       </div>`);
     pending = null;
-    F.file.value = ""; F.title.value = ""; updatePath();
+    F.file.value = ""; resetTitle();
     $("#againBtn").addEventListener("click", () => { clearStatus(); F.file.focus(); });
+    waitUntilLive(r.url, stamp, openUrl);
   } catch (err){
     showStatus("err", "上傳失敗", `<div>${esc(err.message)}</div>`);
   } finally {
@@ -634,6 +646,36 @@ async function startUpload(overwrite){
     if (statusBox.querySelector("#againBtn")) statusBox.querySelector("#againBtn").disabled = false;
     statusBox.querySelectorAll(".ask-btn").forEach(b => b.disabled = false);
   }
+}
+
+/** 等 GitHub Pages 發佈完成才顯示「打開課件」，避免太早打開看到 404 */
+async function waitUntilLive(url, stamp, openUrl){
+  const start = Date.now();
+  while (Date.now() - start < 4 * 60000){
+    await new Promise(r => setTimeout(r, 5000));
+    if (!document.getElementById("liveMsg")) return;          // 已關閉或開始另一次上傳
+    try {
+      const res = await fetch(url + "?check=" + stamp + "-" + Date.now(), { method: "HEAD", cache: "no-store" });
+      if (res.ok) break;
+    } catch (e) {}
+    const s = Math.round((Date.now() - start) / 1000);
+    const m = document.getElementById("liveMsg");
+    if (m) m.textContent = `⏳ 網站正在發佈這個課件……（已等 ${s} 秒，通常 1 分鐘內）`;
+  }
+  const m = document.getElementById("liveMsg"), a = document.getElementById("openNew");
+  if (!m || !a) return;
+  const ok = Date.now() - start < 4 * 60000;
+  m.innerHTML = ok
+    ? `✔ 已發佈，可以打開了。課件網址：<a href="${esc(openUrl)}" target="_blank" rel="noopener">${esc(url)}</a>`
+    : `網站發佈比平時慢，請稍後按下面按鈕再試。課件網址：<a href="${esc(openUrl)}" target="_blank" rel="noopener">${esc(url)}</a>`;
+  a.hidden = false;
+}
+
+/** 課件連結加上更新時間，避免瀏覽器沿用舊版本或之前的 404 */
+function withVersion(url, updated){
+  const v = String(updated || "").replace(/\D/g, "");
+  if (!v || !url.startsWith(CONFIG.BASE_URL)) return url;
+  return url + (url.includes("?") ? "&" : "?") + "v=" + v;
 }
 
 function askOverwrite(path, uploader){
@@ -645,7 +687,7 @@ function askOverwrite(path, uploader){
        <button class="btn warn ask-btn" type="button" id="yesBtn">是，更新</button>
      </div>`);
   $("#yesBtn").addEventListener("click", () => startUpload(true));
-  $("#noBtn").addEventListener("click", () => { clearStatus(); F.title.focus(); F.title.select(); });
+  $("#noBtn").addEventListener("click", () => { clearStatus(); F.title.hidden = false; updatePath(); F.title.focus(); F.title.select(); });
 }
 
 load().then(() => { if (new URLSearchParams(location.search).get("upload") === "1") openUpload(); });
