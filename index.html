@@ -44,6 +44,11 @@ h1{font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1.15;margin:10px 0
 .stat.offline{color:var(--ink);font-size:13px;border:2px dashed var(--muted)}
 .stat b{font-family:var(--num);font-size:18px;color:var(--c-deep);margin-right:2px;font-variant-numeric:tabular-nums}
 .floaty{position:absolute;font-family:var(--num);font-weight:800;opacity:.3;pointer-events:none;user-select:none}
+/* 教師模式的隱蔽入口：外觀與其他裝飾符號一樣 */
+.secret{z-index:2;pointer-events:auto;border:0;background:none;padding:4px 6px;margin:0;cursor:default;line-height:1}
+.secret:focus-visible{opacity:.9}
+.stat.teacher{border:2px solid var(--ink);display:inline-flex;gap:8px;align-items:center}
+.stat.teacher button{border:0;background:var(--ink);color:#fff;border-radius:99px;font-size:13px;font-weight:700;padding:2px 10px;cursor:pointer}
 .side{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:12px;flex:0 0 auto}
 .bot{width:170px;max-width:40vw;animation:bob 3.2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px) rotate(-2deg)}}
@@ -164,7 +169,7 @@ dialog:not([open]){display:none}
 
 <div class="wrap" id="app">
   <section class="hero">
-    <span class="floaty" style="left:4%;top:8%;font-size:32px;color:var(--grape)">&lt;/&gt;</span>
+    <button class="floaty secret" id="teacherKey" type="button" aria-label="教師登入" title="" style="left:3%;top:5%;font-size:32px;color:var(--grape)">&lt;/&gt;</button>
     <span class="floaty" style="left:42%;top:6%;font-size:26px;color:#0d6f97">01</span>
     <span class="floaty" style="left:56%;bottom:8%;font-size:28px;color:var(--pink)">{ }</span>
     <span class="floaty" style="left:30%;bottom:4%;font-size:24px;color:#178f5c">if</span>
@@ -272,6 +277,29 @@ dialog:not([open]){display:none}
       <div class="actions">
         <button class="btn ghost" type="button" id="cancelBtn">取消</button>
         <button class="btn" type="submit" id="submitBtn">⬆ 上傳</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============ 教師登入 ============ -->
+<dialog id="tDlg" aria-labelledby="tTitle">
+  <form id="tForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="tTitle">🔑 教師模式</h2>
+      <button class="x" type="button" id="tClose" aria-label="關閉">✕</button>
+    </div>
+    <div class="dlg-body">
+      <div>輸入教師密碼後，課件卡片會顯示「編輯」和「刪除」按鈕。</div>
+      <div class="field">
+        <label for="tPw">教師密碼</label>
+        <input id="tPw" type="password" autocomplete="current-password">
+      </div>
+      <div class="hint">只在這個瀏覽器分頁有效；關閉分頁或按「登出」即回到學生模式。課室電腦用完請登出。</div>
+      <div class="status" id="tStatus" role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="tCancel">取消</button>
+        <button class="btn" type="submit" id="tGo">🔓 進入教師模式</button>
       </div>
     </div>
   </form>
@@ -441,7 +469,8 @@ function render(){
     $("#list").innerHTML = `<div class="empty"><span class="big">📭</span>暫時未有課件。<br>按右上角「上傳課件」加入第一個課件吧！</div>`;
     return;
   }
-  $("#stats").innerHTML = `<span class="stat"><b>${countReal(COURSES)}</b> 個課件</span><span class="stat"><b>${new Set(COURSES.map(c => c.grade + "|" + c.topic)).size}</b> 個課題</span>`;
+  $("#stats").innerHTML = `<span class="stat"><b>${countReal(COURSES)}</b> 個課件</span><span class="stat"><b>${new Set(COURSES.map(c => c.grade + "|" + c.topic)).size}</b> 個課題</span>`
+    + (TEACHER ? `<span class="stat teacher">🔓 教師模式<button type="button" id="teacherOut">登出</button></span>` : "");
 
   const searched = COURSES.filter(matchQ);
   const allGrades = [...new Set([...CONFIG.grades, ...COURSES.map(c => c.grade)])].sort((a, b) => gradeOrder(a) - gradeOrder(b));
@@ -486,8 +515,11 @@ function render(){
 
 let CAN_DELETE = false;
 let CAN_EDIT = false;
-const editBtn = c => CAN_EDIT ? `<button class="btn edit" type="button" data-edit="${COURSES.indexOf(c)}" aria-label="編輯 ${esc(c.title || c.topic)}">✎ 編輯</button>` : "";
-const delBtn = c => CAN_DELETE ? `<button class="btn del" type="button" data-del="${COURSES.indexOf(c)}" aria-label="刪除 ${esc(c.title || c.topic)}">🗑 刪除</button>` : "";
+/* 教師模式：只存在這個分頁（sessionStorage）；不能存取時只保留在記憶體 */
+let TEACHER = false, TEACHER_PW = "";
+try { TEACHER_PW = sessionStorage.getItem("ictcw-teacher") || ""; TEACHER = !!TEACHER_PW; } catch (e) {}
+const editBtn = c => TEACHER && CAN_EDIT ? `<button class="btn edit" type="button" data-edit="${COURSES.indexOf(c)}" aria-label="編輯 ${esc(c.title || c.topic)}">✎ 編輯</button>` : "";
+const delBtn = c => TEACHER && CAN_DELETE ? `<button class="btn del" type="button" data-del="${COURSES.indexOf(c)}" aria-label="刪除 ${esc(c.title || c.topic)}">🗑 刪除</button>` : "";
 
 function card(c){
   if (!c.title){
@@ -854,6 +886,55 @@ function askOverwrite(path, uploader){
 }
 
 /* ============================================================
+   教師模式（左上角「</>」隱蔽入口）
+   ============================================================ */
+const tDlg = $("#tDlg"), tStatus = $("#tStatus");
+let tBusy = false;
+function tShow(kind, title, html){ tStatus.className = "status show " + kind; tStatus.innerHTML = `<strong>${esc(title)}</strong>${html || ""}`; }
+function setTeacher(pw){
+  TEACHER = !!pw; TEACHER_PW = pw || "";
+  try { if (pw) sessionStorage.setItem("ictcw-teacher", pw); else sessionStorage.removeItem("ictcw-teacher"); } catch (e) {}
+  shownKey = ""; if (COURSES.length) render();
+}
+$("#teacherKey").addEventListener("click", () => {
+  if (TEACHER) return;
+  tStatus.className = "status"; tStatus.innerHTML = ""; $("#tPw").value = "";
+  if (typeof tDlg.showModal === "function"){ try { tDlg.showModal(); } catch (e) { tDlg.setAttribute("open", ""); } }
+  else tDlg.setAttribute("open", "");
+  $("#tPw").focus();
+});
+const closeT = () => { if (tBusy) return; if (typeof tDlg.close === "function") tDlg.close(); else tDlg.removeAttribute("open"); };
+$("#tClose").addEventListener("click", closeT);
+$("#tCancel").addEventListener("click", closeT);
+tDlg.addEventListener("cancel", e => { if (tBusy) e.preventDefault(); });
+$("#stats").addEventListener("click", e => { if (e.target.id === "teacherOut") setTeacher(""); });
+$("#tForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (tBusy) return;
+  const pw = $("#tPw").value;
+  if (!pw){ tShow("err", "請輸入教師密碼。"); return; }
+  tBusy = true;
+  $("#tForm").querySelectorAll("input,button").forEach(el => el.disabled = true);
+  tShow("busy", "核對密碼中，請稍候…", `<div class="bar"><i></i></div>`);
+  try {
+    // 由 Apps Script 核對密碼（密碼不在網頁內）。新版後端回傳 ok；舊版後端密碼正確時回傳 BAD_INPUT（未有上傳資料）。
+    const r = await api("POST", null, { action: "verify", password: pw });
+    if (r.ok || r.code === "BAD_INPUT"){
+      setTeacher(pw);
+      tBusy = false; closeT();
+      return;
+    }
+    tShow("err", "未能進入教師模式", `<div>${esc(r.message || "密碼不正確。")}</div>`);
+    $("#tPw").value = "";
+  } catch (err){
+    tShow("err", "未能進入教師模式", `<div>${esc(err.message)}</div>`);
+  } finally {
+    tBusy = false;
+    $("#tForm").querySelectorAll("input,button").forEach(el => el.disabled = false);
+  }
+});
+
+/* ============================================================
    編輯
    ============================================================ */
 const editDlg = $("#editDlg"), editStatus = $("#editStatus");
@@ -895,7 +976,7 @@ function openEdit(c){
   let cred = null;
   try { cred = JSON.parse(store.get(K.cred) || "null"); } catch (e) {}
   E.name.value = (cred && cred.name) || F.name.value || "";
-  E.pw.value = (cred && cred.pw) || F.pw.value || "";
+  E.pw.value = TEACHER_PW || (cred && cred.pw) || F.pw.value || "";
   editRefresh();
   if (typeof editDlg.showModal === "function"){ try { editDlg.showModal(); } catch (e) { editDlg.setAttribute("open", ""); } }
   else editDlg.setAttribute("open", "");
@@ -976,7 +1057,7 @@ function openDelete(c){
   let cred = null;
   try { cred = JSON.parse(store.get(K.cred) || "null"); } catch (e) {}
   $("#dName").value = (cred && cred.name) || F.name.value || "";
-  $("#dPw").value = (cred && cred.pw) || F.pw.value || "";
+  $("#dPw").value = TEACHER_PW || (cred && cred.pw) || F.pw.value || "";
   if (typeof delDlg.showModal === "function"){ try { delDlg.showModal(); } catch (e) { delDlg.setAttribute("open", ""); } }
   else delDlg.setAttribute("open", "");
   $("#dPw").focus();

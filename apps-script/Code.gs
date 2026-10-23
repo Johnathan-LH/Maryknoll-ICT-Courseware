@@ -73,6 +73,9 @@ function doPost(e) {
     }
     clearFails_();
 
+    // 教師模式登入：只核對密碼
+    if (d.action === 'verify') return json_({ ok: true });
+
     // 刪除課件（同一個教師密碼）
     if (d.action === 'delete') {
       if (!lock.tryLock(30000)) return json_({ ok: false, code: 'BUSY', message: '系統忙碌中，請稍後再試。' });
