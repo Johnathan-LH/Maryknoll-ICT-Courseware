@@ -34,7 +34,7 @@ function doGet(e) {
   try {
     const p = (e && e.parameter) || {};
     const action = p.action || 'list';
-    if (action === 'list') return json_({ ok: true, canDelete: true, courses: readCourses_() });
+    if (action === 'list') return json_({ ok: true, canDelete: true, canEdit: true, courses: readCourses_() });
     if (action === 'exists') {
       const grade = String(p.grade || '');
       const title = safeName_(p.title);
@@ -77,6 +77,12 @@ function doPost(e) {
     if (d.action === 'delete') {
       if (!lock.tryLock(30000)) return json_({ ok: false, code: 'BUSY', message: '系統忙碌中，請稍後再試。' });
       return deleteCourse_(d, token);
+    }
+
+    // 編輯課件（同一個教師密碼）
+    if (d.action === 'edit') {
+      if (!lock.tryLock(30000)) return json_({ ok: false, code: 'BUSY', message: '系統忙碌中，請稍後再試。' });
+      return editCourse_(d, token);
     }
 
     // 2. 欄位
@@ -256,6 +262,111 @@ function deleteCourse_(d, token) {
 }
 
 /**
+ * 編輯課件：按原來的 年級＋課題＋課件名稱＋連結 找出那一行，改為新資料。
+ * - 可改：年級、單元、課題、課件名稱、簡介、標籤；可選擇上載新 HTML 取代原檔。
+ * - 年級或課件名稱改變 → 檔案移到新路徑（F{年級}/{課件名稱}.html），舊檔案刪除，網址隨之改變。
+ * - 「上傳者」保留原來的人；「更新日期」改為現在。
+ */
+function editCourse_(d, token) {
+  const sh = sheet_();
+  const idx = headerIndex_(sh);
+  const last = sh.getLastRow();
+  const notFound = json_({ ok: false, code: 'NOT_FOUND', message: '找不到這個課件，可能已被修改或刪除。請重新整理網頁。' });
+  if (last < 2) return notFound;
+  const rows = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getDisplayValues();
+  const g = function (r, h) { return idx[h] >= 0 ? String(r[idx[h]] || '').trim() : ''; };
+  const o = d.original || {};
+  const was = { grade: String(o.grade || '').trim(), topic: String(o.topic || '').trim(), title: String(o.title || '').trim(), link: normLink_(o.link) };
+  let hit = -1;
+  for (let i = 0; i < rows.length; i++) {
+    if (g(rows[i], '年級') === was.grade && g(rows[i], '課題') === was.topic &&
+        g(rows[i], '課件名稱') === was.title && normLink_(g(rows[i], '連結')) === was.link) { hit = i; break; }
+  }
+  if (hit < 0) return notFound;
+
+  // 新資料
+  const grade = String(d.grade || '').trim();
+  const unit = clean_(d.unit, 60);
+  const topic = clean_(d.topic, 60);
+  const titleRaw = clean_(d.title, 80);
+  const title = safeName_(titleRaw);
+  const who = clean_(d.uploader, 40) || '未署名';
+  if (CFG.GRADES.indexOf(grade) < 0) return bad_('請選擇年級。');
+  if (!unit) return bad_('請填寫單元。');
+  if (!topic) return bad_('請填寫課題。');
+
+  // 新檔案（可選）
+  let bytes = null;
+  const hasFile = !!d.content;
+  if (hasFile) {
+    if (!/\.html?$/i.test(String(d.filename || ''))) return bad_('只接受 .html 或 .htm 檔案。');
+    try { bytes = Utilities.base64Decode(String(d.content).replace(/^data:[^,]*,/, '').replace(/\s/g, '')); }
+    catch (x) { return bad_('檔案內容無法解讀，請重新選擇檔案。'); }
+    if (bytes.length === 0) return bad_('檔案是空白的。');
+    if (bytes.length > CFG.MAX_BYTES) return bad_('檔案太大（' + (bytes.length / 1048576).toFixed(1) + 'MB），上限為 5MB。');
+  }
+
+  const oldLink = was.link;
+  const isRepo = function (l) { return /^F[1-6]\/[^\/]+\.html?$/i.test(l); };
+  const usedByOther = function (l) {
+    return rows.some(function (r, i) { return i !== hit && normLink_(g(r, '連結')).toLowerCase() === l.toLowerCase(); });
+  };
+  let newLink = oldLink, moved = false;
+
+  if (/^https?:\/\//i.test(oldLink)) {
+    if (hasFile) return bad_('這個課件連結到其他網站，不能在這裏更換檔案。');
+  } else if (isRepo(oldLink) || hasFile) {
+    if (!title) return bad_('課件名稱不可留空，亦不可只有符號。');
+    newLink = pathFor_(grade, title);
+    const samePath = newLink === oldLink;
+    if (!samePath && (usedByOther(newLink) || githubSha_(newLink, token))) {
+      return json_({ ok: false, code: 'EXISTS', message: '「' + newLink + '」已經有另一個課件，請改用其他課件名稱。' });
+    }
+    const oldSha = oldLink ? githubSha_(oldLink, token) : '';
+    if (!bytes && !samePath && oldSha) bytes = githubBlob_(oldSha, token);    // 只是移動：沿用原檔內容
+    if (bytes) {
+      const note = (hasFile ? '更換檔案' : '') + (!samePath && oldLink ? (hasFile ? '及' : '') + '移至 ' + newLink : '');
+      const body = {
+        message: '編輯：' + grade + '「' + titleRaw + '」' + (note ? '（' + note + '）' : '') + '（操作者：' + who + '）',
+        content: Utilities.base64Encode(bytes), branch: CFG.BRANCH
+      };
+      if (samePath && oldSha) body.sha = oldSha;
+      const res = UrlFetchApp.fetch(apiUrl_(newLink), { method: 'put', contentType: 'application/json', payload: JSON.stringify(body), headers: ghHeaders_(token), muteHttpExceptions: true });
+      const code = res.getResponseCode();
+      if (code !== 200 && code !== 201) return json_({ ok: false, code: 'GITHUB_' + code, message: githubError_(code) });
+    }
+    if (!samePath && oldSha && !usedByOther(oldLink)) {
+      const res = UrlFetchApp.fetch(apiUrl_(oldLink), {
+        method: 'delete', contentType: 'application/json', headers: ghHeaders_(token), muteHttpExceptions: true,
+        payload: JSON.stringify({ message: '編輯：移除舊位置 ' + oldLink + '（已移至 ' + newLink + '）', sha: oldSha, branch: CFG.BRANCH })
+      });
+      if (res.getResponseCode() !== 200) console.warn('舊檔案未能刪除：' + oldLink);
+      moved = true;
+    }
+  }
+  if (newLink && !titleRaw) return bad_('課件名稱不可留空。');
+
+  writeRow_({
+    '年級': grade, '單元': unit, '課題': topic, '課件名稱': titleRaw, '連結': newLink,
+    '簡介': clean_(d.desc, 300), '標籤': clean_(d.tags, 120), '上傳者': g(rows[hit], '上傳者'),
+    '更新日期': Utilities.formatDate(new Date(), CFG.TZ, 'yyyy-MM-dd HH:mm')
+  }, hit + 2);
+  const courses = publishCatalog_(token);
+  return json_({
+    ok: true, moved: moved, replaced: hasFile, title: titleRaw || topic,
+    url: newLink && !/^https?:/i.test(newLink) ? CFG.PAGES_BASE + encPath_(newLink) : newLink, courses: courses
+  });
+}
+
+/** 讀取 GitHub 上的檔案內容（blob，支援 1MB 以上的檔案） */
+function githubBlob_(sha, token) {
+  const res = UrlFetchApp.fetch('https://api.github.com/repos/' + CFG.OWNER + '/' + CFG.REPO + '/git/blobs/' + sha,
+    { headers: ghHeaders_(token), muteHttpExceptions: true });
+  if (res.getResponseCode() !== 200) throw new Error(githubError_(res.getResponseCode()));
+  return Utilities.base64Decode(String(JSON.parse(res.getContentText()).content || '').replace(/\s/g, ''));
+}
+
+/**
  * 把最新課件清單存成網站上的 courses.json（GitHub Pages 讀取約 0.5 秒，比經 Apps Script 快很多）。
  * 失敗不影響上傳／刪除；網頁仍會在背景向 Apps Script 核對最新清單。回傳清單供網頁即時更新。
  */
@@ -263,7 +374,7 @@ function publishCatalog_(token) {
   const courses = readCourses_();
   try {
     const path = 'courses.json';
-    const content = JSON.stringify({ ok: true, canDelete: true, generated: Utilities.formatDate(new Date(), CFG.TZ, 'yyyy-MM-dd HH:mm:ss'), courses: courses }, null, 1);
+    const content = JSON.stringify({ ok: true, canDelete: true, canEdit: true, generated: Utilities.formatDate(new Date(), CFG.TZ, 'yyyy-MM-dd HH:mm:ss'), courses: courses }, null, 1);
     const body = { message: '更新課件清單 courses.json（自動）', content: Utilities.base64Encode(content, Utilities.Charset.UTF_8), branch: CFG.BRANCH };
     const sha = githubSha_(path, token);
     if (sha) body.sha = sha;

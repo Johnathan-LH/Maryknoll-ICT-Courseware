@@ -2,6 +2,9 @@
 
 最新的記錄放在最上方。格式及規則見 [AGENTS.md](AGENTS.md) 第 5 節。
 
+## 2026-10-23
+- 新增：課件卡片「✎ 編輯」按鈕（同一個教師密碼）：可改年級、單元、課題、課件名稱、簡介、標籤，亦可更換 HTML 檔案；改年級或名稱會自動移動檔案。Apps Script 新增 `editCourse_()`、`githubBlob_()`。需重新部署 Apps Script 新版本後按鈕才會出現。
+
 ## 2026-10-22
 - 改善速度：課件清單改為先讀網站上的 courses.json（約 0.5 秒），再在背景向 Apps Script 核對；上傳省去另外的同名檢查；上傳和刪除直接回傳最新清單，不用再讀一次。Apps Script 新增 `publishCatalog_()`、`publishCatalogNow()`。
 - 新增：課件卡片「🗑 刪除」按鈕，使用同一個教師密碼；刪除試算表那一行，並從倉庫刪除課件檔案（Apps Script `deleteCourse_()`）。需重新部署 Apps Script 新版本後按鈕才會出現。

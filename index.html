@@ -99,6 +99,9 @@ main{display:flex;flex-direction:column;gap:32px}
 .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .card .btn.del{background:#fff;color:#a3122e;border:2px solid #a3122e;box-shadow:0 3px 0 #a3122e;font-size:14px;padding:5px 14px;min-height:36px}
 .card .btn.del:hover{box-shadow:0 5px 0 #a3122e}
+.card .btn.edit{background:#fff;color:var(--ink);border:2px solid var(--ink);box-shadow:0 3px 0 var(--ink);font-size:14px;padding:5px 14px;min-height:36px}
+.card .btn.edit:hover{box-shadow:0 5px 0 var(--ink)}
+.movenote{font-size:14px;border:2px dashed #9a6a00;border-radius:12px;padding:8px 12px;background:#fff7dc}
 .delname{font-size:18px;font-weight:800;overflow-wrap:anywhere}
 .card.soon{background:transparent;border:3px dashed var(--muted);box-shadow:none}
 .soon-lbl{align-self:flex-start;font-weight:800;font-size:14px;border:2px solid var(--ink);border-radius:99px;padding:2px 12px;background:#fff}
@@ -274,6 +277,66 @@ dialog:not([open]){display:none}
   </form>
 </dialog>
 
+<!-- ============ 編輯課件 ============ -->
+<dialog id="editDlg" aria-labelledby="editTitle">
+  <form id="editForm" novalidate>
+    <div class="dlg-head">
+      <h2 id="editTitle">✎ 編輯課件</h2>
+      <button class="x" type="button" id="editClose" aria-label="關閉">✕</button>
+    </div>
+    <div class="dlg-body">
+      <div class="grid2">
+        <div class="field">
+          <label for="eGrade">年級<span class="req">必填</span></label>
+          <select id="eGrade"></select>
+        </div>
+        <div class="field">
+          <label for="eUnitSel" id="eUnitLabel">單元<span class="req">必填</span></label>
+          <select id="eUnitSel"></select>
+          <input id="eUnitTxt" list="unitList" maxlength="60" hidden>
+        </div>
+      </div>
+      <div class="field">
+        <label for="eTopic">課題<span class="req">必填</span></label>
+        <input id="eTopic" list="topicList" maxlength="60">
+      </div>
+      <div class="field">
+        <label for="eTitleIn">課件名稱<span class="req">亦用作檔名</span></label>
+        <input id="eTitleIn" maxlength="80">
+      </div>
+      <div class="field">
+        <label for="eDesc">簡介<span class="req">可留空</span></label>
+        <textarea id="eDesc" maxlength="300"></textarea>
+      </div>
+      <div class="field">
+        <label for="eTags">標籤<span class="req">可留空 · 用逗號分隔</span></label>
+        <input id="eTags" maxlength="120" placeholder="例如：互動,練習">
+      </div>
+      <div class="field">
+        <label for="eFile">更換 HTML 檔案<span class="req">可留空 · 不換就保留原檔</span></label>
+        <input id="eFile" type="file" accept=".html,.htm,text/html">
+      </div>
+      <div class="hint">儲存位置：<span class="pathbox" id="ePath">—</span></div>
+      <div class="movenote" id="eMove" hidden></div>
+      <div class="grid2">
+        <div class="field">
+          <label for="eName">你的姓名<span class="req">可留空</span></label>
+          <input id="eName" maxlength="40" autocomplete="name" placeholder="例如：陳老師">
+        </div>
+        <div class="field">
+          <label for="ePw">教師密碼<span class="req">必填</span></label>
+          <input id="ePw" type="password" autocomplete="current-password">
+        </div>
+      </div>
+      <div class="status" id="editStatus" role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="editCancel">取消</button>
+        <button class="btn" type="submit" id="editGo">✔ 儲存修改</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
 <!-- ============ 刪除確認 ============ -->
 <dialog id="delDlg" aria-labelledby="delTitle">
   <form id="delForm" novalidate>
@@ -422,6 +485,8 @@ function render(){
 }
 
 let CAN_DELETE = false;
+let CAN_EDIT = false;
+const editBtn = c => CAN_EDIT ? `<button class="btn edit" type="button" data-edit="${COURSES.indexOf(c)}" aria-label="編輯 ${esc(c.title || c.topic)}">✎ 編輯</button>` : "";
 const delBtn = c => CAN_DELETE ? `<button class="btn del" type="button" data-del="${COURSES.indexOf(c)}" aria-label="刪除 ${esc(c.title || c.topic)}">🗑 刪除</button>` : "";
 
 function card(c){
@@ -430,7 +495,7 @@ function card(c){
       <span class="topic">課題：<b>${esc(c.topic)}</b></span>
       <span class="soon-lbl">⏳ 課件準備中</span>
       ${c.desc ? `<span class="d">${esc(c.desc)}</span>` : ""}
-      ${delBtn(c)}
+      ${editBtn(c)}${delBtn(c)}
     </article>`;
   }
   const date = c.updated ? c.updated.slice(0, 10) : "";
@@ -442,7 +507,7 @@ function card(c){
     <span class="meta">${c.uploader ? `<span>👤 ${esc(c.uploader)}</span>` : ""}${date ? `<span>📅 ${esc(date)}</span>` : ""}</span>
     <span class="acts">
       ${/^https?:\/\//i.test(c.url) ? `<a class="btn" href="${esc(withVersion(c.url, c.updated))}" target="_blank" rel="noopener">▶ 開始學習</a>` : `<span class="nolink">（未有連結）</span>`}
-      ${delBtn(c)}
+      ${editBtn(c)}${delBtn(c)}
     </span>
   </article>`;
 }
@@ -459,11 +524,12 @@ $("#q").addEventListener("input", e => { state.q = e.target.value.trim(); if (CO
 
 /** 用一份清單更新畫面（內容沒變就不重畫，避免閃動） */
 let shownKey = "";
-function applyList(list, canDelete){
-  const key = JSON.stringify(list) + "|" + !!canDelete;
+function applyList(list, canDelete, canEdit){
+  const key = JSON.stringify(list) + "|" + !!canDelete + "|" + !!canEdit;
   if (key === shownKey) return;
   shownKey = key;
   CAN_DELETE = canDelete === true;
+  CAN_EDIT = canEdit === true;
   COURSES = toCourses(list);
   render();
 }
@@ -496,17 +562,17 @@ async function load(){
   let shown = false, live = false;
   try {
     const c = JSON.parse(store.get(K.list) || "null");
-    if (c && Array.isArray(c.courses)){ applyList(c.courses, c.canDelete); shown = true; }
+    if (c && Array.isArray(c.courses)){ applyList(c.courses, c.canDelete, c.canEdit); shown = true; }
   } catch (e) {}
 
   const fromSite = getJSON(CONFIG.BASE_URL + "courses.json?t=" + Date.now(), 10000)
-    .then(d => { if (!live){ applyList(d.courses, d.canDelete); shown = true; } })
+    .then(d => { if (!live){ applyList(d.courses, d.canDelete, d.canEdit); shown = true; } })
     .catch(() => {});
   const fromSheet = getJSON(CONFIG.API_URL + "?action=list&t=" + Date.now(), 45000)
     .then(d => {
       live = true;
-      applyList(d.courses, d.canDelete);
-      store.set(K.list, JSON.stringify({ courses: d.courses, canDelete: d.canDelete }));
+      applyList(d.courses, d.canDelete, d.canEdit);
+      store.set(K.list, JSON.stringify({ courses: d.courses, canDelete: d.canDelete, canEdit: d.canEdit }));
       setNote("");
     })
     .catch(() => { if (shown) setNote("⚠️ 未能連線核對，顯示的可能不是最新清單"); });
@@ -523,8 +589,8 @@ async function load(){
 /** 上傳／刪除成功後，直接用回傳的清單更新畫面，不用再讀一次 */
 function useReturnedList(r){
   if (!r || !Array.isArray(r.courses)) return false;
-  applyList(r.courses, true);
-  store.set(K.list, JSON.stringify({ courses: r.courses, canDelete: true }));
+  applyList(r.courses, true, CAN_EDIT || r.canEdit === true || "moved" in r);
+  store.set(K.list, JSON.stringify({ courses: r.courses, canDelete: true, canEdit: CAN_EDIT }));
   return true;
 }
 
@@ -786,6 +852,116 @@ function askOverwrite(path, uploader){
   $("#yesBtn").addEventListener("click", () => startUpload(true));
   $("#noBtn").addEventListener("click", () => { clearStatus(); F.file.value = ""; updatePath(); showStatus("ask", "請先改檔案名稱", "<div>請在電腦把 HTML 檔案改一個新名稱，然後重新選擇檔案再上傳。</div>"); });
 }
+
+/* ============================================================
+   編輯
+   ============================================================ */
+const editDlg = $("#editDlg"), editStatus = $("#editStatus");
+const E = { grade: $("#eGrade"), unitSel: $("#eUnitSel"), unitTxt: $("#eUnitTxt"), topic: $("#eTopic"), title: $("#eTitleIn"),
+  desc: $("#eDesc"), tags: $("#eTags"), file: $("#eFile"), name: $("#eName"), pw: $("#ePw") };
+let editTarget = null, editBusy = false;
+E.grade.innerHTML = CONFIG.grades.map(g => `<option>${esc(g)}</option>`).join("");
+function editShow(kind, title, html){ editStatus.className = "status show " + kind; editStatus.innerHTML = `<strong>${esc(title)}</strong>${html || ""}`; editStatus.scrollIntoView({ block: "nearest" }); }
+const isRepoLink = l => /^F[1-6]\/[^\/]+\.html?$/i.test(l || "");
+function editUnit(){ return (isDse(E.grade.value) ? E.unitSel.value : E.unitTxt.value).trim(); }
+function editRefresh(){
+  const dse = isDse(E.grade.value);
+  E.unitSel.hidden = !dse; E.unitTxt.hidden = dse;
+  $("#eUnitLabel").htmlFor = dse ? "eUnitSel" : "eUnitTxt";
+  const c = editTarget; if (!c) return;
+  const external = /^https?:\/\//i.test(c.link);
+  E.file.disabled = external || editBusy;
+  let path = c.link || "（未有檔案）";
+  if (!external && (isRepoLink(c.link) || E.file.files[0])){
+    const t = safeName(E.title.value);
+    path = t ? `${folderOf(E.grade.value)}/${t}.html` : "—（請填課件名稱）";
+  }
+  $("#ePath").textContent = path;
+  const moving = c.link && isRepoLink(c.link) && path !== c.link && !path.startsWith("—");
+  $("#eMove").hidden = !moving;
+  if (moving) $("#eMove").textContent = `年級或課件名稱改了，檔案會由「${c.link}」移到「${path}」，課件網址亦會改變。`;
+}
+function openEdit(c){
+  editTarget = c; editStatus.className = "status"; editStatus.innerHTML = "";
+  $("#editForm").querySelectorAll("input,select,textarea,button").forEach(el => el.disabled = false);
+  $("#editCancel").textContent = "取消";
+  E.grade.value = CONFIG.grades.includes(c.grade) ? c.grade : CONFIG.grades[0];
+  const dse = isDse(E.grade.value);
+  E.unitSel.innerHTML = [...new Set([...CONFIG.units, ...(dse && c.unit && !CONFIG.units.includes(c.unit) ? [c.unit] : [])])].map(u => `<option>${esc(u)}</option>`).join("");
+  E.unitSel.value = dse && c.unit ? c.unit : CONFIG.units[0];
+  E.unitTxt.value = dse ? "" : c.unit;
+  E.topic.value = c.topic; E.title.value = c.title; E.desc.value = c.desc; E.tags.value = c.tags.join(",");
+  E.file.value = "";
+  let cred = null;
+  try { cred = JSON.parse(store.get(K.cred) || "null"); } catch (e) {}
+  E.name.value = (cred && cred.name) || F.name.value || "";
+  E.pw.value = (cred && cred.pw) || F.pw.value || "";
+  editRefresh();
+  if (typeof editDlg.showModal === "function"){ try { editDlg.showModal(); } catch (e) { editDlg.setAttribute("open", ""); } }
+  else editDlg.setAttribute("open", "");
+}
+function closeEdit(){ if (editBusy) return; if (typeof editDlg.close === "function") editDlg.close(); else editDlg.removeAttribute("open"); }
+$("#editClose").addEventListener("click", closeEdit);
+$("#editCancel").addEventListener("click", closeEdit);
+editDlg.addEventListener("cancel", e => { if (editBusy) e.preventDefault(); });
+[E.grade, E.title].forEach(el => el.addEventListener("input", editRefresh));
+E.grade.addEventListener("change", editRefresh);
+E.file.addEventListener("change", () => {
+  const f = E.file.files[0];
+  if (f){ const err = checkFile(f); if (err){ E.file.value = ""; editShow("err", "檔案不符合要求", `<div>${esc(err)}</div>`); } }
+  editRefresh();
+});
+$("#list").addEventListener("click", e => {
+  const b = e.target.closest("[data-edit]"); if (!b) return;
+  const c = COURSES[Number(b.dataset.edit)]; if (c) openEdit(c);
+});
+$("#editForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (editBusy || !editTarget) return;
+  const c = editTarget, f = E.file.files[0];
+  const err = !editUnit() ? "請選擇或填寫單元。" : !E.topic.value.trim() ? "請填寫課題。"
+    : ((isRepoLink(c.link) || f) && !safeName(E.title.value)) ? "請填寫課件名稱（不可只有符號）。"
+    : !E.pw.value ? "請輸入教師密碼。" : "";
+  if (err){ editShow("err", "未能儲存", `<div>${esc(err)}</div>`); return; }
+  editBusy = true;
+  $("#editForm").querySelectorAll("input,select,textarea,button").forEach(el => el.disabled = true);
+  $("#editGo").textContent = "儲存中…";
+  editShow("busy", f ? "上傳新檔案及儲存中，請稍候…" : "儲存中，請稍候…", `<div class="bar"><i></i></div>`);
+  let done = false;
+  try {
+    const payload = {
+      action: "edit", original: { grade: c.grade, topic: c.topic, title: c.title, link: c.link },
+      grade: E.grade.value, unit: editUnit(), topic: E.topic.value.trim(), title: E.title.value.trim(),
+      desc: E.desc.value.trim(), tags: E.tags.value.trim(), uploader: E.name.value.trim(), password: E.pw.value
+    };
+    let fixed = false;
+    if (f){ const p = await prepareFile(f); payload.content = p.content; payload.filename = f.name; fixed = p.fixed; }
+    const r = await api("POST", null, payload);
+    if (!r.ok){
+      editShow("err", "未能儲存", `<div>${esc(r.message || "發生未知錯誤。")}</div>`);
+      if (r.code === "BAD_PASSWORD" || r.code === "LOCKED") E.pw.value = "";
+      return;
+    }
+    if (!useReturnedList(r)) load();
+    done = true;
+    const fileChanged = r.replaced || r.moved;
+    const stamp = Date.now(), openUrl = r.url && /^https?:/.test(r.url) ? r.url + "?v=" + stamp : "";
+    editShow("ok", "✔ 已儲存修改",
+      `${fixed ? `<div>🔧 新檔案由 AI 網頁工具製作，已自動修正「404」問題。</div>` : ""}
+       ${fileChanged && openUrl ? `<div id="liveMsg">⏳ 網站正在發佈${r.moved ? "新位置的" : "新的"}檔案（通常 1 分鐘內）…</div>
+       <div class="actions" style="justify-content:flex-start;margin-top:8px"><a class="btn" id="openNew" href="${esc(openUrl)}" target="_blank" rel="noopener" hidden>▶ 打開課件</a></div>`
+       : `<div>目錄已更新。</div>`}`);
+    if (fileChanged && openUrl) waitUntilLive(r.url, stamp, openUrl);
+    editTarget = null;
+  } catch (err){
+    editShow("err", "未能儲存", `<div>${esc(err.message)}</div>`);
+  } finally {
+    editBusy = false;
+    $("#editForm").querySelectorAll("input,select,textarea,button").forEach(el => el.disabled = done && el.id !== "editClose" && el.id !== "editCancel");
+    $("#editGo").textContent = "✔ 儲存修改";
+    if (done) $("#editCancel").textContent = "關閉";
+  }
+});
 
 /* ============================================================
    刪除
