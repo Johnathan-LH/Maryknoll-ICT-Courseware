@@ -1,7 +1,8 @@
 {
  "ok": true,
  "canDelete": true,
- "generated": "2026-10-22 08:45:01 UTC",
+ "canEdit": true,
+ "generated": "2026-10-23 09:07:31",
  "courses": [
   {
    "grade": "中一",
@@ -51,23 +52,23 @@
    "grade": "中四",
    "unit": "C 互聯網及其應用",
    "topic": "DSE ICT 必修單元 C：網絡協定",
-   "title": "DSE_ICT_必修單元_C電子郵件的運作原理",
-   "link": "F4/DSE_ICT_必修單元_C電子郵件的運作原理.html",
-   "desc": "",
-   "tags": "",
-   "uploader": "T39",
-   "updated": "2026-10-22 16:12"
-  },
-  {
-   "grade": "中四",
-   "unit": "C 互聯網及其應用",
-   "topic": "DSE ICT 必修單元 C：網絡協定",
    "title": "DSE_ICT_必修單元_C_電子郵件的運作原理",
    "link": "F4/DSE_ICT_必修單元_C_電子郵件的運作原理.html",
    "desc": "",
    "tags": "",
    "uploader": "T39",
    "updated": "2026-10-22 16:16"
+  },
+  {
+   "grade": "中五",
+   "unit": "D 計算思維與程式編寫",
+   "topic": "DSE 列表綜合應用",
+   "title": "DSE 列表綜合應用",
+   "link": "F5/DSE 列表綜合應用.html",
+   "desc": "",
+   "tags": "",
+   "uploader": "T39",
+   "updated": "2026-10-23 08:27"
   }
  ]
 }
