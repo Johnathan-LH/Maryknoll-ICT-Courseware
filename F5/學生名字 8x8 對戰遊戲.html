@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>學生名字 8x8 對戰遊戲</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft JhengHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px;
+      touch-action: manipulation;
+    }
+    header {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #1e293b;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+    .game-title { font-size: 17px; font-weight: 800; color: #fde047; }
+    .score-badge {
+      display: flex;
+      gap: 12px;
+      background: #0f172a;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .p1-color { color: #38bdf8; }
+    .p2-color { color: #f87171; }
+    .btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      background: #3b82f6;
+      color: #fff;
+    }
+    .btn-reset { background: #475569; }
+
+    .target-bar {
+      width: 100%;
+      max-width: 960px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+    .target-bar b { color: #fde047; }
+
+    .battlefield {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 960px;
+    }
+    .player-section {
+      flex: 1;
+      max-width: 460px;
+      background: #1e293b;
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .p1-section { border-top: 4px solid #38bdf8; }
+    .p2-section { border-top: 4px solid #f87171; }
+
+    .player-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    /* 8x8 棋盤 */
+    .grid-board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 3px;
+      width: 340px;
+      height: 340px;
+      background: #18100a;
+      padding: 4px;
+      border-radius: 10px;
+      border: 3px solid #452b1b;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+      touch-action: none; /* 防止平板拖動時拉扯網頁 */
+    }
+
+    /* 木塊格子樣式 */
+    .tile {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: 5px;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: transform 0.05s ease;
+    }
+    .tile:active {
+      transform: scale(0.94);
+    }
+
+    /* 木塊原色 */
+    .tile-wood {
+      background: #9a5b28;
+      color: #ffffff;
+      border: 1px solid #c88349;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+
+    /* 被選取的木塊（準備移動） */
+    .tile-selected {
+      outline: 3px solid #facc15 !important;
+      background: #c2410c !important;
+      transform: scale(0.96);
+    }
+
+    /* 空格凹槽 */
+    .tile-empty {
+      background: #0b0704;
+      border: 1px dashed #2e1a0e;
+      cursor: pointer;
+    }
+
+    /* 連線成功鎖定變色 */
+    .tile-matched {
+      color: #0f172a !important;
+      border: 2px solid #ffffff !important;
+      font-size: 17px !important;
+      box-shadow: 0 0 6px rgba(255,255,255,0.7);
+    }
+
+    .matched-list {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #cbd5e1;
+      width: 100%;
+      min-height: 36px;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .tag {
+      display: inline-block;
+      padding: 1px 5px;
+      margin: 1px;
+      border-radius: 4px;
+      color: #111;
+      font-weight: 800;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: #1e293b;
+      border: 3px solid #f59e0b;
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      width: 85%;
+      max-width: 400px;
+    }
+    .modal h2 { font-size: 22px; margin-bottom: 10px; color: #fbbf24; }
+    .modal p { font-size: 14px; margin-bottom: 16px; line-height: 1.5; color: #cbd5e1; }
+
+    @media (max-width: 768px) {
+      .battlefield { flex-direction: column; align-items: center; }
+      .grid-board { width: 310px; height: 310px; }
+      .tile { font-size: 15px; }
+      .player-section { width: 100%; max-width: 330px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="game-title">🧩 學生名字 8x8 對戰</div>
+    <div class="score-badge">
+      <span class="p1-color">藍方: <b id="p1Score">0</b>/17</span>
+      <span style="color:#475569;">|</span>
+      <span class="p2-color">紅方: <b id="p2Score">0</b>/17</span>
+    </div>
+    <button class="btn btn-reset" onclick="initGame()">重新開始</button>
+  </header>
+
+  <div class="target-bar">
+    <b>操作說明：</b>支援 <b>iPad 手指直接滑動</b>！亦可直接點擊相鄰單一空格的木塊滑動；周圍有多個空格時點擊會高亮選取，再點目標空格即可移入。
+  </div>
+
+  <div class="battlefield">
+    <!-- 藍方 (P1) -->
+    <div class="player-section p1-section">
+      <div class="player-header">
+        <span class="p1-color">藍方 (P1)</span>
+        <span>步數: <span id="p1Steps">0</span></span>
+      </div>
+      <div class="grid-board" id="p1Board"></div>
+      <div class="matched-list" id="p1Matched">已拼出：無</div>
+    </div>
+
+    <!-- 紅方 (P2) -->
+    <div class="player-section p2-section">
+      <div class="player-header">
+        <span class="p2-color">紅方 (P2)</span>
+        <span>步數: <span id="p2Steps">0</span></span>
+      </div>
+      <div class="grid-board" id="p2Board"></div>
+      <div class="matched-list" id="p2Matched">已拼出：無</div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h2 id="modalTitle">🎉 獲勝！</h2>
+      <p id="modalMsg"></p>
+      <button class="btn" onclick="initGame()">再來一局</button>
+    </div>
+  </div>
+
+  <script>
+    var studentNames = [
+      "陳耔龍", "陳梓軒", "林旲良", "馮耀宗", "黃英傑", 
+      "呂卓軒", "彭博", "張穎曦", "何泓德", "何樂銘", 
+      "廖冬青", "蔡煒舜", "周鉦皓", "何子豪", "劉逸東", 
+      "廖峻琒", "鄧卓軒", "黃烙林"
+    ];
+
+    var studentColors = [
+      '#f59e0b', '#10b981', '#06b6d4', '#818cf8', '#f43f5e',
+      '#84cc16', '#14b8a6', '#a855f7', '#ec4899', '#fb923c',
+      '#38bdf8', '#c084fc', '#facc15', '#4ade80', '#60a5fa',
+      '#fb7185', '#2dd4bf'
+    ];
+
+    var GRID_SIZE = 8;
+    var TOTAL_CELLS = 64;
+
+    var p1Grid = [];
+    var p2Grid = [];
+    var p1Selected = -1;
+    var p2Selected = -1;
+    var p1Steps = 0;
+    var p2Steps = 0;
+    var isRunning = true;
+
+    function areAdjacent(idxA, idxB) {
+      var rA = Math.floor(idxA / GRID_SIZE);
+      var cA = idxA % GRID_SIZE;
+      var rB = Math.floor(idxB / GRID_SIZE);
+      var cB = idxB % GRID_SIZE;
+      return (Math.abs(rA - rB) + Math.abs(cA - cB)) === 1;
+    }
+
+    function checkMatches(grid) {
+      var matchedInfo = [];
+      var matchedCellColors = {};
+
+      studentNames.forEach(function(name, sIdx) {
+        var c1 = name[0], c2 = name[1], c3 = name[2];
+        var found = false;
+
+        // 橫向
+        for (var r = 0; r < GRID_SIZE && !found; r++) {
+          for (var c = 0; c < GRID_SIZE - 2 && !found; c++) {
+            var i1 = r * GRID_SIZE + c;
+            var i2 = r * GRID_SIZE + c + 1;
+            var i3 = r * GRID_SIZE + c + 2;
+
+            if ((grid[i1] === c1 && grid[i2] === c2 && grid[i3] === c3) ||
+                (grid[i1] === c3 && grid[i2] === c2 && grid[i3] === c1)) {
+              matchedInfo.push({ name: name, color: studentColors[sIdx] });
+              matchedCellColors[i1] = studentColors[sIdx];
+              matchedCellColors[i2] = studentColors[sIdx];
+              matchedCellColors[i3] = studentColors[sIdx];
+              found = true;
+            }
+          }
+        }
+
+        // 直向
+        for (var c = 0; c < GRID_SIZE && !found; c++) {
+          for (var r = 0; r < GRID_SIZE - 2 && !found; r++) {
+            var i1 = r * GRID_SIZE + c;
+            var i2 = (r + 1) * GRID_SIZE + c;
+            var i3 = (r + 2) * GRID_SIZE + c;
+
+            if ((grid[i1] === c1 && grid[i2] === c2 && grid[i3] === c3) ||
+                (grid[i1] === c3 && grid[i2] === c2 && grid[i3] === c1)) {
+              matchedInfo.push({ name: name, color: studentColors[sIdx] });
+              matchedCellColors[i1] = studentColors[sIdx];
+              matchedCellColors[i2] = studentColors[sIdx];
+              matchedCellColors[i3] = studentColors[sIdx];
+              found = true;
+            }
+          }
+        }
+      });
+
+      return { list: matchedInfo, cellColors: matchedCellColors };
+    }
+
+    function initGame() {
+      p1Steps = 0;
+      p2Steps = 0;
+      p1Selected = -1;
+      p2Selected = -1;
+      isRunning = true;
+      document.getElementById('p1Steps').innerText = '0';
+      document.getElementById('p2Steps').innerText = '0';
+      document.getElementById('overlay').className = 'overlay';
+
+      var allChars = [];
+      studentNames.forEach(function(name) {
+        for (var i = 0; i < name.length; i++) {
+          allChars.push(name[i]);
+        }
+      });
+
+      var initialBoard = allChars.slice();
+      while (initialBoard.length < TOTAL_CELLS) {
+        initialBoard.push('');
+      }
+
+      for (var i = initialBoard.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = initialBoard[i];
+        initialBoard[i] = initialBoard[j];
+        initialBoard[j] = tmp;
+      }
+
+      p1Grid = initialBoard.slice();
+      p2Grid = initialBoard.slice();
+
+      renderBoard('p1');
+      renderBoard('p2');
+    }
+
+    // 執行兩格位置互換
+    function makeMove(player, fromIdx, toIdx) {
+      var grid = (player === 'p1') ? p1Grid : p2Grid;
+      var tmp = grid[fromIdx];
+      grid[fromIdx] = grid[toIdx];
+      grid[toIdx] = tmp;
+
+      if (player === 'p1') {
+        p1Selected = -1;
+        p1Steps++;
+        document.getElementById('p1Steps').innerText = p1Steps;
+      } else {
+        p2Selected = -1;
+        p2Steps++;
+        document.getElementById('p2Steps').innerText = p2Steps;
+      }
+      renderBoard(player);
+    }
+
+    // 手指滑動處理 (向特定方向滑移)
+    function handleSwipe(player, idx, dirX, dirY) {
+      if (!isRunning) return;
+      var grid = (player === 'p1') ? p1Grid : p2Grid;
+      if (grid[idx] === '') return;
+
+      var r = Math.floor(idx / GRID_SIZE);
+      var c = idx % GRID_SIZE;
+      var targetR = r + dirY;
+      var targetC = c + dirX;
+
+      if (targetR >= 0 && targetR < GRID_SIZE && targetC >= 0 && targetC < GRID_SIZE) {
+        var targetIdx = targetR * GRID_SIZE + targetC;
+        if (grid[targetIdx] === '') {
+          makeMove(player, idx, targetIdx);
+        }
+      }
+    }
+
+    // 點擊處理
+    function handleCellClick(player, idx) {
+      if (!isRunning) return;
+
+      var grid = (player === 'p1') ? p1Grid : p2Grid;
+      var sel = (player === 'p1') ? p1Selected : p2Selected;
+
+      // 1. 如果已經有選取的木塊
+      if (sel !== -1) {
+        if (sel === idx) {
+          if (player === 'p1') p1Selected = -1; else p2Selected = -1;
+          renderBoard(player);
+          return;
+        }
+
+        // 若點擊目標是空格且相鄰，或是相鄰字塊，進行交換
+        if (grid[idx] === '' || areAdjacent(sel, idx)) {
+          makeMove(player, sel, idx);
+          return;
+        }
+
+        // 換選其他木塊
+        if (grid[idx] !== '') {
+          if (player === 'p1') p1Selected = idx; else p2Selected = idx;
+          renderBoard(player);
+          return;
+        }
+      }
+
+      // 2. 直接點擊木塊
+      if (grid[idx] !== '') {
+        var r = Math.floor(idx / GRID_SIZE);
+        var c = idx % GRID_SIZE;
+        var emptyNeighbors = [];
+
+        var checkPos = [
+          { r: r - 1, c: c }, // 上
+          { r: r + 1, c: c }, // 下
+          { r: r, c: c - 1 }, // 左
+          { r: r, c: c + 1 }  // 右
+        ];
+
+        checkPos.forEach(function(pos) {
+          if (pos.r >= 0 && pos.r < GRID_SIZE && pos.c >= 0 && pos.c < GRID_SIZE) {
+            var nIdx = pos.r * GRID_SIZE + pos.c;
+            if (grid[nIdx] === '') {
+              emptyNeighbors.push(nIdx);
+            }
+          }
+        });
+
+        // 若周圍「剛好只有 1 個」空格，直接滑入
+        if (emptyNeighbors.length === 1) {
+          makeMove(player, idx, emptyNeighbors[0]);
+          return;
+        }
+
+        // 若周圍有多個空格，或沒有相鄰空格：設為選中狀態讓玩家自己點選目標
+        if (player === 'p1') p1Selected = idx; else p2Selected = idx;
+        renderBoard(player);
+      }
+    }
+
+    function renderBoard(player) {
+      var grid = (player === 'p1') ? p1Grid : p2Grid;
+      var selectedIdx = (player === 'p1') ? p1Selected : p2Selected;
+      var boardEl = document.getElementById(player === 'p1' ? 'p1Board' : 'p2Board');
+      var res = checkMatches(grid);
+
+      if (player === 'p1') {
+        document.getElementById('p1Score').innerText = res.list.length;
+        renderMatchedList('p1Matched', res.list);
+      } else {
+        document.getElementById('p2Score').innerText = res.list.length;
+        renderMatchedList('p2Matched', res.list);
+      }
+
+      boardEl.innerHTML = '';
+      for (var i = 0; i < TOTAL_CELLS; i++) {
+        var cell = document.createElement('div');
+        var val = grid[i];
+
+        if (!val || val === '') {
+          cell.className = 'tile tile-empty';
+        } else {
+          cell.innerText = val;
+          if (res.cellColors[i]) {
+            cell.className = 'tile tile-matched';
+            cell.style.backgroundColor = res.cellColors[i];
+          } else {
+            cell.className = 'tile tile-wood';
+          }
+        }
+
+        if (i === selectedIdx) {
+          cell.className += ' tile-selected';
+        }
+
+        (function(index) {
+          var startX = 0, startY = 0;
+          var isMoved = false;
+
+          // iPad / 平板手指觸控滑動支援
+          cell.addEventListener('touchstart', function(e) {
+            var touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            isMoved = false;
+          }, { passive: true });
+
+          cell.addEventListener('touchmove', function(e) {
+            if (isMoved) return;
+            var touch = e.touches[0];
+            var diffX = touch.clientX - startX;
+            var diffY = touch.clientY - startY;
+            var threshold = 18; // 滑動靈敏度
+
+            if (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold) {
+              isMoved = true;
+              if (Math.abs(diffX) > Math.abs(diffY)) {
+                handleSwipe(player, index, diffX > 0 ? 1 : -1, 0); // 左右
+              } else {
+                handleSwipe(player, index, 0, diffY > 0 ? 1 : -1); // 上下
+              }
+            }
+          }, { passive: true });
+
+          cell.addEventListener('touchend', function(e) {
+            if (!isMoved) {
+              e.preventDefault();
+              handleCellClick(player, index);
+            }
+          });
+
+          // 電腦滑鼠點擊支援
+          cell.addEventListener('mousedown', function(e) {
+            handleCellClick(player, index);
+          });
+        })(i);
+
+        boardEl.appendChild(cell);
+      }
+
+      if (res.list.length === studentNames.length && isRunning) {
+        winGame(player);
+      }
+    }
+
+    function renderMatchedList(elId, list) {
+      var el = document.getElementById(elId);
+      if (!list || list.length === 0) {
+        el.innerHTML = '已拼出：無';
+        return;
+      }
+      var html = '已拼出：';
+      list.forEach(function(item) {
+        html += '<span class="tag" style="background:' + item.color + ';">' + item.name + '</span> ';
+      });
+      el.innerHTML = html;
+    }
+
+    function winGame(winner) {
+      isRunning = false;
+      var name = winner === 'p1' ? '藍方' : '紅方';
+      var step = winner === 'p1' ? p1Steps : p2Steps;
+      document.getElementById('modalTitle').innerText = '🏆 ' + name + ' 獲勝！';
+      document.getElementById('modalMsg').innerHTML = '成功拼出所有學生姓名！<br>步數：' + step + ' 步';
+      document.getElementById('overlay').className = 'overlay show';
+    }
+
+    initGame();
+  </script>
+</body>
+</html>
