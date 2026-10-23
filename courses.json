@@ -2,7 +2,7 @@
  "ok": true,
  "canDelete": true,
  "canEdit": true,
- "generated": "2026-10-23 09:07:31",
+ "generated": "2026-10-23 10:35:11",
  "courses": [
   {
    "grade": "中一",
@@ -65,10 +65,10 @@
    "topic": "DSE 列表綜合應用",
    "title": "DSE 列表綜合應用",
    "link": "F5/DSE 列表綜合應用.html",
-   "desc": "",
+   "desc": "必修部分 D：列表運算、搜索列表、對分檢索、點算項目、找出最大/最小的值、檢查列表次序、加入/刪除列表、調動列表、列表內置函數；附挑戰題。",
    "tags": "",
    "uploader": "T39",
-   "updated": "2026-10-23 08:27"
+   "updated": "2026-10-23 10:35"
   }
  ]
 }
