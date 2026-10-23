@@ -1,6 +1,6 @@
 # AGENTS.md — 給 AI 助手的網站維護說明
 
-本倉庫是 ICT 科的互動課件網站。任何 AI 助手（Claude、ChatGPT、Gemini、Copilot 等）在修改本倉庫前，請先讀完這份文件。
+本倉庫是 ICT 科的互動課件網站。任何 AI 助手（Codex、Claude、ChatGPT、Gemini、Copilot 等）在修改本倉庫前，請先讀完這份文件。
 語言：網站內容和說明以繁體中文為主（香港用語）。
 
 ## 1. 網站架構
@@ -9,19 +9,20 @@
 Google Sites 頁面
    └─ 「按網址嵌入」→ https://johnathan-lh.github.io/Maryknoll-ICT-Courseware/   （本倉庫 index.html，GitHub Pages）
           ├─ 讀取：GET  Apps Script ?action=list  → 試算表「ICT課件清單」的 JSON
-          └─ 上傳：POST Apps Script（text/plain JSON，檔案 base64）
-                    → 驗證教師密碼 → GitHub Contents API 提交到本倉庫 → 寫入／更新試算表
+          ├─ 快速清單：GET 本網站 courses.json（Apps Script 自動更新）
+          └─ 上傳／編輯／刪除：POST Apps Script（text/plain JSON，檔案 base64）
+                    → 驗證教師密碼 → GitHub Contents API 提交到本倉庫 → 寫入／更新試算表 → 更新 courses.json
 ```
 
 - **課件清單的唯一資料來源是 Google 試算表**，不是資料夾結構。index.html 不會掃描倉庫。
 - 載入清單（快 → 準）：先顯示瀏覽器上次的清單 → 讀取網站上的 `courses.json`（約 0.5 秒）→ 背景向 Apps Script `?action=list` 讀取試算表最新內容（3–20 秒），有分別才更新畫面。
-- `courses.json` 由 Apps Script `publishCatalog_()` 在每次上傳／刪除後自動寫入倉庫，**不要手動編輯**。在試算表手動改了資料，網頁的背景核對會顯示最新內容；如想 courses.json 也即時更新，在 Apps Script 執行 `publishCatalogNow()`。
-- 上傳和刪除的回應都附帶最新清單（`courses`），網頁直接用來更新，不再額外讀取。上傳不再先另外檢查同名，由上傳請求本身回傳 `EXISTS`。
+- `courses.json` 由 Apps Script `publishCatalog_()` 在每次上傳／編輯／刪除後自動寫入倉庫，**不要手動編輯**。在試算表手動改了資料，網頁的背景核對會顯示最新內容；如想 courses.json 也即時更新，在 Apps Script 執行 `publishCatalogNow()`。
+- 上傳、編輯和刪除的回應都附帶最新清單（`courses`），網頁直接用來更新，不再額外讀取。上傳不再先另外檢查同名，由上傳請求本身回傳 `EXISTS`。
 - GitHub Pages 從 `main` 分支根目錄發佈，推送後約 1–3 分鐘生效。
 - index.html 也可以原封不動放在學校校網（所有網址均為完整網址）。在 iframe 內選檔受限時，表單的後備按鈕會開啟 GitHub Pages 上的同一頁（`?upload=1` 會自動打開上傳表單）。
 - 上傳成功後，表單每 5 秒檢查 GitHub Pages 是否已發佈該檔案，發佈後才顯示「打開課件」；目錄頁的課件連結加上 `?v=更新日期`，避免瀏覽器沿用舊版或之前的 404。
 - AI 網頁工具（例如 wouter 路由的 React 單頁程式）匯出的 HTML，只在網址為「/」時顯示主頁，放在子資料夾會顯示其內置的「404 Page Not Found」。上傳表單的 `fixSpaRouting()` 會自動把後備路由改為主頁；手動上架這類檔案時也要做同樣修正。
-- 上傳表單只有：年級、單元、課題、HTML 檔案、課件名稱（一律取自所選 HTML 的檔案名稱，表單沒有名稱欄；要改名須先改檔名）、上傳者姓名（可留空，留空記為「未署名」）、教師密碼。簡介、標籤由教師在試算表補填。
+- 上傳表單只有：年級、單元、課題、HTML 檔案、課件名稱（一律取自所選 HTML 的檔案名稱，表單沒有名稱欄；要改名須先改檔名）、上傳者姓名（可留空，留空記為「未署名」）、教師密碼。簡介、標籤可用課件卡片的「✎ 編輯」補填，或直接在試算表填寫。
 
 ### Google 試算表
 
@@ -121,3 +122,28 @@ ICT 課件同時放在兩個網站，**內容必須保持一致**：
 
 - 日期用香港時間；同一天的改動寫在同一個日期標題下。
 - 經網站上傳的課件，GitHub commit 已記錄上傳者和課件名稱，不必每次補寫 CHANGELOG。
+
+## 6. 交接須知（給接手的 AI 助手，例如 Codex）
+
+### AI 助手可以自己做
+- 修改本倉庫任何檔案（index.html、apps-script/Code.gs、課件 HTML、文件），提交並推送到 `main`；GitHub Pages 約 1 分鐘後生效。
+- 讀取課件清單：`GET <網頁應用程式網址>?action=list`（不需要密碼）。
+- 同步 Teacher 倉庫的 ICT 課件（見第 4 節）及執行 `tools/check-ict-sync.sh`。
+
+### 必須交給教師（Johnathan）親手做，AI 助手不可代勞
+- **重新部署 Apps Script**：改了 `apps-script/Code.gs` 後，教師要把整個檔案貼到 Apps Script 編輯器 → 儲存 → 「部署 → 管理部署作業 → 編輯（鉛筆）→ 版本：新版本 → 部署」。網址不變。未部署前，網站仍用舊版後端。改 Code.gs 後要在回覆中明確提醒教師做這一步。
+- 部署前先問教師確認。
+- GitHub token、教師密碼（Script Properties）、任何登入或 Google 授權畫面。**絕不可要求教師把 token 或密碼貼到對話中。**
+- 直接編輯 Google 試算表（除非 AI 助手有教師授權的 Google Sheets 工具）。沒有的話，請教師在試算表手動改，或改用網站的編輯功能。
+
+### 新增後端功能的做法（向後兼容）
+- 前端用 `?action=list` 回傳的旗標（例如 `canDelete`、`canEdit`）決定是否顯示新按鈕；舊版後端未部署時按鈕自動隱藏，網站不會壞。新增功能時沿用這個做法，並同時在 `publishCatalog_()` 寫入 courses.json 的旗標。
+
+### 修改後如何測試
+- 前端：用 Playwright 開啟 index.html 的副本，把 `CONFIG.API_URL` 換成假網址並攔截請求回傳假資料，測試清單、上傳、編輯、刪除流程。
+- Apps Script：可用 Node 的 `vm` 執行 Code.gs，以假的 SpreadsheetApp／UrlFetchApp 模擬試算表及 GitHub。
+- **不要用真正的教師密碼做測試上傳**；需要實測時請教師親自操作。
+
+### 目前狀態（2026-10-23）
+- Apps Script 已部署第 3 版（上傳、編輯、刪除、courses.json 自動更新）。
+- 同步中的課件：中一兩個、中五「DSE 算法追蹤室」（見 ict-sync.tsv）。其餘課件由同事經網站上傳，只在本倉庫。
