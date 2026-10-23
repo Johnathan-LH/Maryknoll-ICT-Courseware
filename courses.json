@@ -2,7 +2,7 @@
  "ok": true,
  "canDelete": true,
  "canEdit": true,
- "generated": "2026-10-23 11:10:40",
+ "generated": "2026-10-23 14:00:27",
  "courses": [
   {
    "grade": "中一",
@@ -76,10 +76,10 @@
    "topic": "認識你的ICT同伴",
    "title": "學生名字 8x8 對戰遊戲",
    "link": "F5/學生名字 8x8 對戰遊戲.html",
-   "desc": "",
+   "desc": "認識你的ICT同伴(中五26-27)",
    "tags": "",
    "uploader": "T39",
-   "updated": "2026-10-23 11:10"
+   "updated": "2026-10-23 14:00"
   }
  ]
 }
