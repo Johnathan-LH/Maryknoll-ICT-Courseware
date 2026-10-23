@@ -2,7 +2,7 @@
  "ok": true,
  "canDelete": true,
  "canEdit": true,
- "generated": "2026-10-23 14:00:32",
+ "generated": "2026-10-23 14:06:53",
  "courses": [
   {
    "grade": "中一",
@@ -43,10 +43,10 @@
    "topic": "全像投影/全息影像",
    "title": "全像投影產生器",
    "link": "F3/全像投影產生器.html",
-   "desc": "",
+   "desc": "全像投影產生器（3D Hologram Generator / Projector）主要分為： 一、 硬體裝置與全像投影器 二、 軟體與 AI 全像影片產生器 此軟件會協助學生製成「硬體裝置與全像投影器」",
    "tags": "",
    "uploader": "t39",
-   "updated": "2026-10-22 10:40"
+   "updated": "2026-10-23 14:06"
   },
   {
    "grade": "中四",
