@@ -3,7 +3,7 @@
 最新的記錄放在最上方。格式及規則見 [AGENTS.md](AGENTS.md) 第 5 節。
 
 ## 2026-11-01
-- 上架（由 Johnathan 提供，已同步到 Teacher）：中一（無單元）課題「micro:bit」— micro:bit 小實驗室，第 1–3 課合併（F1/microbit 小實驗室.html）。
+- 上架（由 Johnathan 提供，已同步到 Teacher）：中一「microbit」課題「micro:bit」— micro:bit 小實驗室，第 1–3 課合併（F1/microbit 小實驗室.html）。
 
 ## 2026-10-23
 - 修改：移除左上角「</>」隱藏入口，改在「上傳課件」旁顯示「教師模式」按鈕；登入後可按「離開教師模式」登出，並更新使用及交接說明。教師密碼繼續由 Apps Script 指令碼屬性管理，沒有寫入網站或倉庫。
