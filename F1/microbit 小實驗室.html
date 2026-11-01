@@ -1,0 +1,1813 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>micro:bit 小實驗室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;700&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
+:root{
+  --ws:#EEF1F5; --dot:#D3D9E2; --paper:#FFFFFF; --line:#D5DBE4;
+  --ink:#1B2433; --ink-2:#5B6678;
+  --basic:#1E90FF; --input:#D400D4; --logic:#00A4A6; --loops:#00AA00;
+  --var:#DC143C; --music:#E63022; --neo:#2699BF;
+  --run:#FFD400; --idle:#6F7A8C;
+  --ok:#00A65A; --bad:#D93025;
+  --mouth:#EEF1F5; --mouth-logic:#E8F7F7;
+  --future:#DCE2EA; --hover:#AEB7C4; --dis-bg:#E3E7ED; --dis-ink:#8A94A6;
+  --open-bg:#F3F5F8; --avatar:#FFE7A3; --light-hi:#F7E9A6;
+  --pcb:#1B1D21; --led-on:#FF3B2F; --led-off:#5A2A26; --key:#0D0E10;
+  --font:"Chiron GoRound TC","Noto Sans HK",sans-serif;
+  --pop:cubic-bezier(.2,.9,.3,1.2);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:var(--font);font-size:22px;line-height:1.45;color:var(--ink);
+  background-color:var(--ws);
+  background-image:radial-gradient(circle,var(--dot) 1.5px,transparent 1.6px);
+  background-size:22px 22px;
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit;color:inherit}
+.num,time{font-variant-numeric:tabular-nums}
+h1,h2,h3,p{margin:0}
+
+/* ---------- shell ---------- */
+#app{display:grid;grid-template-rows:72px minmax(0,1fr) 104px;height:100vh;height:100dvh}
+.topbar{display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--paper);border-bottom:1px solid var(--line);min-width:0}
+.topbar .lesson-name{font-weight:700;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.topbar .spacer{flex:1}
+.bottombar{display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--paper);border-top:1px solid var(--line)}
+main{overflow:auto;padding:10px 32px 10px;position:relative}
+.view-home .only-lesson,.view-lab .only-lesson{visibility:hidden}
+.view-home .back{display:none}
+
+/* ---------- buttons ---------- */
+.btn{min-height:44px;min-width:44px;padding:6px 18px;border-radius:12px;border:2px solid var(--line);background:var(--paper);
+  font-size:22px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 2px 0 var(--line);transition:transform .08s,box-shadow .08s,border-color .15s;-webkit-tap-highlight-color:transparent;user-select:none}
+.btn:hover{border-color:var(--hover)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn:focus-visible,.focusable:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.btn.primary{background:var(--basic);border-color:var(--basic);color:var(--paper);box-shadow:0 2px 0 var(--ink-2)}
+.btn.primary:hover{border-color:var(--ink)}
+.btn[disabled]{background:var(--dis-bg);color:var(--dis-ink);border-color:var(--dis-bg);box-shadow:none;cursor:default;transform:none}
+.btn.on{border-color:var(--ink);background:var(--open-bg)}
+.btn.big{min-height:64px}
+.btn.small{font-size:16px;min-height:44px;padding:4px 12px}
+.icon-btn{width:48px;height:48px;padding:0}
+.icon-btn svg{width:26px;height:26px}
+.back{font-size:22px}
+
+/* A / B keys */
+.keybtn{height:64px;min-width:150px;padding:0 18px 0 12px;border-radius:12px;border:2px solid var(--line);background:var(--paper);
+  display:inline-flex;align-items:center;gap:12px;font-size:22px;font-weight:700;cursor:pointer;box-shadow:0 2px 0 var(--line)}
+.keybtn .cap{width:40px;height:40px;border-radius:50%;background:var(--key);color:var(--paper);display:grid;place-items:center;font-size:22px;font-weight:700;box-shadow:inset 0 -3px 0 rgba(255,255,255,.12)}
+.keybtn.next{padding:0 12px 0 18px;background:var(--basic);border-color:var(--basic);color:var(--paper);box-shadow:0 2px 0 var(--ink-2)}
+.keybtn:hover{border-color:var(--hover)} .keybtn.next:hover{border-color:var(--ink)}
+.keybtn:active{transform:translateY(2px);box-shadow:none}
+.keybtn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.keybtn[disabled]{background:var(--dis-bg);border-color:var(--dis-bg);color:var(--dis-ink);box-shadow:none;cursor:default}
+.keybtn[disabled] .cap{background:var(--dis-ink)}
+.view-home .keybtn,.view-lab .keybtn{visibility:hidden}
+
+/* progress made of blocks */
+.progress{display:flex;align-items:center;gap:10px}
+.pblocks{display:flex}
+.pb{width:38px;height:16px;background:var(--future);border-radius:3px;position:relative;margin-right:4px}
+.pb::after{content:"";position:absolute;right:-6px;top:4px;width:8px;height:8px;border-radius:50%;background:inherit;z-index:1}
+.pb:last-child::after{display:none}
+.pb.done{background:var(--logic)} .pb.cur{background:var(--basic)}
+.pcount{font-size:16px;font-weight:700;color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* teacher timer */
+.timer{position:relative}
+.timer-pill{height:44px;border-radius:999px;background:var(--ws);border:1px solid var(--line);padding:0 16px;display:flex;align-items:center;gap:10px;cursor:pointer;white-space:nowrap;font-size:16px;color:var(--ink-2)}
+.timer-pill b{font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.timer-pill.over{border:3px solid var(--run);padding:0 14px}
+.timer-pill:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.timer.hidden{display:none}
+.timer-panel{position:absolute;right:0;top:54px;width:330px;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;z-index:40;box-shadow:0 8px 24px rgba(27,36,51,.12)}
+.timer-panel[hidden]{display:none}
+.timer-panel h3{font-size:16px;color:var(--ink-2);margin-bottom:6px}
+.timer-panel ol{list-style:none;margin:0 0 10px;padding:0}
+.timer-panel li{display:flex;justify-content:space-between;font-size:16px;padding:6px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.timer-panel li.cur{font-weight:700;color:var(--ink)}
+.timer-panel .row{display:flex;gap:8px;justify-content:space-between;align-items:center}
+.timer-panel .row span{font-size:16px;color:var(--ink-2)}
+
+/* 呂Sir helper */
+.helper{flex:1;display:flex;align-items:center;gap:14px;min-width:0;justify-content:center}
+.helper.hidden .bubble,.helper.hidden .avatar{visibility:hidden}
+.avatar{width:60px;height:60px;border-radius:50%;background:var(--avatar);display:grid;place-items:center;font-weight:700;font-size:24px;flex:none;overflow:hidden;border:1.5px solid var(--line)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.bubble{position:relative;background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:10px 18px;font-size:22px;max-width:640px;line-height:1.35}
+.bubble::before{content:"";position:absolute;left:-9px;top:50%;margin-top:-8px;width:14px;height:14px;background:var(--paper);border-left:1.5px solid var(--line);border-bottom:1.5px solid var(--line);transform:rotate(45deg)}
+.tools{display:flex;gap:8px}
+
+/* ---------- page ---------- */
+.page{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:10px;min-height:100%}
+.page>h1{font-size:40px;line-height:1.15;font-weight:700}
+.pop{animation:pop .22s var(--pop) both}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.slide-in-r{animation:slideR .26s ease-out both} .slide-in-l{animation:slideL .26s ease-out both}
+@keyframes slideR{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 20px;position:relative}
+.muted{color:var(--ink-2);font-size:16px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:700;border-radius:999px;padding:4px 12px;background:var(--ws);border:1px solid var(--line)}
+
+/* category chip (small block with step number) */
+.chip{align-self:flex-start;display:inline-block;position:relative;background:var(--c,var(--basic));color:var(--paper);font-weight:700;font-size:22px;padding:4px 14px;border-radius:6px;line-height:1.3}
+.chip::before{content:"";position:absolute;left:12px;top:0;width:18px;height:5px;background:rgba(0,0,0,.18);border-radius:0 0 4px 4px}
+
+/* ---------- home ---------- */
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1}
+.entry{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:0;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;
+  transition:border-color .15s,transform .08s;min-height:200px}
+.entry:hover{border-color:var(--hover)}
+.entry:active{transform:translateY(2px)}
+.entry:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.entry .band{height:22px;background:var(--c);position:relative}
+.entry .band::after{content:"";position:absolute;left:28px;bottom:-8px;width:34px;height:10px;background:var(--c);border-radius:0 0 6px 6px}
+.entry .body{display:flex;gap:20px;align-items:center;padding:24px 26px;flex:1}
+.entry h2{font-size:40px;line-height:1.15}
+.entry p{font-size:22px;margin-top:6px}
+.entry .meta{font-size:16px;color:var(--ink-2);margin-top:8px;font-weight:700}
+.entry svg{flex:none;width:140px;height:110px}
+
+/* ---------- blocks ---------- */
+.blocks{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.blk{--c:var(--basic);position:relative;background:var(--c);color:var(--paper);font-weight:700;font-size:24px;line-height:1.25;
+  padding:12px 18px;border-radius:6px;display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;transition:outline-color .15s,box-shadow .15s,background-color .15s;outline:4px solid transparent;outline-offset:3px}
+.blk::before{content:"";position:absolute;left:18px;top:0;width:22px;height:6px;background:rgba(0,0,0,.18);border-radius:0 0 4px 4px}
+.cblk{--c:var(--basic);--m:var(--mouth);display:inline-flex;flex-direction:column;min-width:300px;max-width:100%}
+.c-basic{--c:var(--basic)} .c-input{--c:var(--input)} .c-logic{--c:var(--logic)} .c-loops{--c:var(--loops)}
+.c-var{--c:var(--var)} .c-music{--c:var(--music)} .c-neo{--c:var(--neo)}
+.cblk.c-logic{--m:var(--mouth-logic)}
+.chead,.cmid{position:relative;background:var(--c);color:var(--paper);font-weight:700;font-size:24px;line-height:1.25;padding:12px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  outline:4px solid transparent;outline-offset:3px;transition:outline-color .15s,box-shadow .15s,background-color .15s}
+.chead{border-radius:6px 6px 6px 0}
+.chead::before{content:"";position:absolute;left:18px;top:0;width:22px;height:6px;background:rgba(0,0,0,.18);border-radius:0 0 4px 4px}
+.hat>.chead{border-radius:14px 14px 6px 0}
+.hat>.chead::before{display:none}
+.cmid{border-radius:0 6px 6px 0}
+.cmouth{border-left:22px solid var(--c);background:var(--m);padding:6px 12px 6px 10px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;min-height:44px;transition:border-color .15s}
+.cfoot{height:18px;background:var(--c);border-radius:0 0 6px 6px;width:120px;transition:background-color .15s}
+.cblk.collapsed>.cmouth,.cblk.collapsed>.cfoot{display:none}
+.cblk.collapsed>.chead{border-radius:6px}
+.p{background:var(--paper);color:var(--ink);border-radius:999px;padding:1px 14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;min-height:30px}
+.p.num{border:2px solid var(--line)}
+.p.sensor{background:var(--input);color:var(--paper);border:2px solid rgba(255,255,255,.55)}
+.p.reporter{background:var(--neo);color:var(--paper);border:2px solid rgba(255,255,255,.55)}
+.p.cmp{background:var(--logic);color:var(--paper);border:2px solid rgba(0,0,0,.22);padding:2px 8px}
+.p.icon svg{width:30px;height:30px;display:block}
+.dot{width:20px;height:20px;border-radius:50%;display:inline-block;border:2px solid var(--line);flex:none}
+.p.more{min-width:44px;justify-content:center}
+.run{outline-color:var(--run)!important;box-shadow:0 0 9px 7px color-mix(in srgb,var(--run) 25%,transparent)}
+.idle{--c:var(--idle)}
+.blk.idle{background:var(--idle)}
+.blk.idle .p.sensor,.blk.idle .p.reporter{background:var(--idle)}
+.cblk.collapsible>.chead{cursor:pointer}
+.cblk.collapsible>.chead:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.more{background:var(--paper);color:var(--ink);border-radius:999px;padding:0 12px;font-size:16px;font-weight:700;line-height:28px}
+
+/* ---------- sim layout ---------- */
+.sim{display:grid;grid-template-columns:minmax(440px,620px) minmax(0,1fr);gap:24px;flex:1;min-height:0}
+.sim .code{overflow:auto;padding:2px 6px 2px 8px}
+.stagecard{background:var(--paper);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.stage{position:relative;flex:1;min-height:240px}
+.stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:none;outline:none}
+.stage .labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.stage .loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-2);font-size:22px}
+.lbl{position:absolute;transform:translate(-50%,-100%);background:var(--paper);color:var(--ink);font-size:16px;font-weight:700;border-radius:999px;padding:2px 10px;border:2px solid var(--c,var(--line));white-space:nowrap}
+.lbl.below{transform:translate(-50%,0)}
+.lbl.right{transform:translate(0,-50%)}
+.lbl.pin{transform:translate(-50%,-50%);min-width:30px;text-align:center}
+.result{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;z-index:3;pointer-events:none}
+.result .pill{background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:4px 16px;font-size:22px;font-weight:700;white-space:nowrap}
+.inputs{border-top:1px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.inrow{display:flex;align-items:center;gap:16px}
+.bignum{font-size:44px;font-weight:700;line-height:1;min-width:92px;text-align:right;font-variant-numeric:tabular-nums;color:var(--input)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+.fallback-note{position:absolute;left:12px;bottom:10px;font-size:16px;color:var(--ink-2);background:var(--paper);padding:2px 8px;border-radius:8px}
+.fallback svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* sliders */
+.slider{flex:1;position:relative;height:44px;display:flex;align-items:center;min-width:120px}
+.slider input{-webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;margin:0;cursor:pointer}
+.slider input::-webkit-slider-runnable-track{height:14px;border-radius:999px;background:var(--track)}
+.slider input::-moz-range-track{height:14px;border-radius:999px;background:var(--track)}
+.slider input::-webkit-slider-thumb{-webkit-appearance:none;width:40px;height:40px;border-radius:50%;background:var(--paper);border:3px solid var(--input);margin-top:-13px;box-shadow:0 2px 4px rgba(27,36,51,.2)}
+.slider input::-moz-range-thumb{width:34px;height:34px;border-radius:50%;background:var(--paper);border:3px solid var(--input)}
+.slider input:focus-visible{outline:3px solid var(--ink);outline-offset:2px;border-radius:12px}
+.slider input:disabled{cursor:default;opacity:1}
+.slider.light{--track:linear-gradient(90deg,var(--ink),var(--light-hi))}
+.slider.sound{--track:linear-gradient(90deg,var(--line),var(--input))}
+.slider .mark{position:absolute;top:2px;bottom:2px;width:3px;background:var(--logic);pointer-events:none;margin-left:-1.5px}
+.slider .mark span{position:absolute;top:-6px;left:6px;font-size:16px;font-weight:700;color:var(--logic);background:var(--paper);padding:0 4px;border-radius:4px;line-height:1.1}
+
+/* ---------- lab ---------- */
+.lab{display:grid;grid-template-columns:minmax(0,2fr) minmax(360px,1fr);gap:20px;flex:1;min-height:0}
+.lab .stagecard{min-height:420px}
+.controls{display:flex;flex-direction:column;gap:10px;overflow:auto;padding:2px 4px 2px 2px}
+.controls h3{font-size:16px;color:var(--ink-2);font-weight:700;margin-top:4px}
+.controls .btnrow .btn{flex:1 1 auto}
+.ctlrow{display:flex;align-items:center;gap:10px}
+.ctlrow .num{font-size:22px;font-weight:700;min-width:48px;text-align:right;color:var(--input)}
+.partcard{position:absolute;left:12px;top:12px;width:min(340px,calc(100% - 24px));z-index:4;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px 16px;box-shadow:0 8px 24px rgba(27,36,51,.14)}
+.partcard[hidden]{display:none}
+.partcard h3{font-size:24px;margin-right:48px}
+.partcard p{margin-top:6px}
+.partcard .close{position:absolute;right:8px;top:8px}
+.typetag{display:inline-flex;align-items:center;gap:8px;margin-top:10px;border-radius:999px;padding:4px 14px 4px 8px;font-weight:700;font-size:22px;color:var(--paper);background:var(--c)}
+.typetag svg{width:26px;height:26px}
+.typetag.t-plain{background:var(--ws);color:var(--ink);border:1px solid var(--line)}
+.state-msg{font-size:22px;font-weight:700;display:flex;gap:8px;align-items:center}
+.state-msg svg{width:28px;height:28px;flex:none}
+.state-msg.ok{color:var(--ok)} .state-msg.bad{color:var(--bad)}
+.stage-msg{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:6px 18px;z-index:3;white-space:nowrap}
+.stage-msg[hidden]{display:none}
+
+/* ---------- intro ---------- */
+.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:center;flex:1}
+.intro .scene{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex}
+.intro .scene svg{width:100%;height:auto;max-height:440px}
+.question{font-size:40px;font-weight:700;line-height:1.3}
+.qcard{display:flex;flex-direction:column;gap:18px}
+
+/* ---------- IPO ---------- */
+.ipo{display:grid;grid-template-columns:1fr 54px 1fr 54px 1fr;align-items:stretch}
+.ipo .box{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 16px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.ipo .arrow{display:grid;place-items:center}
+.ipo .arrow svg{width:40px;height:28px}
+.ipo .box b{font-size:24px}
+
+/* IPO explanation */
+.ipo2{display:grid;grid-template-columns:120px 1fr 48px 1fr 48px 1fr;gap:20px 0;align-items:stretch}
+.ipo2 .box{min-height:100px}
+.ipo2 .def{padding:0 8px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.ipo2 .def p{font-size:22px;line-height:1.35}
+.ipo2 .rowlab{align-self:center;font-size:24px}
+.ipo2 .box{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px;outline:4px solid transparent;outline-offset:3px;transition:outline-color .15s,box-shadow .15s}
+.ipo2 .box svg{width:48px;height:40px;flex:none}
+.ipo2 .box b{font-size:24px;line-height:1.3}
+.ipo2 .arrow{display:grid;place-items:center}.ipo2 .arrow svg{width:36px;height:26px}
+.exled svg{width:44px;height:44px}
+.exled.on .hon{fill:var(--led-on)}
+.defrow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.defrow>div{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:8px 12px;font-size:22px;line-height:1.3}
+.defrow .chip{flex:none}
+.findlist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.findlist li{display:flex;align-items:center;gap:8px;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:4px 8px;font-size:16px;font-weight:700;min-height:36px}
+.findlist .n{width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font-size:16px;flex:none;font-variant-numeric:tabular-nums}
+.findlist .ok{margin-left:auto;width:22px;height:22px;color:var(--ok);visibility:hidden}
+.findlist .ok svg{width:22px;height:22px}
+.findlist li.found{border-color:var(--ok)}
+.findlist li.found .ok{visibility:visible}
+.controls h3 .found{color:var(--ink)}
+.login{margin:0;padding-left:30px;display:flex;flex-direction:column;gap:4px}
+.acct{font-size:24px;letter-spacing:.02em}
+/* sort game */
+.sort{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;flex:1;min-height:0}
+.ipo2 .box.run{outline-color:var(--run);box-shadow:0 0 9px 7px color-mix(in srgb,var(--run) 25%,transparent)}
+.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:64px;align-items:flex-start}
+.scard{min-height:56px;padding:8px 16px;border-radius:12px;border:2px solid var(--line);background:var(--paper);font-weight:700;font-size:22px;cursor:grab;touch-action:none;user-select:none;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 0 var(--line)}
+.scard.sel{outline:3px solid var(--ink);outline-offset:2px}
+.scard.placed-ok{border-color:var(--ok)}
+.scard.placed-bad{border-color:var(--bad)}
+.scard .mark{width:24px;height:24px}
+.scard.dragging{opacity:.35}
+.ghost{position:fixed;z-index:100;pointer-events:none;transform:translate(-50%,-50%) rotate(-2deg);box-shadow:0 10px 24px rgba(27,36,51,.25)}
+.bucket{background:var(--paper);border:2px dashed var(--line);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-height:150px;cursor:pointer}
+.bucket.hot{border-style:solid;border-color:var(--ink);background:var(--open-bg)}
+.bucket h3{font-size:24px;display:flex;align-items:center;gap:8px}
+.bucket h3 svg{width:28px;height:28px;flex:none}
+.bucket .slot{display:flex;flex-wrap:wrap;gap:8px}
+.feedback{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px;min-height:30px}
+.feedback svg{width:28px;height:28px;flex:none}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+
+/* ---------- concept 2 / 3 ---------- */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1;min-height:0}
+.varbox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.box3d{width:240px;border:3px solid var(--ink);border-radius:12px;background:var(--paper);position:relative;padding:22px 16px 18px;text-align:center}
+.box3d .name{position:absolute;top:-20px;left:50%;transform:translateX(-50%);white-space:nowrap}
+.box3d .v{font-size:44px;font-weight:700;color:var(--input);font-variant-numeric:tabular-nums;line-height:1.1}
+.fork{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.fork .q{background:var(--logic);color:var(--paper);font-weight:700;font-size:24px;padding:12px 20px;border-radius:12px}
+.fork .paths{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%}
+.path{border:2px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;background:var(--paper);transition:outline-color .15s,background-color .15s;outline:4px solid transparent;outline-offset:3px}
+.path b{font-size:24px}
+.path.idle{background:var(--idle);color:var(--paper);border-color:var(--idle)}
+.bars{display:flex;gap:10px;background:var(--pcb);padding:12px 14px;border-radius:12px}
+.bars i{width:52px;height:52px;border-radius:8px;background:var(--paper);display:block;transition:background-color .12s,box-shadow .12s}
+.bars i.on{background:var(--led-on);box-shadow:0 0 12px var(--led-on)}
+.bars.big i{width:78px;height:78px}
+
+/* ---------- steps ---------- */
+.steps{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:24px;flex:1;min-height:0}
+.steptabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.steptabs .btn{min-width:64px}
+.steptabs .btn.on{background:var(--basic);color:var(--paper);border-color:var(--basic)}
+.stepcard{padding-top:18px;display:flex;flex-direction:column;gap:12px;min-height:330px}
+.stepcard .chip{align-self:flex-start}
+.stepcard h2{font-size:24px}
+.stepcard ol{margin:0;padding-left:30px;display:flex;flex-direction:column;gap:6px}
+.dl2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dl2 .card{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.dl2 svg{width:100%;height:90px}
+.ui-chip{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:10px;padding:2px 12px;font-weight:700;background:var(--paper)}
+.faq{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:16px;background:var(--paper);overflow:hidden;align-self:start}
+.faq h2{font-size:24px;padding:14px 18px 8px}
+.faq details{border-top:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;min-height:56px;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:700}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"▼";font-size:16px;transition:transform .15s}
+.faq details[open]{background:var(--open-bg)}
+.faq details[open] summary::after{transform:rotate(180deg)}
+.faq details>div{padding:0 18px 14px}
+.faq ul{margin:0;padding-left:26px}
+
+/* ---------- hints ---------- */
+.hints{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.hint{padding-top:20px;min-height:300px;display:flex;flex-direction:column;gap:12px}
+.hint .chip{align-self:flex-start}
+.hint .closed{flex:1;display:grid;place-items:center}
+.goal{display:flex;gap:18px;align-items:center}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:24px;flex:1}
+.qtext{font-size:24px;font-weight:700;margin:6px 0 12px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{min-height:64px;justify-content:flex-start;text-align:left;padding:8px 18px}
+.opt.right{border-color:var(--ok);border-width:3px}
+.opt.wrong{border-color:var(--bad);border-width:3px}
+.opt .mark{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:22px}
+.opt .mark svg{width:26px;height:26px}
+.ledside{display:flex;flex-direction:column;align-items:center;gap:16px;justify-content:center}
+.minimb{background:var(--pcb);border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px 16px;width:220px}
+.minimb i{aspect-ratio:3/5;background:var(--led-off);border-radius:3px;display:block;transition:background-color .1s,box-shadow .1s}
+.minimb i.on{background:var(--led-on);box-shadow:0 0 10px var(--led-on)}
+.score{font-size:44px;font-weight:700;font-variant-numeric:tabular-nums;display:inline-flex;overflow:hidden;height:56px;line-height:56px}
+.score .roll{display:inline-block;animation:roll .35s var(--pop)}
+@keyframes roll{from{transform:translateY(60%);opacity:0}to{transform:none;opacity:1}}
+.qprog{display:flex;gap:8px}
+.qprog i{width:28px;height:12px;border-radius:3px;background:var(--future);display:block}
+.qprog i.cur{background:var(--basic)} .qprog i.done{background:var(--logic)}
+
+/* ---------- summary ---------- */
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.keycard{padding-top:20px;display:flex;flex-direction:column;gap:10px}
+.keycard p{font-size:22px}
+.exit{display:flex;flex-direction:column;gap:12px}
+.exit .opts{flex-direction:row;flex-wrap:wrap}
+.exit .opt{min-height:56px}
+
+/* checklist (show page) */
+.checks{display:flex;flex-direction:column;gap:12px}
+.check{display:flex;align-items:center;gap:14px;min-height:64px;padding:8px 16px;border:2px solid var(--line);border-radius:12px;background:var(--paper);cursor:pointer;text-align:left;font-size:22px;font-weight:700}
+.check .box{width:36px;height:36px;border:3px solid var(--ink);border-radius:8px;display:grid;place-items:center;flex:none}
+.check .box svg{width:24px;height:24px;visibility:hidden}
+.check[aria-pressed="true"] .box svg{visibility:visible}
+.check[aria-pressed="true"]{border-color:var(--ok)}
+
+/* page transition micro:bit */
+.xfer{position:fixed;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;background:var(--pcb);border-radius:10px;padding:9px;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;z-index:90;pointer-events:none;opacity:0;transition:opacity .1s}
+.xfer.show{opacity:1}
+.xfer i{background:var(--led-off);border-radius:2px;display:block}
+.xfer i.on{background:var(--led-on)}
+
+.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:8px 20px;z-index:80;font-weight:700}
+.toast[hidden]{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media (max-width:1000px){
+  .sim,.lab,.steps,.quiz,.two,.intro{grid-template-columns:1fr}
+  .home-grid{grid-template-columns:1fr}
+  .hints,.keys{grid-template-columns:1fr}
+  .progress .pblocks{display:none}
+  .bubble{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  .pop,.slide-in-r,.slide-in-l{animation:fade .15s both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .score .roll{animation:none}
+  .btn:active,.keybtn:active,.entry:active{transform:none}
+  *{scroll-behavior:auto!important}
+}
+
+</style>
+</head>
+<body>
+<noscript><p style="padding:24px">請開啟 JavaScript 才可以使用這個網站。</p></noscript>
+<script type="module">
+/* ================= 3D STAGE (Three.js) ================= */
+const P3D = {
+  pcb:0x1B1D21, gold:0xD9AC4C, ledOff:0x5A2A26, ledOn:0xFF3B2F, btnBase:0x3A3D42, btnCap:0x0D0E10,
+  robot:0x2A6FDB, pix:0xE8E8E8, input:0xD400D4, basic:0x1E90FF
+};
+const PARTS = {
+  led:{name:'LED 屏',use:'顯示圖案和數字，也可以感應光線。',types:['output','input'],tlabel:'輸出（也可感應光線：輸入）'},
+  btnA:{name:'按鈕 A',use:'按下去，告訴 micro:bit 要做甚麼。',types:['input'],tlabel:'輸入'},
+  btnB:{name:'按鈕 B',use:'按下去，告訴 micro:bit 要做甚麼。',types:['input'],tlabel:'輸入'},
+  logo:{name:'觸摸 logo',use:'用手指摸一下，就是一個輸入。',types:['input'],tlabel:'輸入'},
+  mic:{name:'咪高峰',use:'聽到周圍的聲音有多大。',types:['input'],tlabel:'輸入'},
+  pins:{name:'金手指和針腳',use:'連接其他配件，例如燈條。',types:[],tlabel:'連接（接駁配件用）'},
+  usb:{name:'USB 接口',use:'接電腦：供電和下載程式。',types:[],tlabel:'電源和連接'},
+  reset:{name:'重設掣',use:'按一下，程式由頭開始。',types:[],tlabel:'控制（重新開始）'},
+  battery:{name:'電池插座',use:'接電池盒，不用電腦也可以運行。',types:[],tlabel:'電源'},
+  speaker:{name:'喇叭',use:'發出聲音和音樂。',types:['output'],tlabel:'輸出'},
+  cpu:{name:'處理器',use:'micro:bit 的大腦，負責處理；也可以量溫度。',types:['process','input'],tlabel:'處理（也可量溫度：輸入）'},
+  accel:{name:'加速度計和指南針',use:'感應搖動、傾斜和方向。',types:['input'],tlabel:'輸入'},
+  rbBatt:{name:'18650 電池座',use:'在插槽後面，放一粒 18650 電池，為整塊板供電。',types:[],tlabel:'電源'},
+  rbSwitch:{name:'電源開關（ON）',use:'推到 ON 才有電。點一下可以開關。',types:[],tlabel:'電源'},
+  rbRgb:{name:'4 粒 RGB 燈（P16）',use:'在前面，標示 0 至 3，可以亮出不同顏色。',types:['output'],tlabel:'輸出'},
+  rbGvs:{name:'GVS 插口（P0–P2）',use:'在後面。黃色一行是 S（訊號），紅色是 V（電源），黑色是 G（地線）。',types:[],tlabel:'連接（接駁配件用）'},
+  rbBuzzer:{name:'蜂鳴器（P0）',use:'發出嗶嗶聲。',types:['output'],tlabel:'輸出'},
+  rbSlot:{name:'micro:bit 插槽',use:'micro:bit 直插入去，LED 屏和 RGB 燈都向前。',types:[],tlabel:'連接'},
+  strip:{name:'彩虹燈條（10 粒）',use:'插在 P1，可以亮出長條圖。',types:['output'],tlabel:'輸出'}
+};
+
+const Stage3D = (() => {
+  let THREE, OrbitControls, renderer, scene, camera, controls, hemi, dir, fill, ground;
+  let rig, mb, robot, strip, plug, wire, wireCurvePts, slotEl = null, labelsEl = null, raf = 0, opts = {};
+  const mats = [], hits = [], halos = {}, anim = [];
+  const ledMats = [], rgbMats = [], rgbLights = [], stripMats = [], stripLights = [];
+  let btnCaps = {}, switchKnob, lightF = 1, mode = 'mb', filter = null, rigBaseRot = -0.4;
+  let camTween = null, labels = [], ro = null, downXY = null, clock = 0, last = 0;
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function M(part, o) {
+    const m = new THREE.MeshStandardMaterial(o);
+    m.userData = { part, base: m.color.clone(), baseE: m.emissive.clone(), baseEI: m.emissiveIntensity };
+    mats.push(m); return m;
+  }
+  function rr(w, h, r) {
+    const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
+    s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+    s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+    s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y); return s;
+  }
+  function box(w, h, d, mat, x, y, z, parent) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m;
+  }
+  function cyl(r, h, mat, x, y, z, parent, axis = 'z', seg = 32) {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat);
+    if (axis === 'z') m.rotation.x = Math.PI / 2; if (axis === 'x') m.rotation.z = Math.PI / 2;
+    m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m;
+  }
+  function textPlane(w, h, draw, z, parent, back = false) {
+    const k = 24, c = document.createElement('canvas'); c.width = w * k; c.height = h * k;
+    const g = c.getContext('2d'); g.scale(k, k); g.translate(w / 2, h / 2); g.scale(1, -1);
+    const T = (t, x, y, size = 1.7, col = '#ffffff', align = 'center') => {
+      g.save(); g.translate(x, y); g.scale(1, -1); g.fillStyle = col;
+      g.font = `700 ${size}px "Chiron GoRound TC","Noto Sans HK",sans-serif`; g.textAlign = align; g.textBaseline = 'middle';
+      g.fillText(t, 0, 0); g.restore();
+    };
+    draw(T, g);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const mat = M(null, { map: tex, transparent: true, depthWrite: false, roughness: .6 });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    p.position.z = z; if (back) p.rotation.y = Math.PI; p.raycast = () => {}; parent.add(p); return p;
+  }
+  /* hotspot: invisible hit plane + halo frame */
+  function hotspot(part, cx, cy, w, h, z, parent, back = false, lp = 'above') {
+    const hm = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false });
+    const hp = new THREE.Mesh(new THREE.PlaneGeometry(w, h), hm);
+    hp.position.set(cx, cy, z); if (back) hp.rotation.y = Math.PI; hp.userData.part = part; parent.add(hp); hits.push(hp);
+    const g = new THREE.Group(); g.position.set(cx, cy, z - (back ? -0.02 : 0.02)); if (back) g.rotation.y = Math.PI;
+    const outer = rr(w + 2.2, h + 2.2, 2.2), inner = rr(w + 0.6, h + 0.6, 1.6); outer.holes.push(inner);
+    const fm = new THREE.MeshBasicMaterial({ color: P3D.input, toneMapped: false, transparent: true, depthWrite: false });
+    g.add(new THREE.Mesh(new THREE.ShapeGeometry(outer, 6), fm));
+    const gc = document.createElement('canvas'); gc.width = gc.height = 64; const gg = gc.getContext('2d');
+    const rad = gg.createRadialGradient(32, 32, 8, 32, 32, 32); rad.addColorStop(0, 'rgba(255,255,255,.9)'); rad.addColorStop(1, 'rgba(255,255,255,0)');
+    gg.fillStyle = rad; gg.fillRect(0, 0, 64, 64);
+    const gm = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(gc), color: P3D.input, transparent: true, opacity: .55, depthWrite: false, toneMapped: false });
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(w + 12, h + 12), gm); glow.position.z = -0.01; g.add(glow);
+    g.children.forEach(c => c.raycast = () => {});
+    g.visible = false; parent.add(g);
+    const anchor = new THREE.Object3D(); parent.add(anchor);
+    anchor.position.set(lp === 'right' ? cx + (back ? -1 : 1) * (w / 2 + 1.5) : cx, lp === 'below' ? cy - h / 2 - 1.5 : lp === 'right' ? cy : cy + h / 2 + 1.5, z);
+    halos[part] = { g, fm, gm, anchor, back, lp };
+  }
+
+  function buildMicrobit() {
+    const g = new THREE.Group();
+    const pcb = new THREE.Mesh(new THREE.ExtrudeGeometry(rr(52, 42, 3.2), { depth: 1.6, bevelEnabled: false, curveSegments: 10 }),
+      M(null, { color: P3D.pcb, roughness: .42, metalness: .1 }));
+    pcb.geometry.translate(0, 0, -.8); pcb.castShadow = pcb.receiveShadow = true; g.add(pcb);
+    const gold = M('pins', { color: P3D.gold, metalness: .85, roughness: .3 });
+    const holeM = M(null, { color: 0x050506, roughness: .9 });
+    const padX = [-19.5, -9.75, 0, 9.75, 19.5];
+    for (const side of [1, -1]) {
+      for (const x of padX) {
+        const s = new THREE.Shape(); s.moveTo(-3.5, -21); s.lineTo(3.5, -21); s.lineTo(3.5, -12.5); s.quadraticCurveTo(3.5, -11.5, 2.5, -11.5);
+        s.lineTo(-2.5, -11.5); s.quadraticCurveTo(-3.5, -11.5, -3.5, -12.5); s.lineTo(-3.5, -21);
+        const h = new THREE.Path(); h.absarc(0, -16, 2.1, 0, Math.PI * 2, true); s.holes.push(h);
+        const pad = new THREE.Mesh(new THREE.ShapeGeometry(s, 16), gold); pad.position.set(x * side, 0, .81 * side);
+        if (side < 0) pad.rotation.y = Math.PI; g.add(pad);
+        const hole = new THREE.Mesh(new THREE.CircleGeometry(2.1, 24), holeM); hole.position.set(x, -16, .805 * side);
+        if (side < 0) hole.rotation.y = Math.PI; g.add(hole);
+      }
+      for (let x = -25; x <= 25; x += 1.27) {
+        if (padX.some(p => Math.abs(x - p) < 4.2)) continue;
+        const f = box(.75, 3.4, .05, gold, x, -19.3, .82 * side, g); f.castShadow = false;
+      }
+    }
+    // LEDs
+    const lg = new THREE.BoxGeometry(1.3, 2.3, .7);
+    for (let i = 0; i < 25; i++) {
+      const r = Math.floor(i / 5), c = i % 5, m = M('led', { color: P3D.ledOff, roughness: .35, emissive: 0x000000 });
+      const l = new THREE.Mesh(lg, m); l.position.set((c - 2) * 4.3, 1 + (2 - r) * 4.3, 1.15); l.castShadow = true; g.add(l); ledMats.push(m);
+    }
+    // buttons
+    for (const [id, x] of [['btnA', -19.5], ['btnB', 19.5]]) {
+      box(6.4, 6.4, 1.4, M(id, { color: P3D.btnBase, roughness: .5 }), x, 1, 1.5, g);
+      btnCaps[id] = cyl(2.3, 1.3, M(id, { color: P3D.btnCap, roughness: .4 }), x, 1, 2.85, g);
+    }
+    // logo + mic
+    const logo = cyl(1, .25, M('logo', { color: P3D.gold, metalness: .85, roughness: .3 }), 0, 15.4, .9, g, 'z', 48);
+    logo.scale.set(4.2, 1, 2.7);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.65, 1.25, 24), M('mic', { color: 0x9a9fa8, metalness: .6, roughness: .4 }));
+    ring.position.set(8.5, 15.4, .82); g.add(ring);
+    const mh = new THREE.Mesh(new THREE.CircleGeometry(.65, 20), M('mic', { color: 0x050506 })); mh.position.set(8.5, 15.4, .815); g.add(mh);
+    textPlane(52, 42, T => {
+      T('A', -19.5, 7.4, 2.4); T('B', 19.5, 7.4, 2.4);
+      ['0', '1', '2', '3V', 'GND'].forEach((t, i) => T(t, padX[i], -9.9, 1.6));
+    }, .83, g);
+    // back side
+    const metal = M('usb', { color: 0xC9CDD3, metalness: .8, roughness: .35 });
+    box(7.6, 5.4, 2.7, metal, 0, 19.4, -2.15, g);
+    box(3.2, 3.2, 1.1, M('reset', { color: P3D.btnBase }), -8.5, 17.6, -1.35, g);
+    box(1.8, 1.8, .8, M('reset', { color: P3D.btnCap }), -8.5, 17.6, -2.2, g);
+    box(6, 4.4, 4.6, M('battery', { color: 0xEDEAE2, roughness: .6 }), 10, 17.6, -3.1, g);
+    const spk = cyl(4.6, 2.4, M('speaker', { color: 0x141518, roughness: .5 }), 0, -3, -2, g, 'z', 40);
+    cyl(.9, 2.5, M('speaker', { color: 0x050506 }), 0, -3, -2.05, g);
+    box(7.2, 7.2, 1, M('cpu', { color: 0x26282c, roughness: .35, metalness: .2 }), -13, 3, -1.3, g);
+    box(3.2, 3.2, .9, M('accel', { color: 0x2c2e33, roughness: .35 }), 13, -1.5, -1.25, g);
+    box(2.2, 2.2, .8, M('accel', { color: 0x2c2e33, roughness: .35 }), 13, 3, -1.2, g);
+    const smd = M(null, { color: 0x8f8a7e, roughness: .6 });
+    [[-4, 9], [-2, 9], [4, 9], [6, 6], [-20, -6], [-18, -6], [20, 6], [22, 6], [-6, -9], [6, -9], [-20, 10], [18, -7]].forEach(([x, y]) => box(1.6, .8, .5, smd, x, y, -1.05, g));
+    textPlane(52, 42, T => { T('USB', 0, 14.6, 1.5); }, -.83, g, true);
+    // hotspots
+    hotspot('led', 0, 1, 22, 22, 1.6, g, false, 'below'); hotspot('btnA', -19.5, 1, 8, 8, 3.6, g); hotspot('btnB', 19.5, 1, 8, 8, 3.6, g);
+    hotspot('logo', 0, 15.4, 10, 6.6, 1.2, g); hotspot('mic', 8.5, 15.4, 3.6, 3.6, 1.2, g, false, 'right'); hotspot('pins', 0, -16.2, 51, 9.6, 1.1, g, false, 'below');
+    hotspot('usb', 0, 19.4, 9.5, 5, -3.7, g, true); hotspot('reset', -8.5, 17.6, 4.6, 4.6, -2.8, g, true);
+    hotspot('battery', 10, 17.6, 7.5, 5.8, -5.6, g, true); hotspot('speaker', 0, -3, 11, 11, -3.4, g, true);
+    hotspot('cpu', -13, 3, 9, 9, -2, g, true); hotspot('accel', 13, .7, 6.4, 9, -2, g, true);
+    return g;
+  }
+
+  const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  /* Robotbit: flat black board, top face = +y. micro:bit stands in the slot at the front edge. */
+  const HDR = { S: -12.5, V: -15.04, G: -17.58 };            // header rows (z), S nearest the battery holder
+  const RIGHT = ['P15', 'P14', 'P13', 'P12', 'P8', 'P2', 'P1', 'P0'], colX = i => -(9 + i * 2.54), P1X = colX(6);
+  function buildRobot() {
+    const g = new THREE.Group();
+    const bg = new THREE.ExtrudeGeometry(rr(80, 57, 4), { depth: 1.6, bevelEnabled: false, curveSegments: 8 });
+    bg.rotateX(-Math.PI / 2); bg.translate(0, -1.6, 0);
+    const b = new THREE.Mesh(bg, M(null, { color: 0x1d1f23, roughness: .55 })); b.castShadow = b.receiveShadow = true; g.add(b);
+    const dark = M(null, { color: 0x101113, roughness: .7 }), metal = M(null, { color: 0xC9CDD3, metalness: .8, roughness: .35 });
+    for (const [x, z] of [[-36, 24.5], [36, 24.5], [-36, -24.5], [36, -24.5]]) {
+      cyl(2.2, 2.4, dark, x, -2.8, z, g, 'y');
+      const hole = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.6, 24), M(null, { color: 0xd9d9d9, metalness: .6, roughness: .4 }));
+      hole.rotation.x = -Math.PI / 2; hole.position.set(x, .02, z); g.add(hole);
+    }
+    // front edge: 4 RGB LEDs (NeoPixel, P16), labelled 0-3
+    for (let i = 0; i < 4; i++) {
+      const x = -18 + i * 12, m = M('rbRgb', { color: P3D.pix, roughness: .3, emissive: 0x000000 });
+      box(5, 1.6, 5, m, x, .8, 24.5, g); rgbMats.push(m);
+      const L = new THREE.PointLight(0xffffff, 0, 30, 2); L.position.set(x, 6, 25); g.add(L); rgbLights.push(L);
+    }
+    // micro:bit slot (vertical edge connector)
+    box(60, 8, 6, M('rbSlot', { color: 0x2a2c30, roughness: .6 }), 0, 4, 16, g);
+    box(54, .3, 1.6, M('rbSlot', { color: 0x050506 }), 0, 8.05, 16, g);
+    // 18650 battery holder (on the top side, behind the slot)
+    const hm = M('rbBatt', { color: 0x16171a, roughness: .7 });
+    box(74, 1.5, 20, hm, 0, .75, 1, g); box(74, 16, 1.5, hm, 0, 8, -8.25, g); box(60, 9, 1.5, hm, 0, 4.5, 10.25, g);
+    box(2.5, 18, 20, hm, -36.25, 9, 1, g); box(2.5, 18, 20, hm, 36.25, 9, 1, g);
+    cyl(9, 65, M('rbBatt', { color: 0x3f6b4a, roughness: .45, metalness: .1 }), 0, 10.5, 1, g, 'x', 36);
+    cyl(3, 1, M('rbBatt', { color: 0xC9CDD3, metalness: .8, roughness: .3 }), 33, 10.5, 1, g, 'x');
+    // GVS headers along the rear edge: rows S (yellow) / V (red) / G (black)
+    const rowCol = { S: 0xF2C230, V: 0xE0452B, G: 0x1a1a1a }, pin = M(null, { color: P3D.gold, metalness: .85, roughness: .3 });
+    const pinG = M('rbGvs', { color: P3D.gold, metalness: .85, roughness: .3 }), pinGeo = new THREE.BoxGeometry(.64, 8.5, .64);
+    for (const [r, z] of Object.entries(HDR)) {
+      const plain = M(null, { color: rowCol[r], roughness: .6 }), mine = M('rbGvs', { color: rowCol[r], roughness: .6 });
+      box(8 * 2.54, 2.5, 2.5, plain, 33 - 3.5 * 2.54, 1.25, z, g);                 // S8..S1 (left group)
+      box(5 * 2.54, 2.5, 2.5, plain, colX(2), 1.25, z, g);                           // P15..P8
+      box(3 * 2.54, 2.5, 2.5, mine, colX(6), 1.25, z, g);                             // P2 P1 P0
+      for (let i = 0; i < 8; i++) {
+        for (const [x, m] of [[33 - i * 2.54, pin], [colX(i), i >= 5 ? pinG : pin]]) {
+          const p = new THREE.Mesh(pinGeo, m); p.position.set(x, 4.25, z); g.add(p);
+        }
+      }
+    }
+    // buzzer (P0), jumper, rear-edge parts
+    cyl(6, 8, M('rbBuzzer', { color: 0x2b2d31, roughness: .5 }), 3, 4, -14.5, g, 'y', 40);
+    cyl(1, 8.1, M('rbBuzzer', { color: 0x050506 }), 3, 4.05, -14.5, g, 'y');
+    box(5.08, 2.5, 7.6, M(null, { color: 0xE0452B, roughness: .6 }), -4.5, 1.25, -15, g);
+    box(8, 3, 5.5, metal, 6, 1.5, -25.6, g);
+    box(11, 4.5, 5, M('rbSwitch', { color: 0xB8BCC2, metalness: .6, roughness: .4 }), -8, 2.25, -25, g);
+    switchKnob = box(3, 4, 3, M('rbSwitch', { color: 0x16171a, roughness: .5 }), -5.5, 5.5, -25, g);
+    box(9, 7, 7, M(null, { color: 0x2e9e5b, roughness: .5 }), -21, 3.5, -24.5, g);
+    for (const x of [-18.8, -23.2]) cyl(1.5, .6, metal, x, 7.1, -24.5, g, 'y');
+    for (const x of [-37.5, 37.5]) for (let j = 0; j < 4; j++) { const p = new THREE.Mesh(pinGeo, pin); p.position.set(x, 4.25, -11 - j * 2.54); g.add(p); }
+    // silkscreen (top group: x, y=-z)
+    const top = new THREE.Group(); top.rotation.x = -Math.PI / 2; g.add(top);
+    textPlane(80, 57, T => {
+      ['0', '1', '2', '3'].forEach((t, i) => T(t, -18 + i * 12 + 5, -24.5, 3));
+      RIGHT.forEach((t, i) => T(t.replace(/^P(?=1)/, ''), colX(i), 19.9, 1.2));
+      for (let i = 0; i < 8; i++) T('S' + (8 - i), 33 - i * 2.54, 19.9, 1.1);
+      T('S', -30.6, 12.5, 1.4); T('V', -30.6, 15.04, 1.4); T('G', -30.6, 17.58, 1.4);
+      T('ON', -15.5, 26.6, 1.6); T('+', 30, -5, 3); T('−', -30, -5, 3);
+    }, .03, top);
+    hotspot('rbSlot', 0, -16, 62, 8, 8.6, top); hotspot('rbRgb', 0, -24.5, 44, 7, 2, top); hotspot('rbBatt', 0, -1, 76, 22, 19.6, top);
+    hotspot('rbBuzzer', 3, 14.5, 13, 13, 8.6, top); hotspot('rbSwitch', -8, 25, 13, 6, 7.8, top); hotspot('rbGvs', P1X, 15.04, 9, 8.6, 9, top);
+    return g;
+  }
+
+  function buildStrip() {
+    const g = new THREE.Group();
+    box(108, 1, 11, M('strip', { color: 0x1B1D21, roughness: .5 }), 0, 0, 0, g);
+    for (let i = 0; i < 10; i++) {
+      const m = M('strip', { color: P3D.pix, roughness: .3, emissive: 0x000000 });
+      box(5, 1.6, 5, m, -45 + i * 10, 1.1, 0, g); stripMats.push(m);
+      if (i % 2 === 0) { const L = new THREE.PointLight(0xffffff, 0, 34, 2); L.position.set(-40 + i * 10, 7, 0); g.add(L); stripLights.push(L); }
+    }
+    hotspot('strip', 0, 0, 108, 11, 2.3, g); const h = halos.strip; h.g.rotation.x = -Math.PI / 2; h.g.position.set(0, 2.3, 0);
+    hits[hits.length - 1].rotation.x = -Math.PI / 2; hits[hits.length - 1].position.set(0, 2.3, 0); h.anchor.position.set(0, 3, -6);
+    return g;
+  }
+  function buildPlug() {
+    const g = new THREE.Group();
+    box(2.6, 8, 7.8, M('strip', { color: 0x16171a, roughness: .6 }), 0, 0, 0, g);
+    const side = new THREE.Group(); side.rotation.y = -Math.PI / 2; side.position.x = -1.32; g.add(side);
+    textPlane(7.8, 8, T => { T('S', 2.54, 0, 1.6); T('V', 0, 0, 1.6); T('G', -2.54, 0, 1.6); }, 0, side);
+    return g;
+  }
+
+  /* layout: micro:bit centre = origin; robot local coords (board top = y 0) */
+  const ROBOT_POS = { x: 0, y: -24.5, z: -16 }, GROUND_R = -28.5;
+  const FIT = { mb: { t: [0, 0, 0], r: 31, d: [0, .32, 1] }, robot: { t: [0, -5, -16], r: 54, d: [0, .55, 1] }, strip: { t: [-4, -9, -2], r: 72, d: [-.2, .8, 1] } };
+  function groundY() { return mode === 'mb' ? -21.6 : GROUND_R; }
+  function plugTarget() { return V3(P1X, 6.5, HDR.V); }   // robot local
+  function plugStart() { return V3(-64, 0, 34); }
+  function stripPos() { return V3(0, -3.5, 46); }
+  const WIRE_COL = [['S', 0xF2C230], ['V', 0xE0452B], ['G', 0x1a1a1a]];
+  function updateWire() {
+    if (!wire) return;
+    wire.children.forEach((m, i) => {
+      const dz = HDR[WIRE_COL[i][0]] - HDR.V, p = plug.position.clone().add(V3(0, 4, dz));
+      const curve = new THREE.CatmullRomCurve3([p, p.clone().add(V3(0, 10, 0)), V3(-44 - dz * .3, 18, 12), V3(-62, 3, 38 + dz * .3), V3(-55, -3.2, 46 + dz * .35)]);
+      m.geometry.dispose(); m.geometry = new THREE.TubeGeometry(curve, 48, .6, 6, false);
+    });
+  }
+
+  function fitCamera(instant) {
+    const f = FIT[mode]; rig.updateMatrixWorld(); const t = rig.localToWorld(new THREE.Vector3(...f.t));
+    const w = slotEl ? slotEl.clientWidth : 800, h = slotEl ? slotEl.clientHeight : 500, asp = Math.max(.3, w / Math.max(h, 1));
+    const vf = THREE.MathUtils.degToRad(camera.fov) / 2, hf = Math.atan(Math.tan(vf) * asp);
+    const d = f.r / Math.sin(Math.min(vf, hf)) * 1.02;
+    const dirv = new THREE.Vector3(...f.d).normalize();
+    const pos = t.clone().add(dirv.multiplyScalar(d));
+    if (instant || reduced()) { camera.position.copy(pos); controls.target.copy(t); controls.update(); camTween = null; }
+    else camTween = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos, t1: t, k: 0 };
+    controls.minDistance = Math.min(d * .45, 40); controls.maxDistance = d * 2.2;
+  }
+
+  function focusOn(world, r, dirLocal) {
+    const t = world.clone();
+    const dv = dirLocal.clone().normalize().applyQuaternion(rig.quaternion);
+    const w = slotEl ? slotEl.clientWidth : 800, h = slotEl ? slotEl.clientHeight : 500, vf = THREE.MathUtils.degToRad(camera.fov) / 2, hf = Math.atan(Math.tan(vf) * w / Math.max(h, 1));
+    const p = t.clone().add(dv.multiplyScalar(r / Math.sin(Math.min(vf, hf))));
+    if (reduced()) { camera.position.copy(p); controls.target.copy(t); camTween = null; }
+    else camTween = { p0: camera.position.clone(), t0: controls.target.clone(), p1: p, t1: t, k: 0 };
+  }
+  function setMode(m, instant) {
+    mode = m;
+    robot.visible = m !== 'mb'; strip.visible = m === 'strip'; plug.visible = m === 'strip'; wire.visible = m === 'strip';
+    ground.position.y = groundY();
+    if (m === 'mb') { mb.position.set(0, 0, 0); mb.rotation.set(0, 0, 0); }
+    fitCamera(instant);
+  }
+
+  /* ---------- tween engine ---------- */
+  function seq(steps, done) {
+    if (reduced()) { steps.forEach(s => s.fn && s.fn(1)); done && done(); return; }
+    anim.push({ steps, i: 0, t: 0, done });
+  }
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const HOVER = 26;
+
+  function assemble(withWrong = true, done) {
+    setMode(HW.stripLinked ? 'strip' : 'robot');
+    const up = V3(0, HOVER, 0), half = V3(0, 9, 0), fin = V3(0, 0, 0);
+    const steps = [];
+    msg(null);
+    if (withWrong) {
+      steps.push({ d: .01, fn: () => { mb.position.copy(up); mb.rotation.set(0, Math.PI, 0); } });
+      steps.push({ d: .7, fn: t => { mb.position.lerpVectors(up, half, ease(t)); } });
+      steps.push({ d: .05, fn: () => msg('bad', '方向錯：LED 屏向着電池座，背向 RGB 燈') });
+      steps.push({ d: 1.6 });
+      steps.push({ d: .5, fn: t => { mb.position.lerpVectors(half, up, ease(t)); } });
+      steps.push({ d: .7, fn: t => { mb.rotation.y = Math.PI * (1 - ease(t)); } });
+    } else steps.push({ d: .01, fn: () => { mb.position.copy(up); mb.rotation.set(0, 0, 0); } });
+    steps.push({ d: .8, fn: t => { mb.rotation.y = 0; mb.position.lerpVectors(up, fin, ease(t)); } });
+    steps.push({ d: .05, fn: () => { HW.assembled = true; msg('ok', '方向正確：LED 屏和 RGB 燈都向前'); } });
+    seq(steps, done);
+  }
+  function linkStrip(done) {
+    const go = () => {
+      HW.stripLinked = false; setMode('strip');
+      const s = plugStart(), t = plugTarget(), a = t.clone().add(V3(0, 16, 0));
+      plug.position.copy(s); updateWire();
+      showPinLabels(false); msg(null);
+      seq([
+        { d: 1.1, fn: k => { plug.position.lerpVectors(s, a, ease(k)); updateWire(); } },
+        { d: .05, fn: () => focusOn(robot.localToWorld(V3(P1X, 12, HDR.V)), 17, V3(-1, .45, -.12)) },
+        { d: .7 },
+        { d: .05, fn: () => { showPinLabels(true); msg('plain', '黃對 S、紅對 V、黑對 G'); } },
+        { d: 1.9 },
+        { d: .7, fn: k => { plug.position.lerpVectors(a, t, ease(k)); updateWire(); } },
+        { d: .05, fn: () => { HW.stripLinked = true; msg('ok', 'G 對 G、V 對 V、S 對 S：插好了'); } }
+      ], () => { setTimeout(() => { showPinLabels(false); if (mode === 'strip') fitCamera(false); }, 2000); done && done(); });
+    };
+    if (!HW.assembled) assemble(false, go); else go();
+  }
+  function placeStripStatic() { plug.position.copy(plugTarget()); updateWire(); }
+
+  /* ---------- labels ---------- */
+  let pinLbl = false;
+  function showPinLabels(on) { pinLbl = on; }
+  function msg(kind, text) { opts.onMsg && opts.onMsg(kind, text); }
+
+  function project(v3) {
+    const v = v3.clone().project(camera);
+    return { x: (v.x * .5 + .5) * slotEl.clientWidth, y: (-v.y * .5 + .5) * slotEl.clientHeight, vis: v.z < 1 };
+  }
+  function facing(obj) {
+    const n = new THREE.Vector3(0, 0, 1).applyQuaternion(obj.getWorldQuaternion(new THREE.Quaternion()));
+    const p = obj.getWorldPosition(new THREE.Vector3());
+    return n.dot(camera.position.clone().sub(p)) > 0;
+  }
+  function drawLabels() {
+    if (!labelsEl) return;
+    let html = '';
+    if (filter) {
+      for (const [id, h] of Object.entries(halos)) {
+        if (!h.g.visible) continue;
+        if (!h.g.parent.visible || !visibleChain(h.g)) continue;
+        if (id !== 'strip' && !facing(h.g)) continue;
+        const p = project(h.anchor.getWorldPosition(new THREE.Vector3())); if (!p.vis) continue;
+        const col = filter === 'input' ? 'var(--input)' : 'var(--basic)';
+        html += `<span class="lbl ${h.lp === 'above' ? '' : h.lp}" style="left:${p.x}px;top:${p.y}px;--c:${col}">${PARTS[id].name}</span>`;
+      }
+    }
+    if (pinLbl && mode === 'strip') {
+      for (const [t, z] of Object.entries(HDR)) {
+        const a = project(robot.localToWorld(new THREE.Vector3(P1X, 10, z)));
+        const b = project(robot.localToWorld(new THREE.Vector3(plug.position.x, plug.position.y + 5.5, z)));
+        html += `<span class="lbl pin" style="left:${a.x}px;top:${a.y}px">${t}</span><span class="lbl pin" style="left:${b.x}px;top:${b.y}px">${t}</span>`;
+      }
+    }
+    labelsEl.innerHTML = html;
+  }
+  function visibleChain(o) { while (o) { if (!o.visible) return false; o = o.parent; } return true; }
+
+  /* ---------- look ---------- */
+  function applyLook() {
+    const hl = new Set();
+    if (filter) for (const [id, p] of Object.entries(PARTS)) if (p.types.includes(filter)) hl.add(id);
+    for (const m of mats) {
+      const f = !filter || hl.has(m.userData.part) ? 1 : .35;
+      m.color.copy(m.userData.base).multiplyScalar(f);
+      m.emissive.copy(m.userData.baseE); m.emissiveIntensity = m.userData.baseEI * (f < 1 ? .35 : 1);
+    }
+    for (const [id, h] of Object.entries(halos)) {
+      const on = filter && hl.has(id);
+      h.g.visible = !!on;
+      const c = filter === 'input' ? P3D.input : P3D.basic; h.fm.color.setHex(c); h.gm.color.setHex(c);
+    }
+  }
+  function setLit(m, hex, k = 1) {
+    if (hex == null) { m.userData.base.setHex(m === undefined ? 0 : (ledMats.includes(m) ? P3D.ledOff : P3D.pix)); m.userData.baseE.setHex(0); m.userData.baseEI = 0; }
+    else { m.userData.base.setHex(hex).multiplyScalar(.5); m.userData.baseE.setHex(hex); m.userData.baseEI = (ledMats.includes(m) ? 1.6 : 1.05) * k; }
+  }
+  function sync() {
+    if (!renderer) return;
+    HW.leds.forEach((v, i) => setLit(ledMats[i], v ? P3D.ledOn : null));
+    const pw = HW.power;
+    HW.rgb.forEach((c, i) => { const hex = pw && c ? parseInt(c.slice(1), 16) : null; setLit(rgbMats[i], hex); rgbLights[i].color.setHex(hex || 0xffffff); rgbLights[i].intensity = hex ? 260 : 0; });
+    const sk = HW.stripBright == null ? 1 : HW.stripBright;
+    HW.strip.forEach((c, i) => { const hex = pw && HW.stripLinked && c ? parseInt(c.slice(1), 16) : null; setLit(stripMats[i], hex, .65 + .35 * sk); });
+    stripLights.forEach((L, j) => { const c = pw && HW.stripLinked && (HW.strip[j * 2] || HW.strip[j * 2 + 1]); L.color.setHex(c ? parseInt(c.slice(1), 16) : 0xffffff); L.intensity = c ? 300 * sk : 0; });
+    if (switchKnob) switchKnob.position.x = pw ? -10.5 : -5.5;
+    lightF = .25 + .75 * (HW.light / 255);
+    hemi.intensity = 1.6 * lightF; dir.intensity = 2.4 * lightF; fill.intensity = .8 * lightF;
+    for (const m of mats) m.envMapIntensity = .55 * lightF;
+    applyLook();
+  }
+
+  /* ---------- interaction ---------- */
+  function pick(ev) {
+    const r = renderer.domElement.getBoundingClientRect();
+    const v = new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    const rc = new THREE.Raycaster(); rc.setFromCamera(v, camera);
+    const vis = hits.filter(h => visibleChain(h));
+    const hit = rc.intersectObjects(vis, false)[0];
+    return hit ? hit.object.userData.part : null;
+  }
+  function onDown(e) { downXY = [e.clientX, e.clientY]; }
+  function onUp(e) {
+    if (!downXY) return; const dx = e.clientX - downXY[0], dy = e.clientY - downXY[1]; downXY = null;
+    if (dx * dx + dy * dy > 64) return;
+    const part = pick(e);
+    if (part === 'btnA' || part === 'btnB') pressCap(part);
+    if (part === 'rbSwitch') { HW.power = !HW.power; hwChanged(); }
+    opts.onPart && opts.onPart(part);
+  }
+  function pressCap(id) {
+    const c = btnCaps[id]; if (!c) return;
+    seq([{ d: .08, fn: t => c.position.z = 2.85 - .6 * t }, { d: .12, fn: t => c.position.z = 2.25 + .6 * t }]);
+  }
+  function shake() {
+    const target = mode === 'mb' ? mb : rig, x0 = target.position.x, r0 = target.rotation.z;
+    seq([{ d: .5, fn: t => { const s = Math.sin(t * Math.PI * 6) * (1 - t); target.position.x = x0 + s * 5; target.rotation.z = r0 + s * .08; } },
+      { d: .01, fn: () => { target.position.x = x0; target.rotation.z = r0; } }]);
+  }
+  function view(side) {
+    const from = rig.rotation.y, to = rigBaseRot + (side === 'back' ? Math.PI : 0);
+    controls.autoRotate = false; opts.onAuto && opts.onAuto(false);
+    const p0 = camera.position.clone(), t0 = controls.target.clone();
+    rig.rotation.y = to; fitCamera(true); const p1 = camera.position.clone(), t1 = controls.target.clone();
+    rig.rotation.y = from; camera.position.copy(p0); controls.target.copy(t0);
+    seq([{ d: .6, fn: k => { const e = ease(k); rig.rotation.y = from + (to - from) * e; camera.position.lerpVectors(p0, p1, e); controls.target.lerpVectors(t0, t1, e); } }]);
+  }
+
+  function frame(ts) {
+    raf = requestAnimationFrame(frame);
+    const dt = Math.min(.25, (ts - last) / 1000 || 0); last = ts;
+    for (let i = anim.length - 1; i >= 0; i--) {
+      const a = anim[i], s = a.steps[a.i]; a.t += dt;
+      const k = Math.min(1, a.t / s.d); s.fn && s.fn(k);
+      if (k >= 1) { a.i++; a.t = 0; if (a.i >= a.steps.length) { anim.splice(i, 1); a.done && a.done(); } }
+    }
+    if (camTween) {
+      camTween.k = Math.min(1, camTween.k + dt / .6); const e = ease(camTween.k);
+      camera.position.lerpVectors(camTween.p0, camTween.p1, e); controls.target.lerpVectors(camTween.t0, camTween.t1, e);
+      if (camTween.k >= 1) camTween = null;
+    }
+    controls.update();
+    renderer.render(scene, camera);
+    drawLabels();
+  }
+  function resize() {
+    if (!slotEl) return; const w = slotEl.clientWidth, h = slotEl.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+
+  async function init() {
+    THREE = await import('three');
+    ({ OrbitControls } = await import('three/addons/controls/OrbitControls.js'));
+    const test = document.createElement('canvas');
+    if (!(test.getContext('webgl2') || test.getContext('webgl'))) throw new Error('no webgl');
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(28, 1.6, 1, 2000);
+    hemi = new THREE.HemisphereLight(0xffffff, 0xB8C2D0, 1.6); scene.add(hemi);
+    dir = new THREE.DirectionalLight(0xffffff, 2.4); dir.position.set(-90, 160, 140); dir.castShadow = true;
+    dir.shadow.mapSize.set(2048, 2048); dir.shadow.radius = 8; dir.shadow.bias = -.0004;
+    Object.assign(dir.shadow.camera, { left: -140, right: 140, top: 140, bottom: -140, near: 10, far: 600 }); scene.add(dir);
+    fill = new THREE.DirectionalLight(0xDFE8FF, .8); fill.position.set(160, 40, 60); scene.add(fill);
+    try { const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js'); const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture; } catch (e) {}
+    ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.ShadowMaterial({ opacity: .16 }));
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    rig = new THREE.Group(); rig.rotation.y = rigBaseRot; scene.add(rig);
+    mb = buildMicrobit(); rig.add(mb);
+    robot = buildRobot(); robot.position.set(ROBOT_POS.x, ROBOT_POS.y, ROBOT_POS.z); rig.add(robot);
+    strip = buildStrip(); strip.position.copy(stripPos()); robot.add(strip);
+    plug = buildPlug(); robot.add(plug);
+    wire = new THREE.Group(); robot.add(wire);
+    WIRE_COL.forEach(([, c]) => { const w = new THREE.Mesh(new THREE.BufferGeometry(), M('strip', { color: c, roughness: .55 })); w.castShadow = true; wire.add(w); });
+    plug.position.copy(plugStart()); updateWire();
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; controls.dampingFactor = .12; controls.enablePan = false; controls.autoRotateSpeed = 2.2;
+    controls.maxPolarAngle = Math.PI * .62;
+    renderer.domElement.addEventListener('pointerdown', onDown);
+    renderer.domElement.addEventListener('pointerup', onUp);
+    renderer.domElement.setAttribute('aria-label', '3D 模型：拖動可以轉動，兩指捏合可以縮放');
+    ro = new ResizeObserver(() => { resize(); });
+    setMode('mb', true); sync();
+  }
+
+  return {
+    init,
+    mount(slot, o = {}) {
+      opts = o; slotEl = slot; labelsEl = slot.querySelector('.labels');
+      slot.prepend(renderer.domElement); ro.disconnect(); ro.observe(slot); resize();
+      filter = null; controls.autoRotate = false;
+      rig.rotation.set(0, rigBaseRot, 0); rig.position.set(0, 0, 0);
+      anim.length = 0;
+      const m = o.mode || 'mb';
+      if (m === 'mb') { mb.position.set(0, 0, 0); mb.rotation.set(0, 0, 0); }
+      if (m !== 'mb' && HW.assembled) { mb.position.set(0, 0, 0); mb.rotation.set(0, 0, 0); }
+      if (m !== 'mb' && !HW.assembled) { mb.position.set(0, HOVER, 0); mb.rotation.set(0, 0, 0); }
+      if (m === 'strip' && HW.stripLinked) placeStripStatic(); else if (m === 'strip') { plug.position.copy(plugStart()); updateWire(); }
+      setMode(m, true); sync(); applyLook();
+      cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(frame);
+    },
+    unmount() { cancelAnimationFrame(raf); raf = 0; if (renderer && renderer.domElement.parentNode) renderer.domElement.remove(); slotEl = null; labelsEl = null; ro && ro.disconnect(); },
+    sync, shake, view, assemble, linkStrip, pressCap,
+    setFilter(f) { filter = f; applyLook(); },
+    setAuto(on) { controls.autoRotate = on; },
+    setMode(m) { setMode(m); },
+    get mode() { return mode; },
+    snapAssembled() { HW.assembled = true; mb.position.set(0, 0, 0); mb.rotation.set(0, 0, 0); },
+    snapStrip() { HW.assembled = true; HW.stripLinked = true; mb.position.set(0, 0, 0); placeStripStatic(); }
+  };
+})();
+
+/* ================= STATE ================= */
+const AVATAR_SRC = ''; // 放入呂Sir 頭像後改為例如 'lusir.png'
+const HW = { leds: Array(25).fill(0), rgb: [null, null, null, null], strip: Array(10).fill(null), stripBright: 1,
+  power: false, assembled: false, stripLinked: false, light: 180, sound: 40 };
+const store = {
+  get(k) { try { return localStorage.getItem('mblab.' + k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem('mblab.' + k, v); } catch (e) {} }
+};
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+let has3D = null;
+const ready3D = (async () => {
+  try { await Promise.race([Stage3D.init(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000))]); has3D = true; }
+  catch (e) { console.warn('3D unavailable:', e); has3D = false; }
+})();
+function hwChanged() { if (has3D) Stage3D.sync(); Fallback.sync(); }
+function resetHW(o = {}) {
+  HW.leds = Array(25).fill(0); HW.rgb = [null, null, null, null]; HW.strip = Array(10).fill(null); HW.stripBright = 1;
+  HW.light = 180; HW.sound = 40; HW.power = false; Object.assign(HW, o);
+}
+
+/* ================= LED PATTERNS ================= */
+const rows = (...r) => r.join('');
+const PAT = {
+  heart: rows('.#.#.', '#####', '#####', '.###.', '..#..'), smile: rows('.....', '.#.#.', '.....', '#...#', '.###.'),
+  x: rows('#...#', '.#.#.', '..#..', '.#.#.', '#...#'),
+  1: rows('..#..', '.##..', '..#..', '..#..', '.###.'), 2: rows('.###.', '....#', '..##.', '.#...', '.####'),
+  3: rows('.###.', '....#', '..##.', '....#', '.###.'), 4: rows('..##.', '.#.#.', '#..#.', '#####', '...#.'),
+  5: rows('#####', '#....', '####.', '....#', '####.'), 6: rows('...#.', '..#..', '.###.', '#...#', '.###.')
+};
+const pat = k => [...PAT[k]].map(c => c === '#' ? 1 : 0);
+
+/* ================= AUDIO ================= */
+const AU = {
+  ctx: null, muted: store.get('mute') === '1',
+  ensure() {
+    if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    if (this.ctx.state === 'suspended') this.ctx.resume(); return this.ctx;
+  },
+  tone(f, d, type = 'square', when = 0, vol = .07) {
+    if (this.muted) return; const c = this.ensure(); if (!c) return;
+    const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + when;
+    o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01);
+    g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(c.destination); o.start(t); o.stop(t + d + .03);
+  },
+  melody() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => this.tone(f, .17, 'square', i * .16)); },
+  click() { this.tone(900, .04, 'square', 0, .03); },
+  alarm() { this.tone(880, .16, 'square', 0, .06); this.tone(660, .16, 'square', .18, .06); },
+  ok() { this.tone(784, .1, 'triangle', 0, .12); this.tone(1175, .18, 'triangle', .1, .12); },
+  no() { this.tone(196, .22, 'triangle', 0, .1); },
+  dice() { for (let i = 0; i < 5; i++) this.tone(400 + i * 120, .05, 'square', i * .06, .04); }
+};
+
+/* ================= MIC ================= */
+const Mic = {
+  stream: null, raf: 0,
+  async start(cb, onFail) {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('no');
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const c = AU.ensure() || new AudioContext(); const src = c.createMediaStreamSource(this.stream), an = c.createAnalyser();
+      an.fftSize = 1024; src.connect(an); const buf = new Float32Array(an.fftSize);
+      const loop = () => { an.getFloatTimeDomainData(buf); let s = 0; for (const v of buf) s += v * v;
+        const rms = Math.sqrt(s / buf.length); cb(Math.max(0, Math.min(255, Math.round(rms * 900)))); this.raf = requestAnimationFrame(loop); };
+      loop(); return true;
+    } catch (e) { this.stop(); onFail && onFail(); return false; }
+  },
+  stop() { cancelAnimationFrame(this.raf); if (this.stream) this.stream.getTracks().forEach(t => t.stop()); this.stream = null; },
+  get on() { return !!this.stream; }
+};
+
+/* ================= ICONS ================= */
+const IC = {
+  ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="var(--paper)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  bad: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M8 8l8 8M16 8l-8 8" stroke="var(--paper)" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  input: '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M2 13h12M9 7l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="17" y="4" width="7" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
+  output: '<svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="4" width="7" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M11 13h12M18 7l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  plug: '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M8 3v6M18 3v6M5 9h16v5a8 8 0 0 1-16 0zM13 22v3" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  sound: '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M4 10h4l6-5v16l-6-5H4z" fill="currentColor"/><path d="M18 9a5 5 0 0 1 0 8M20.5 6a9 9 0 0 1 0 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  mute: '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M4 10h4l6-5v16l-6-5H4z" fill="currentColor"/><path d="M18 10l6 6M24 10l-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  helper: '<svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M4 24c1-5 5-8 9-8s8 3 9 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  arrow: '<svg viewBox="0 0 40 28" aria-hidden="true"><path d="M2 14h32M24 4l12 10-12 10" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+const EXICON = {
+  eye: '<svg viewBox="0 0 48 32" aria-hidden="true"><path d="M3 16C10 5 38 5 45 16C38 27 10 27 3 16Z" fill="none" stroke="var(--ink)" stroke-width="3"/><circle cx="24" cy="16" r="6" fill="var(--ink)"/></svg>',
+  brain: '<svg viewBox="0 0 48 32" aria-hidden="true"><path d="M14 28c-6 0-9-5-7-9-4-3-2-10 4-10 1-5 9-7 13-3 4-4 12-2 13 3 6 0 8 7 4 10 2 4-1 9-7 9z" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><path d="M24 6v22" stroke="var(--ink)" stroke-width="2.5"/></svg>',
+  feet: '<svg viewBox="0 0 48 40" aria-hidden="true"><g fill="var(--ink)"><ellipse cx="14" cy="26" rx="6" ry="10"/><ellipse cx="34" cy="26" rx="6" ry="10"/><circle cx="10" cy="11" r="2.2"/><circle cx="15" cy="9" r="2.2"/><circle cx="20" cy="11" r="2"/><circle cx="29" cy="11" r="2"/><circle cx="34" cy="9" r="2.2"/><circle cx="39" cy="11" r="2.2"/></g></svg>',
+  btn: '<svg viewBox="0 0 48 32" aria-hidden="true"><rect x="12" y="4" width="24" height="24" rx="4" fill="#3A3D42"/><circle cx="24" cy="16" r="8" fill="var(--key)"/></svg>',
+  chip: '<svg viewBox="0 0 48 32" aria-hidden="true"><rect x="14" y="6" width="20" height="20" rx="2" fill="var(--ink)"/><g stroke="var(--ink)" stroke-width="2.5">' + [10, 16, 22].map(y => `<line x1="8" y1="${y}" x2="14" y2="${y}"/><line x1="34" y1="${y}" x2="40" y2="${y}"/>`).join('') + '</g></svg>',
+  led: '<span class="exled"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="6" fill="var(--pcb)"/></svg></span>'
+};
+const fb = (ok, text) => `<span class="feedback ${ok ? 'ok' : 'bad'}">${ok ? IC.ok : IC.bad}${text}</span>`;
+
+/* ================= BLOCK BUILDERS ================= */
+const icon5 = k => { const a = pat(k); let s = '<svg viewBox="0 0 25 25" aria-hidden="true">';
+  a.forEach((v, i) => s += `<rect x="${(i % 5) * 5 + .8}" y="${Math.floor(i / 5) * 5 + .8}" width="3.4" height="3.4" rx=".8" fill="${v ? 'var(--led-on)' : 'var(--line)'}"/>`);
+  return s + '</svg>'; };
+const P = (t, c = '') => `<span class="p ${c}">${t}</span>`;
+const ICONP = (k, name) => `<span class="p icon">${icon5(k)}<span class="sr">${name}</span></span>`;
+const DOT = (name, col) => `<span class="p"><span class="dot" style="background:${col}"></span>${name}</span>`;
+const blk = (cat, inner, id = '') => `<div class="blk c-${cat}"${id ? ` data-id="${id}"` : ''}>${inner}</div>`;
+const cblk = (cat, head, mouth, o = {}) => `<div class="cblk c-${cat}${o.hat ? ' hat' : ''}${o.collapsed ? ' collapsed collapsible' : ''}"${o.id ? ` data-id="${o.id}"` : ''}><div class="chead"${o.collapsed ? ' data-collapse role="button" tabindex="0" aria-expanded="false" title="點一下展開／收起"' : ''}>${head}${o.collapsed ? '<span class="more" aria-hidden="true">⋯ 展開</span>' : ''}</div><div class="cmouth">${mouth}</div><div class="cfoot"></div></div>`;
+const ifelse = (cond, thenH, elseH, id = 'if', elifs = []) => `<div class="cblk c-logic" data-id="${id}"><div class="chead" data-r="if">如果 ${cond} 那麼</div><div class="cmouth" data-r="then">${thenH}</div>${elifs.map((e, i) => `<div class="cmid" data-r="elif${i}">否則如果 ${e[0]} 那麼</div><div class="cmouth" data-r="elif${i}b">${e[1]}</div>`).join('')}<div class="cmid" data-r="else">否則</div><div class="cmouth" data-r="elsebody">${elseH}</div><div class="cfoot"></div></div>`;
+const CMP = (a, op, b) => `<span class="p cmp">${a} ${op} ${b}</span>`;
+const SENS = t => P(t, 'sensor'), NUM = n => P(n, 'num');
+const ONSTART = (body, collapsed) => cblk('basic', '當開始', body, { hat: true, collapsed, id: 'start' });
+const SETSTRIP = (pin, n) => blk('var', `設定 ${P('strip')} 為 ${P(`NeoPixel 在 ${pin} 有 ${n} 粒燈`, 'reporter')}`);
+function wireCollapse(root) {
+  $$('[data-collapse]', root).forEach(b => {
+    const t = () => { const c = b.closest('.cblk'); const col = c.classList.toggle('collapsed'); b.setAttribute('aria-expanded', !col); $('.more', b).textContent = col ? '⋯ 展開' : '收起'; };
+    b.addEventListener('click', t); b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t(); } });
+  });
+}
+
+/* ================= 2D FALLBACK ================= */
+const Fallback = (() => {
+  let slot = null, o = {};
+  function svg(mode) {
+    const R = mode !== 'mb', S = mode === 'strip', H = S ? 470 : R ? 400 : 200;
+    let s = `<svg viewBox="0 0 380 ${H}" role="img" aria-label="micro:bit 平面圖"><g transform="translate(112,12)">`;
+    s += `<rect width="156" height="126" rx="10" fill="var(--pcb)"/>`;
+    for (let i = 0; i < 25; i++) s += `<rect id="fl-${i}" x="${78 + (i % 5 - 2) * 13 - 2}" y="${66 - (2 - Math.floor(i / 5)) * 13 - 3.5}" width="4" height="7" rx="1" fill="var(--led-off)"/>`;
+    s += `<g data-part="btnA" class="fpart"><rect x="10" y="57" width="20" height="20" rx="3" fill="#3A3D42"/><circle cx="20" cy="67" r="7" fill="var(--key)"/><text x="20" y="46" fill="#fff" font-size="12" text-anchor="middle" font-weight="700">A</text></g>`;
+    s += `<g data-part="btnB" class="fpart"><rect x="126" y="57" width="20" height="20" rx="3" fill="#3A3D42"/><circle cx="136" cy="67" r="7" fill="var(--key)"/><text x="136" y="46" fill="#fff" font-size="12" text-anchor="middle" font-weight="700">B</text></g>`;
+    s += `<ellipse data-part="logo" class="fpart" cx="78" cy="17" rx="12" ry="8" fill="#D9AC4C"/><circle data-part="mic" class="fpart" cx="103" cy="17" r="3" fill="#000" stroke="#9a9fa8" stroke-width="1.5"/>`;
+    s += `<g data-part="pins" class="fpart">${[19.5, 48.75, 78, 107.25, 136.5].map((x, i) => `<rect x="${x - 10}" y="98" width="20" height="28" rx="3" fill="#D9AC4C"/><circle cx="${x}" cy="112" r="6" fill="#050506"/><text x="${x}" y="93" fill="#fff" font-size="9" text-anchor="middle">${['0', '1', '2', '3V', 'GND'][i]}</text>`).join('')}</g></g>`;
+    if (R) {
+      // top view of the real board: front edge (RGB 0-3) nearest the micro:bit, rear edge with GVS headers
+      s += `<g transform="translate(70,146)"><rect width="240" height="172" rx="12" fill="var(--pcb)"/>`;
+      for (let i = 0; i < 4; i++) s += `<rect id="fr-${i}" data-part="rbRgb" class="fpart" x="${44 + i * 40}" y="6" width="16" height="16" rx="3" fill="#E8E8E8"/><text x="${68 + i * 40}" y="20" fill="#fff" font-size="12" font-weight="700">${i}</text>`;
+      s += `<rect data-part="rbSlot" class="fpart" x="28" y="28" width="184" height="14" rx="3" fill="#2a2c30" stroke="#55585e"/>`;
+      s += `<g data-part="rbBatt" class="fpart"><rect x="10" y="50" width="220" height="58" rx="4" fill="#16171a" stroke="#55585e"/><rect x="24" y="62" width="192" height="34" rx="16" fill="#3f6b4a"/><text x="120" y="84" fill="#fff" font-size="11" text-anchor="middle">18650 電池</text></g>`;
+      const rows = [['#F2C230', 'S'], ['#E0452B', 'V'], ['#1a1a1a', 'G']];
+      // seen from the front: P0..P15 group on the left, S1..S8 group on the right
+      s += `<g data-part="rbGvs" class="fpart">${rows.map(([c, t], j) => [...Array(8)].map((_, i) => `<rect x="${24 + i * 9}" y="${116 + j * 9}" width="8" height="8" fill="${c}" stroke="${i < 3 ? '#fff' : '#666'}" stroke-width="${i < 3 ? 1.2 : .6}"/>`).join('') + `<text x="12" y="${123 + j * 9}" fill="#fff" font-size="8">${t}</text>`).join('')}
+        ${['P0', '1', '2', '8', '12', '13', '14', '15'].map((t, i) => `<text x="${28 + i * 9}" y="153" fill="#fff" font-size="6.5" text-anchor="middle">${t}</text>`).join('')}</g>`;
+      rows.forEach(([c], j) => { for (let i = 0; i < 8; i++) s += `<rect x="${156 + i * 9}" y="${116 + j * 9}" width="8" height="8" fill="${c}" stroke="#666" stroke-width=".6"/>`; });
+      s += `<circle data-part="rbBuzzer" class="fpart" cx="134" cy="128" r="12" fill="#2b2d31" stroke="#55585e"/>`;
+      s += `<g data-part="rbSwitch" class="fpart"><rect x="72" y="156" width="34" height="12" rx="2" fill="#B8BCC2"/><rect id="fsw" x="74" y="157" width="12" height="10" rx="2" fill="#16171a"/><text x="58" y="166" fill="#fff" font-size="9" font-weight="700">ON</text></g></g>`;
+    }
+    if (S) {
+      [['#F2C230', 0], ['#E0452B', 9], ['#1a1a1a', 18]].forEach(([c, dy]) => { s += `<path d="M${70 + 37} ${146 + 120 + dy} C 40 ${290 + dy}, 8 ${360}, 30 ${420}" fill="none" stroke="${c}" stroke-width="3"/>`; });
+      s += `<g data-part="strip" class="fpart"><rect x="22" y="410" width="340" height="34" rx="6" fill="#1B1D21"/>`;
+      for (let i = 0; i < 10; i++) s += `<rect id="fs-${i}" x="${32 + i * 33}" y="416" width="22" height="22" rx="4" fill="#E8E8E8"/>`;
+      s += `</g>`;
+    }
+    return s + '</svg>';
+  }
+  function sync() {
+    if (!slot) return;
+    HW.leds.forEach((v, i) => { const e = slot.querySelector('#fl-' + i); if (e) e.setAttribute('fill', v ? 'var(--led-on)' : 'var(--led-off)'); });
+    HW.rgb.forEach((c, i) => { const e = slot.querySelector('#fr-' + i); if (e) e.setAttribute('fill', HW.power && c ? c : '#E8E8E8'); });
+    HW.strip.forEach((c, i) => { const e = slot.querySelector('#fs-' + i); if (e) e.setAttribute('fill', HW.power && HW.stripLinked && c ? c : '#E8E8E8'); });
+    const k = slot.querySelector('#fsw'); if (k) k.setAttribute('x', HW.power ? 92 : 74);
+    const sv = slot.querySelector('svg'); if (sv) sv.style.opacity = .35 + .65 * HW.light / 255;
+  }
+  return {
+    mount(sl, opts) {
+      slot = sl; o = opts; sl.classList.add('fallback');
+      sl.insertAdjacentHTML('afterbegin', svg(opts.mode || 'mb') + '<span class="fallback-note">3D 載入不到，現在用平面圖。</span>');
+      sl.querySelector('svg').addEventListener('click', e => {
+        const g = e.target.closest('[data-part]'); if (!g) return;
+        if (g.dataset.part === 'rbSwitch') { HW.power = !HW.power; hwChanged(); }
+        o.onPart && o.onPart(g.dataset.part);
+      });
+      sync();
+    },
+    unmount() { slot = null; }, sync
+  };
+})();
+
+/* ================= STAGE HELPERS ================= */
+const stageHTML = (extra = '') => `<div class="stage" data-stage><div class="labels"></div><div class="loading">3D 模型載入中…</div>
+  <div class="partcard" hidden role="dialog" aria-live="polite"><button class="btn icon-btn close" type="button" aria-label="關閉">✕</button><h3></h3><p></p><div class="typetag"></div></div>
+  <div class="stage-msg state-msg" hidden></div>${extra}</div>`;
+function showPart(slot, id) {
+  const card = $('.partcard', slot); if (!card) return;
+  if (!id || !PARTS[id]) { card.hidden = true; return; }
+  const p = PARTS[id]; card.hidden = false; $('h3', card).textContent = p.name; $('p', card).textContent = p.use;
+  const t = $('.typetag', card), main = p.types[0];
+  t.className = 'typetag ' + (main === 'input' ? '' : main === 'output' ? '' : 't-plain');
+  t.style.setProperty('--c', main === 'input' ? 'var(--input)' : main === 'output' ? 'var(--basic)' : 'var(--ws)');
+  t.innerHTML = (main === 'input' ? IC.input : main === 'output' ? IC.output : main === 'process' ? '' : IC.plug) + p.tlabel;
+  if (main === 'process') { t.className = 'typetag'; t.style.setProperty('--c', 'var(--ink)'); }
+}
+async function mountStage(root, o = {}) {
+  const slot = $('[data-stage]', root); if (!slot) return;
+  await ready3D; if (!slot.isConnected) return;
+  $('.loading', slot)?.remove();
+  const msgEl = $('.stage-msg', slot);
+  $('.partcard .close', slot).addEventListener('click', () => showPart(slot, null));
+  const opts = Object.assign({}, o, {
+    onPart(id) { if (o.cards !== false) showPart(slot, id); if (id) AU.click(); o.onPart && o.onPart(id); },
+    onMsg(kind, text) {
+      if (!msgEl) return; if (!kind) { msgEl.hidden = true; return; }
+      msgEl.hidden = false; msgEl.className = 'stage-msg state-msg ' + (kind === 'plain' ? '' : kind);
+      msgEl.innerHTML = (kind === 'ok' ? IC.ok : kind === 'bad' ? IC.bad : '') + text;
+      if (kind === 'bad') AU.no(); if (kind === 'ok') AU.ok();
+    }
+  });
+  Stage.opts = opts; Stage.slot = slot;
+  if (has3D) Stage3D.mount(slot, opts); else Fallback.mount(slot, opts);
+  hwChanged();
+}
+const Stage = {
+  opts: null, slot: null,
+  unmount() { if (has3D) Stage3D.unmount(); Fallback.unmount(); this.slot = null; },
+  shake() { if (has3D) Stage3D.shake(); },
+  view(s) { if (has3D) Stage3D.view(s); },
+  filter(f) { if (has3D) Stage3D.setFilter(f); else this.opts && this.opts.onMsg('plain', f ? (f === 'input' ? '輸入：按鈕、logo、咪高峰、加速度計' : '輸出：LED 屏、喇叭') : null); },
+  auto(on) { if (has3D) Stage3D.setAuto(on); },
+  assemble(done) { if (has3D) Stage3D.assemble(true, done); else { HW.assembled = true; this.opts.onMsg('ok', '方向正確：LED 屏和 RGB 燈同一方向'); done && done(); } },
+  linkStrip(done) { if (has3D) Stage3D.linkStrip(done); else { HW.assembled = HW.stripLinked = true; hwChanged(); this.opts.onMsg('ok', 'G 對 G、V 對 V、S 對 S：插好了'); done && done(); } },
+  setMode(m) { if (has3D) Stage3D.setMode(m); },
+  press(id) { if (has3D) Stage3D.pressCap(id); }
+};
+function sliderHTML(kind, id, val, mark) {
+  return `<div class="slider ${kind}"><input type="range" min="0" max="255" value="${val}" id="${id}" aria-label="${kind === 'light' ? '光線強度' : '聲音強度'}">${mark != null ? `<span class="mark" style="left:calc(20px + (100% - 40px) * ${mark / 255})"><span>${mark}</span></span>` : ''}</div>`;
+}
+function rollNum(el, to) {
+  const from = +el.textContent || 0; if (reducedMotion() || from === to) { el.textContent = to; return; }
+  const t0 = performance.now(); const step = t => { const k = Math.min(1, (t - t0) / 250); el.textContent = Math.round(from + (to - from) * k); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+let toastT; function toast(t) { const e = $('#toast'); e.textContent = t; e.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => e.hidden = true, 2600); }
+
+/* ================= SCENES (intro) ================= */
+const SCENE = {
+  1: `<svg viewBox="0 0 520 340" role="img" aria-label="一隻手指按下 micro:bit 的按鈕 A，LED 屏出現心形">
+    <line x1="20" y1="300" x2="500" y2="300" stroke="var(--line)" stroke-width="3"/>
+    <rect x="140" y="70" width="240" height="190" rx="18" fill="var(--pcb)"/>
+    ${pat('heart').map((v, i) => `<rect x="${236 + (i % 5) * 12}" y="${120 + Math.floor(i / 5) * 18}" width="7" height="12" rx="2" fill="${v ? 'var(--led-on)' : 'var(--led-off)'}"/>`).join('')}
+    <rect x="160" y="150" width="34" height="34" rx="5" fill="#3A3D42"/><circle cx="177" cy="167" r="11" fill="var(--key)"/>
+    <rect x="326" y="150" width="34" height="34" rx="5" fill="#3A3D42"/><circle cx="343" cy="167" r="11" fill="var(--key)"/>
+    <ellipse cx="260" cy="92" rx="18" ry="11" fill="#D9AC4C"/>
+    <path d="M60 300 C 60 240, 110 200, 150 190 L 172 176 a 9 9 0 0 1 12 12 L 168 214 C 160 250, 130 290, 120 300 Z" fill="var(--avatar)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M196 150 l 12 -14 M 198 168 h 18 M 196 186 l 12 14" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="440" cy="80" r="40" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><text x="440" y="96" text-anchor="middle" font-size="46" font-weight="700" fill="var(--ink)">?</text>
+    <path d="M405 104 L 388 130 L 420 112" fill="var(--paper)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/></svg>`,
+  2: `<svg viewBox="0 0 520 340" role="img" aria-label="晚上的睡房，桌上的夜燈自動亮起">
+    <rect x="10" y="10" width="500" height="320" rx="14" fill="var(--ink)"/>
+    <rect x="300" y="40" width="160" height="120" rx="6" fill="none" stroke="var(--ink-2)" stroke-width="4"/><line x1="380" y1="40" x2="380" y2="160" stroke="var(--ink-2)" stroke-width="4"/>
+    <path d="M430 62 a 22 22 0 1 0 14 38 a 18 18 0 1 1 -14 -38z" fill="var(--light-hi)"/>
+    <rect x="30" y="200" width="200" height="70" rx="10" fill="none" stroke="var(--ink-2)" stroke-width="4"/><rect x="40" y="186" width="60" height="26" rx="10" fill="none" stroke="var(--ink-2)" stroke-width="4"/>
+    <line x1="250" y1="270" x2="490" y2="270" stroke="var(--ink-2)" stroke-width="4"/>
+    <g fill="var(--light-hi)" opacity=".22"><circle cx="370" cy="232" r="70"/></g>
+    <rect x="320" y="224" width="100" height="44" rx="6" fill="var(--pcb)" stroke="var(--ink-2)" stroke-width="2"/>
+    ${[0, 1, 2, 3].map(i => `<rect x="${330 + i * 22}" y="236" width="14" height="14" rx="3" fill="var(--paper)"/>`).join('')}
+    <g stroke="var(--light-hi)" stroke-width="4" stroke-linecap="round"><line x1="370" y1="208" x2="370" y2="190"/><line x1="320" y1="214" x2="306" y2="200"/><line x1="420" y1="214" x2="434" y2="200"/></g></svg>`,
+  3: `<svg viewBox="0 0 520 340" role="img" aria-label="課室很吵，牆上的燈條亮了很多粒，micro:bit 顯示交叉">
+    <line x1="20" y1="300" x2="500" y2="300" stroke="var(--line)" stroke-width="3"/>
+    <rect x="60" y="30" width="400" height="44" rx="8" fill="var(--pcb)"/>
+    ${[...Array(10)].map((_, i) => `<rect x="${72 + i * 38}" y="40" width="24" height="24" rx="5" fill="${i < 8 ? 'var(--led-on)' : 'var(--line)'}"/>`).join('')}
+    <rect x="215" y="96" width="90" height="72" rx="10" fill="var(--pcb)"/>
+    ${pat('x').map((v, i) => `<rect x="${244 + (i % 5) * 7}" y="${106 + Math.floor(i / 5) * 11}" width="4" height="7" rx="1" fill="${v ? 'var(--led-on)' : 'var(--led-off)'}"/>`).join('')}
+    ${[[90, 240], [260, 250], [430, 240]].map(([x, y]) => `<circle cx="${x}" cy="${y - 40}" r="30" fill="var(--avatar)" stroke="var(--ink)" stroke-width="3"/><path d="M${x - 46} 300 q 46 -60 92 0" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/><ellipse cx="${x}" cy="${y - 30}" rx="9" ry="7" fill="var(--ink)"/>
+      <path d="M${x + 40} ${y - 56} q 12 16 0 32 M${x + 54} ${y - 66} q 20 26 0 52" fill="none" stroke="var(--ink-2)" stroke-width="3" stroke-linecap="round"/>`).join('')}</svg>`
+};
+const HOMEICON = {
+  lab: `<svg viewBox="0 0 140 110" aria-hidden="true"><rect x="30" y="18" width="80" height="64" rx="8" fill="var(--pcb)"/>${pat('smile').map((v, i) => `<rect x="${56 + (i % 5) * 6}" y="${32 + Math.floor(i / 5) * 8}" width="3" height="5" fill="${v ? 'var(--led-on)' : 'var(--led-off)'}"/>`).join('')}<path d="M20 96 a 56 18 0 0 0 100 0" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><path d="M112 88 l10 8 -12 5" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  1: `<svg viewBox="0 0 140 110" aria-hidden="true"><rect x="28" y="10" width="84" height="90" rx="10" fill="var(--pcb)"/>${pat('heart').map((v, i) => `<rect x="${52 + (i % 5) * 8}" y="${30 + Math.floor(i / 5) * 11}" width="4" height="7" rx="1" fill="${v ? 'var(--led-on)' : 'var(--led-off)'}"/>`).join('')}</svg>`,
+  2: `<svg viewBox="0 0 140 110" aria-hidden="true"><rect x="20" y="58" width="100" height="40" rx="6" fill="var(--pcb)"/>${[0, 1, 2, 3].map(i => `<rect x="${30 + i * 22}" y="70" width="14" height="14" rx="3" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>`).join('')}<g stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="70" y1="44" x2="70" y2="28"/><line x1="40" y1="48" x2="30" y2="36"/><line x1="100" y1="48" x2="110" y2="36"/></g><path d="M104 14 a 12 12 0 1 0 8 20 a 10 10 0 1 1 -8 -20z" fill="var(--ink)"/></svg>`,
+  3: `<svg viewBox="0 0 140 110" aria-hidden="true"><rect x="8" y="40" width="124" height="30" rx="6" fill="var(--pcb)"/>${[...Array(10)].map((_, i) => `<rect x="${14 + i * 12}" y="48" width="8" height="14" rx="2" fill="${i < 6 ? 'var(--led-on)' : 'var(--line)'}"/>`).join('')}<path d="M100 22 q 8 8 0 16 M110 16 q 14 14 0 28" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><path d="M80 24h8l8-6v24l-8-6h-8z" fill="var(--ink)"/></svg>`
+};
+
+/* ================= SHARED PAGE PARTS ================= */
+function introPage(n, q) {
+  return { html: `<div class="intro"><div class="scene pop">${SCENE[n]}</div><div class="qcard pop"><span class="chip">想一想</span><p class="question">${q}</p></div></div>` };
+}
+const DL_CARD = {
+  title: '下載到 micro:bit', html: `<div class="dl2">
+    <div class="card"><b>方法 1：USB 配對（Chrome）</b>
+      <svg viewBox="0 0 240 90" aria-hidden="true"><rect x="8" y="14" width="96" height="62" rx="6" fill="none" stroke="var(--ink)" stroke-width="3"/><rect x="24" y="58" width="64" height="12" rx="6" fill="var(--basic)"/><path d="M104 46 C 140 46, 140 46, 160 46" stroke="var(--ink)" stroke-width="3" fill="none" stroke-dasharray="6 5"/><rect x="160" y="22" width="70" height="50" rx="7" fill="var(--pcb)"/></svg>
+      <ol><li>USB 線接好 micro:bit</li><li>按「下載」旁的「⋯」→「連接裝置」</li><li>揀 BBC micro:bit，按「配對」</li><li>之後按「下載」就完成</li></ol></div>
+    <div class="card"><b>方法 2：把 .hex 拖入磁碟</b>
+      <svg viewBox="0 0 240 90" aria-hidden="true"><path d="M20 10h40l14 14v56H20z" fill="var(--paper)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><text x="46" y="60" font-size="15" font-weight="700" text-anchor="middle" fill="var(--ink)">.hex</text><path d="M86 46h56M128 34l14 12-14 12" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="156" y="20" width="76" height="52" rx="6" fill="none" stroke="var(--ink)" stroke-width="3"/><text x="194" y="52" font-size="12" font-weight="700" text-anchor="middle" fill="var(--ink)">MICROBIT</text></svg>
+      <ol><li>按「下載」，得到 .hex 檔</li><li>打開「此電腦」，找 MICROBIT</li><li>把 .hex 拖進去，等黃燈停止閃</li></ol></div></div>`
+};
+const LOGIN = `<ol class="login"><li>打開 <b>makecode.microbit.org</b></li><li>按右上角 <span class="ui-chip">登入（Sign in）</span>，揀 <span class="ui-chip">Microsoft</span></li><li>輸入學校電郵，格式：<b class="acct">261d00@mssch.edu.hk</b></li><li>輸入密碼，登入完成</li></ol>`;
+const IPO_DEFS = [['input', '輸入', '把外面發生的事，告訴 micro:bit。'], ['process', '處理', 'micro:bit 想一想，決定要做甚麼。'], ['output', '輸出', 'micro:bit 做出結果，給人看到或聽到。']];
+const ipoChip = k => `<span class="chip" style="--c:var(--${k === 'input' ? 'input' : k === 'output' ? 'basic' : 'ink'})">${{ input: '輸入', process: '處理', output: '輸出' }[k]}</span>`;
+const L1_PARTS = ['led', 'btnA', 'btnB', 'logo', 'mic', 'pins', 'usb', 'reset', 'battery', 'speaker', 'cpu', 'accel'];
+const L2_PARTS = ['rbBatt', 'rbSwitch', 'rbRgb', 'rbGvs', 'rbSlot'];
+const findList = ids => `<ol class="findlist">${ids.map((id, i) => `<li data-p="${id}"><span class="n">${i + 1}</span><span class="t">${PARTS[id].name.replace(/（.*）/, '')}</span><span class="ok" aria-hidden="true">${IC.ok}</span></li>`).join('')}</ol>`;
+function wireFind(el, ids, doneMsg) {
+  const found = new Set();
+  return id => { if (!ids.includes(id) || found.has(id)) return; found.add(id); $(`.findlist [data-p="${id}"]`, el).classList.add('found'); rollNum($('.found', el), found.size); if (found.size === ids.length) toast(doneMsg); };
+}
+function stepsPage(steps, faqs) {
+  return {
+    html: `<div class="steps"><div><div class="steptabs" role="tablist">${steps.map((s, i) => `<button class="btn${i ? '' : ' on'}" type="button" role="tab" data-step="${i}" aria-selected="${!i}">步驟 ${i + 1}</button>`).join('')}</div>
+      <div class="card stepcard pop" aria-live="polite"></div></div>
+      <div class="faq pop"><h2>常見問題</h2>${faqs.map(f => `<details><summary>${f[0]}</summary><div><ul>${f[1].map(x => `<li>${x}</li>`).join('')}</ul></div></details>`).join('')}</div></div>`,
+    wire(el) {
+      const card = $('.stepcard', el);
+      const show = i => {
+        const s = steps[i];
+        card.innerHTML = `<span class="chip">步驟 ${i + 1}</span><h2>${s.title}</h2>${s.text ? `<p>${s.text}</p>` : ''}${s.html || ''}${i < steps.length - 1 ? `<div><button class="btn" type="button" data-nextstep>做好了，下一步</button></div>` : `<div class="muted">做完了？按右下角「下一頁」。</div>`}`;
+        $$('.steptabs .btn', el).forEach((b, j) => { b.classList.toggle('on', j === i); b.setAttribute('aria-selected', j === i); });
+        card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
+        $('[data-nextstep]', card)?.addEventListener('click', () => { AU.click(); show(i + 1); });
+        wireCollapse(card);
+      };
+      $$('.steptabs .btn', el).forEach(b => b.addEventListener('click', () => show(+b.dataset.step)));
+      show(0);
+    }
+  };
+}
+function hintsPage(goal, hints) {
+  return {
+    html: `<div class="card goal pop"><span class="chip">目標</span><p><b>${goal}</b></p></div>
+      <div class="hints">${hints.map((h, i) => `<div class="card hint pop" data-h="${i}"><span class="chip">提示 ${i + 1}</span><div class="closed"><button class="btn big" type="button" ${i ? 'disabled' : ''}>打開提示 ${i + 1}</button></div><div class="open" hidden>${h}</div></div>`).join('')}</div>`,
+    wire(el) {
+      $$('.hint', el).forEach((c, i) => $('button', c).addEventListener('click', () => {
+        $('.closed', c).hidden = true; $('.closed', c).style.display = 'none'; $('.open', c).hidden = false; AU.click();
+        const nx = $(`.hint[data-h="${i + 1}"] .closed button`, el); if (nx) nx.disabled = false;
+        wireCollapse(c);
+      }));
+    }
+  };
+}
+function miniLed(el) { return { set(k) { const a = k ? pat(k) : Array(25).fill(0); $$('i', el).forEach((d, i) => d.classList.toggle('on', !!a[i])); } }; }
+function quizPage(qs) {
+  return {
+    html: `<div class="quiz"><div class="card pop"><div class="qprog">${qs.map(() => '<i></i>').join('')}</div><div class="qbody"></div></div>
+      <div class="card ledside pop"><div class="minimb" aria-hidden="true">${'<i></i>'.repeat(25)}</div><div>分數 <span class="score"><span class="roll">0</span></span> / ${qs.length}</div></div></div>`,
+    wire(el) {
+      let qi = 0, score = 0, tried = false; const led = miniLed($('.minimb', el)), body = $('.qbody', el);
+      const prog = () => $$('.qprog i', el).forEach((d, i) => d.className = i < qi ? 'done' : i === qi ? 'cur' : '');
+      const setScore = () => { $('.score', el).innerHTML = `<span class="roll">${score}</span>`; };
+      const show = () => {
+        prog(); led.set(null); tried = false;
+        if (qi >= qs.length) {
+          body.innerHTML = `<p class="qtext">完成了！你答對 ${score} 題。</p>${fb(true, score >= qs.length - 1 ? '做得好' : '再溫習一次會更好')}<div style="margin-top:14px"><button class="btn" type="button" data-again>再做一次</button></div>`;
+          led.set('smile'); $('[data-again]', body).addEventListener('click', () => { qi = 0; score = 0; setScore(); show(); }); return;
+        }
+        const q = qs[qi];
+        body.innerHTML = `<p class="muted">第 ${qi + 1} 題</p><p class="qtext">${q[0]}</p><div class="opts">${q[1].map((o, i) => `<button class="btn opt" type="button" data-i="${i}">${o}<span class="mark"></span></button>`).join('')}</div><div class="feedback" aria-live="polite" style="margin-top:10px"></div><div class="nextq" hidden style="margin-top:6px"><button class="btn" type="button">下一題</button></div>`;
+        $$('.opt', body).forEach(b => b.addEventListener('click', () => {
+          const i = +b.dataset.i, right = i === q[2];
+          if (right) {
+            b.classList.add('right'); $('.mark', b).innerHTML = IC.ok + '答對了'; $('.mark', b).style.color = 'var(--ok)';
+            $('.feedback', body).outerHTML = fb(true, q[3] || '答對了'); led.set('smile'); AU.ok();
+            if (!tried) { score++; setScore(); }
+            $$('.opt', body).forEach(x => x.disabled = x !== b); b.disabled = false; b.style.pointerEvents = 'none';
+            const n = $('.nextq', body); n.hidden = false; $('button', n).addEventListener('click', () => { qi++; show(); }); $('button', n).focus();
+          } else {
+            tried = true; b.classList.add('wrong'); b.disabled = true; $('.mark', b).innerHTML = IC.bad + '再試一次'; $('.mark', b).style.color = 'var(--bad)'; AU.no();
+          }
+        }));
+      };
+      show();
+    }
+  };
+}
+function summaryPage(keys, exit) {
+  return {
+    html: `<div class="keys">${keys.map((k, i) => `<div class="card keycard pop"><span class="chip">重點 ${i + 1}</span><p><b>${k}</b></p></div>`).join('')}</div>
+      <div class="card exit pop"><span class="chip">離場題</span><p class="qtext">${exit[0]}</p><div class="opts">${exit[1].map((o, i) => `<button class="btn opt" type="button" data-i="${i}">${o}<span class="mark"></span></button>`).join('')}</div><div class="fbx" aria-live="polite"></div></div>`,
+    wire(el) {
+      $$('.exit .opt', el).forEach(b => b.addEventListener('click', () => {
+        const ok = +b.dataset.i === exit[2];
+        b.classList.add(ok ? 'right' : 'wrong'); $('.mark', b).innerHTML = ok ? IC.ok : IC.bad; $('.mark', b).style.color = ok ? 'var(--ok)' : 'var(--bad)';
+        $('.fbx', el).innerHTML = fb(ok, ok ? '答對了。' + exit[3] : '再試一次'); ok ? AU.ok() : AU.no();
+        if (ok) $$('.exit .opt', el).forEach(x => x.disabled = x !== b);
+        else b.disabled = true;
+      }));
+    }
+  };
+}
+function stageControlsPage(mode, side, sayFoundTarget) {
+  return { html: `<div class="lab"><div class="stagecard pop">${stageHTML()}</div><div class="controls pop">${side}</div></div>` };
+}
+
+/* ================= LESSON 1 ================= */
+const L1code = () => `<div class="blocks">
+  ${cblk('input', '當按鈕 ' + P('A') + ' 被按下', blk('basic', '顯示圖示 ' + ICONP('heart', '心形')), { hat: true, id: 'A' })}
+  ${cblk('input', '當按鈕 ' + P('B') + ' 被按下', blk('basic', '顯示圖示 ' + ICONP('smile', '笑臉')), { hat: true, id: 'B' })}
+  ${cblk('input', '當觸摸 ' + P('logo'), blk('music', '播放旋律 ' + P('♪ 開心') + ' 直到完成'), { hat: true, id: 'logo' })}</div>`;
+EXICON.led = `<span class="exled"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="6" fill="var(--pcb)"/>${pat('heart').map((v, i) => `<rect class="${v ? 'hon' : ''}" x="${6 + (i % 5) * 6.2}" y="${5 + Math.floor(i / 5) * 6.2}" width="3.6" height="4.6" rx="1" fill="var(--led-off)"/>`).join('')}</svg></span>`;
+const SORT_ITEMS = [['按鈕 A', 'input'], ['LED 屏顯示圖案', 'output'], ['觸摸 logo', 'input'], ['處理器判斷', 'process'], ['喇叭播放音樂', 'output'], ['搖一搖（加速度計）', 'input'], ['程式「當…就…」', 'process'], ['咪高峰聽聲音', 'input']];
+const L1 = {
+  name: '認識 micro:bit', full: '第 1 課　認識 micro:bit', cat: 'input',
+  segs: [['引入', 3], ['3D 導覽', 8], ['輸入處理輸出', 4], ['動手', 13], ['挑戰', 5], ['總結', 2]],
+  pages: [
+    { seg: 0, title: '會思考的小電腦', say: '看看圖：手指按一下按鈕，屏幕就出現心形。', ...introPage(1, '按一下按鈕，<br>micro:bit 怎樣知道<br>要做甚麼？') },
+    { seg: 1, title: '轉一轉，找部件', say: '點一點部件，看它叫甚麼；記得轉到背面找 7 至 12 號。',
+      html: `<div class="lab"><div class="stagecard pop">${stageHTML()}</div><div class="controls pop">
+        <h3>轉動</h3><div class="btnrow"><button class="btn" data-v="front">正面</button><button class="btn" data-v="back">背面</button></div>
+        <h3>找部件</h3><div class="btnrow"><button class="btn" data-f="input" aria-pressed="false">只看輸入</button><button class="btn" data-f="output" aria-pressed="false">只看輸出</button></div>
+        <h3>工作紙第 1 題：找出 12 個部件（已找到 <b class="num found">0</b> / 12）</h3>${findList(L1_PARTS)}</div></div>`,
+      wire(el) {
+        resetHW(); const find = wireFind(el, L1_PARTS, '12 個部件全部找到了，寫在工作紙上吧');
+        mountStage(el, { mode: 'mb', onPart(id) {
+          if (id === 'btnA') { HW.leds = pat('heart'); hwChanged(); } if (id === 'btnB') { HW.leds = pat('smile'); hwChanged(); } if (id === 'logo') AU.melody();
+          find(id);
+        } });
+        wireViewFilter(el);
+      } },
+    { seg: 2, title: '輸入、處理、輸出是甚麼', say: '按「播放例子」，看看人和 micro:bit 怎樣一步一步做。',
+      html: `<div class="ipo2 pop"><span></span>${IPO_DEFS.map(([k, n, d], i) => `${i ? '<span></span>' : ''}<div class="def">${ipoChip(k)}<p>${d}</p></div>`).join('')}
+        <b class="rowlab">人</b>${[['eye', '眼睛看到紅燈'], ['brain', '腦：紅燈，要停'], ['feet', '雙腳停下來']].map(([ic, t], i) => `${i ? `<div class="arrow">${IC.arrow}</div>` : ''}<div class="box" data-r="0${i}">${EXICON[ic]}<b>${t}</b></div>`).join('')}
+        <b class="rowlab">micro:bit</b>${[['btn', '按按鈕 A'], ['chip', '處理器：A 被按了'], ['led', 'LED 屏顯示心形']].map(([ic, t], i) => `${i ? `<div class="arrow">${IC.arrow}</div>` : ''}<div class="box" data-r="1${i}">${EXICON[ic]}<b>${t}</b></div>`).join('')}</div>
+        <div class="btnrow pop"><button class="btn big" data-play>播放例子</button></div>`,
+      wire(el) {
+        let tm = [];
+        $('[data-play]', el).addEventListener('click', () => {
+          tm.forEach(clearTimeout); tm = []; $$('.box', el).forEach(b => b.classList.remove('run')); $('.exled', el)?.classList.remove('on');
+          ['00', '01', '02', '10', '11', '12'].forEach((r, i) => tm.push(setTimeout(() => {
+            $$('.box', el).forEach(b => b.classList.remove('run')); $(`[data-r="${r}"]`, el).classList.add('run'); AU.click();
+            if (r === '12') $('.exled', el).classList.add('on');
+          }, reducedMotion() ? i * 300 : i * 800)));
+        });
+      } },
+    { seg: 2, title: '分一分：輸入處理輸出', say: '把每張卡拖到正確的格；也可以先點卡，再點格。',
+      html: `<div class="defrow pop">${IPO_DEFS.map(([k, n, d]) => `<div>${ipoChip(k)}<span>${d}</span></div>`).join('')}</div>
+        <div class="card pop" style="padding:12px 16px"><div class="pool" aria-label="未分類的卡"></div></div>
+        <div class="sort pop">${[['input', '輸入'], ['process', '處理'], ['output', '輸出']].map(([k, n]) => `<div class="bucket" data-b="${k}" role="button" tabindex="0" aria-label="${n}"><h3>${k === 'input' ? IC.input : k === 'output' ? IC.output : ''}${n}</h3><div class="slot"></div></div>`).join('')}</div>
+        <div class="feedback" aria-live="polite"></div>`,
+      wire(el) { sortGame(el); } },
+    { seg: 3, title: '按 A，出心形', say: '按下面的按鈕，看看哪一塊積木在執行。',
+      html: `<div class="sim"><div class="code pop">${L1code()}</div><div class="stagecard pop">${stageHTML('<div class="result"><span class="pill">LED 屏：未有圖案</span></div>')}
+        <div class="inputs"><div class="inrow">${SENS('輸入')}<div class="btnrow"><button class="btn big" data-in="A">按 A</button><button class="btn big" data-in="B">按 B</button><button class="btn big" data-in="logo">摸 logo</button></div></div></div></div></div>`,
+      wire(el) {
+        resetHW(); let t = 0;
+        const run = (id, text) => {
+          $$('.run', el).forEach(x => x.classList.remove('run'));
+          const b = $(`[data-id="${id}"]`, el); $('.chead', b).classList.add('run'); $$('.cmouth>.blk', b).forEach(x => x.classList.add('run'));
+          $('.result', el).innerHTML = `<span class="pill">${text}</span>`;
+          clearTimeout(t); t = setTimeout(() => $$('.run', el).forEach(x => x.classList.remove('run')), 1300);
+        };
+        const input = k => {
+          if (k === 'A') { HW.leds = pat('heart'); Stage.press('btnA'); run('A', 'LED 屏：心形'); }
+          if (k === 'B') { HW.leds = pat('smile'); Stage.press('btnB'); run('B', 'LED 屏：笑臉'); }
+          if (k === 'logo') { AU.melody(); run('logo', '喇叭：播放旋律'); }
+          hwChanged();
+        };
+        $$('[data-in]', el).forEach(b => b.addEventListener('click', () => input(b.dataset.in)));
+        mountStage(el, { mode: 'mb', cards: false, onPart(id) { if (id === 'btnA') input('A'); if (id === 'btnB') input('B'); if (id === 'logo') input('logo'); } });
+      } },
+    { seg: 3, title: '親手砌出來', say: '跟着步驟做，做完一步就按「做好了」。', ...stepsPage([
+      { title: '用 Microsoft 登入，開新專案', html: LOGIN + `<p>登入後按 <span class="ui-chip">新增專案</span> → 名稱寫「我的 micro:bit」→ <span class="ui-chip">建立</span></p>` },
+      { title: '按 A，顯示心形', text: '在「輸入」拖出第一塊，在「基本」拖出第二塊，放進去：', html: `<div class="blocks">${cblk('input', '當按鈕 ' + P('A') + ' 被按下', blk('basic', '顯示圖示 ' + ICONP('heart', '心形')), { hat: true })}</div>` },
+      { title: '按 B，顯示笑臉', text: '再拖一塊，把 A 改成 B，圖示改成笑臉：', html: `<div class="blocks">${cblk('input', '當按鈕 ' + P('B') + ' 被按下', blk('basic', '顯示圖示 ' + ICONP('smile', '笑臉')), { hat: true })}</div>` },
+      { title: '摸 logo，播放音樂', text: '在「輸入」找「當觸摸 logo」，在「音樂」找「播放旋律」：', html: `<div class="blocks">${cblk('input', '當觸摸 ' + P('logo'), blk('music', '播放旋律 ' + P('♪ 開心') + ' 直到完成'), { hat: true })}</div>` },
+      DL_CARD], [
+      ['登入不到？', ['電郵要用學校格式：261d00@mssch.edu.hk', '揀「Microsoft」，不是 Google', '密碼忘記了：舉手問老師']],
+      ['下載後沒有反應？', ['檢查 USB 線有沒有插好', '方法 2：要把 .hex 拖入 MICROBIT 磁碟', '下載完，再按一次 A 試試']],
+      ['找不到 MICROBIT 磁碟？', ['換一條 USB 線（有些線只可以充電）', '換另一個 USB 插口']],
+      ['顯示了錯的圖案？', ['看看「顯示圖示」放在哪個按鈕下面', '檢查是 A 還是 B']],
+      ['摸 logo 沒有聲音？', ['要用 micro:bit V2（背面有喇叭）', '手指要摸金色的 logo']]]) },
+    { seg: 4, title: '搖一搖，擲骰仔', say: '先自己試，真的卡住才打開提示。', ...hintsPage('搖一搖 micro:bit，LED 屏顯示 1 至 6 其中一個數字。', [
+      `<p>在「輸入」找這一塊：</p><div class="blocks">${cblk('input', '當 ' + P('搖動'), '', { hat: true })}</div>`,
+      `<p>在「基本」找「顯示數字」，放進去。</p><div class="blocks">${blk('basic', '顯示數字 ' + NUM('0'))}</div>`,
+      `<p>在「數學」找「選取隨機數」，放在數字的位置，改成 1 至 6。</p><div class="blocks">${blk('basic', '顯示數字 ' + P('選取隨機數 1 至 6', 'num'))}</div>`]) },
+    { seg: 5, title: '小測：4 條題目', say: '選一個答案，答對了 LED 會出笑臉。', ...quizPage([
+      ['按鈕 A 是甚麼？', ['輸入', '輸出', '處理'], 0, '按鈕把你的動作告訴 micro:bit。'],
+      ['按 A 後出現心形，「心形」是甚麼？', ['輸入', '輸出', '處理'], 1, 'LED 屏把結果顯示出來。'],
+      ['想 micro:bit 播放音樂，要用哪個部件？', ['金手指', '按鈕 B', '喇叭'], 2, '喇叭在背面。'],
+      ['「當搖動」用了哪個感應器？', ['加速度計', '咪高峰', 'LED 屏'], 0, '加速度計感應搖動。']]) },
+    { seg: 5, title: '今日學了甚麼', say: '離開前答一答最後一題。', ...summaryPage([
+      'micro:bit 有輸入部件（按鈕、logo）和輸出部件（LED 屏、喇叭）。', '輸入 → 處理 → 輸出：電腦就是這樣工作。', '事件：「當…發生」，就做積木裏面的事。'],
+      ['按按鈕 A，LED 屏就顯示心形。哪一個是輸入？', ['按鈕 A', '處理器', 'LED 屏'], 0, '處理是處理器，輸出是 LED 屏。在工作紙寫下完整答案。']) }
+  ]
+};
+function wireViewFilter(el) {
+  $$('[data-v]', el).forEach(b => b.addEventListener('click', () => { Stage.view(b.dataset.v); $$('[data-auto]', el).forEach(a => { a.setAttribute('aria-pressed', 'false'); a.classList.remove('on'); }); }));
+  $$('[data-f]', el).forEach(b => b.addEventListener('click', () => {
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    $$('[data-f]', el).forEach(x => { x.setAttribute('aria-pressed', 'false'); x.classList.remove('on'); });
+    if (on) { b.setAttribute('aria-pressed', 'true'); b.classList.add('on'); }
+    Stage.filter(on ? b.dataset.f : null);
+  }));
+}
+function sortGame(el) {
+  const pool = $('.pool', el), feedback = $('.feedback', el); let sel = null, drag = null, justDragged = false, left = SORT_ITEMS.length;
+  const items = SORT_ITEMS.map((x, i) => ({ t: x[0], k: x[1], i }));
+  pool.innerHTML = items.map(it => `<button class="scard" type="button" data-k="${it.k}" data-i="${it.i}">${it.t}</button>`).join('');
+  const names = { input: '輸入', output: '輸出', process: '處理' };
+  $$('.scard', el).forEach(card => {
+    card.addEventListener('click', () => {
+      if (justDragged) { justDragged = false; return; } if (card.disabled) return;
+      sel = sel === card ? null : card; $$('.scard', el).forEach(c => c.classList.toggle('sel', c === sel)); AU.click();
+    });
+    card.addEventListener('pointerdown', e => {
+      if (card.disabled) return; drag = { card, x: e.clientX, y: e.clientY, ghost: null, id: e.pointerId };
+      card.setPointerCapture(e.pointerId);
+    });
+    card.addEventListener('pointermove', e => {
+      if (!drag || drag.card !== card) return;
+      if (!drag.ghost && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
+        drag.ghost = card.cloneNode(true); drag.ghost.classList.add('ghost'); document.body.appendChild(drag.ghost); card.classList.add('dragging');
+      }
+      if (drag.ghost) {
+        drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px';
+        const t = document.elementFromPoint(e.clientX, e.clientY)?.closest('.bucket');
+        $$('.bucket', el).forEach(b => b.classList.toggle('hot', b === t));
+      }
+    });
+    const end = e => {
+      if (!drag || drag.card !== card) return;
+      if (drag.ghost) {
+        drag.ghost.remove(); card.classList.remove('dragging'); justDragged = true; setTimeout(() => justDragged = false, 50);
+        const t = document.elementFromPoint(e.clientX, e.clientY)?.closest('.bucket');
+        $$('.bucket', el).forEach(b => b.classList.remove('hot'));
+        if (t) placeAndFix(card, t);
+      }
+      drag = null;
+    };
+    card.addEventListener('pointerup', end); card.addEventListener('pointercancel', end);
+  });
+  function placeAndFix(card, b) {
+    const f = $$('.feedback', el).pop(); const ok = card.dataset.k === b.dataset.b;
+    sel = null; $$('.scard', el).forEach(c => c.classList.remove('sel'));
+    if (ok) {
+      card.classList.add('placed-ok'); card.disabled = true; card.insertAdjacentHTML('afterbegin', `<span class="mark" style="color:var(--ok)">${IC.ok}</span>`);
+      $('.slot', b).appendChild(card); left--; AU.ok();
+      f.outerHTML = fb(true, left ? `答對了：${card.textContent} 是${names[b.dataset.b]}` : '全部答對了，8 張卡都放好了');
+      if (!left) toast('8 張卡全部答對');
+    } else {
+      card.classList.add('placed-bad'); setTimeout(() => card.classList.remove('placed-bad'), 900); AU.no();
+      f.outerHTML = fb(false, `再試一次：${card.textContent} 不是${names[b.dataset.b]}`);
+    }
+    $$('.feedback', el).pop().setAttribute('aria-live', 'polite');
+  }
+  $$('.bucket', el).forEach(b => {
+    const go = () => { if (sel) placeAndFix(sel, b); else { const f = $$('.feedback', el).pop(); f.outerHTML = '<span class="feedback">先點一張卡，再點這一格。</span>'; } };
+    b.addEventListener('click', e => { if (e.target.closest('.scard')) return; go(); });
+    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+}
+
+/* ================= LESSON 2 ================= */
+const L2code = (elif) => `<div class="blocks">
+  ${ONSTART(SETSTRIP('P16', 4), true)}
+  ${cblk('loops', '重複無限次', ifelse(CMP(SENS('光線強度'), '&lt;', NUM('50')), blk('neo', `${P('strip')} 顯示顏色 ${DOT('白色', 'var(--paper)')}`), blk('neo', `${P('strip')} 顯示顏色 ${DOT('黑色（熄燈）', 'var(--ink)')}`)), { id: 'loop' })}</div>`;
+function branchHL(root, active) {
+  const ifb = $('[data-id="if"]', root); if (!ifb) return;
+  $$('.run', ifb).forEach(x => x.classList.remove('run')); $$('.idle', ifb).forEach(x => x.classList.remove('idle'));
+  $('[data-r="if"]', ifb).classList.add('run');
+  const thenB = $$('[data-r="then"]>.blk', ifb), elseB = $$('[data-r="elsebody"]>.blk', ifb);
+  if (active === 'then') { thenB.forEach(b => b.classList.add('run')); elseB.forEach(b => b.classList.add('idle')); }
+  else { $('[data-r="else"]', ifb).classList.add('run'); elseB.forEach(b => b.classList.add('run')); thenB.forEach(b => b.classList.add('idle')); }
+}
+function lightRow(id, val, mark) {
+  return `<div class="inrow">${SENS('光線強度')}${sliderHTML('light', id, val, mark)}<span class="bignum num" data-val>${val}</span></div>`;
+}
+const L2 = {
+  name: '智能夜燈', full: '第 2 課　智能夜燈', cat: 'logic',
+  segs: [['引入', 4], ['認識 Robotbit', 5], ['模擬', 5], ['動手', 14], ['挑戰', 4], ['總結', 3]],
+  pages: [
+    { seg: 0, title: '天黑了，燈自己亮', say: '想想你家的走廊燈：有人經過或者天黑就會亮。', ...introPage(2, '房間變黑，<br>燈怎樣知道<br>要亮起來？') },
+    { seg: 1, title: '認識 Robotbit 擴展板', say: '先按「組裝」看插法，再點一點部件，找齊 5 個。',
+      html: `<div class="lab"><div class="stagecard pop">${stageHTML()}</div><div class="controls pop">
+        <h3>動手試</h3><div class="btnrow"><button class="btn big" data-asm>組裝</button><button class="btn big" data-pow aria-pressed="false">電源：關</button></div>
+        <div class="btnrow"><button class="btn" data-v="front">正面</button><button class="btn" data-v="back">從後面看（插口）</button></div>
+        <h3>工作紙第 1 題：找出 5 個部件（已找到 <b class="num found">0</b> / 5）</h3>${findList(L2_PARTS)}
+        <div class="card"><b>插法：LED 屏和 RGB 燈都向前</b><p class="muted">組裝動畫的錯和對，就是工作紙的圖 B 和圖 A。</p></div></div></div>`,
+      wire(el) {
+        resetHW({ assembled: false, stripLinked: false, rgb: ['#FF3B2F', '#00AA00', '#1E90FF', '#FFFFFF'] });
+        const find = wireFind(el, L2_PARTS, '5 個部件全部找到了，寫在工作紙上吧');
+        mountStage(el, { mode: 'robot', onPart(id) { if (id === 'rbSwitch') powBtn(); find(id); } });
+        const pb = $('[data-pow]', el); const powBtn = () => { pb.textContent = HW.power ? '電源：開' : '電源：關'; pb.setAttribute('aria-pressed', HW.power); pb.classList.toggle('on', HW.power); };
+        pb.addEventListener('click', () => { HW.power = !HW.power; hwChanged(); powBtn(); AU.click(); });
+        $('[data-asm]', el).addEventListener('click', e => { e.target.disabled = true; Stage.assemble(() => e.target.disabled = false); });
+        wireViewFilter(el);
+      } },
+    { seg: 2, title: '變數和如果…否則', say: '按「手遮」，看看程式走哪一條路。',
+      html: `<div class="two"><div class="card varbox pop"><p><b>變數</b>：一個會變的數，好像一個盒。</p><p class="muted">光線強度：0 = 最暗，255 = 最光</p>
+          <div class="box3d"><span class="p sensor name">光線強度</span><div class="v" data-v2>180</div></div>
+          <div class="btnrow"><button class="btn big" data-l="200">亮處</button><button class="btn big" data-l="30">手遮</button><button class="btn big" data-l="5">關燈</button></div></div>
+        <div class="card fork pop"><p><b>如果…那麼…否則</b>：二選一。</p><div class="q">光線強度 &lt; 50 ？</div>
+          <div class="paths"><div class="path" data-p="then"><b>是 → 那麼</b><span>燈亮白色</span></div><div class="path" data-p="else"><b>否 → 否則</b><span>熄燈</span></div></div>
+          <p class="fork-say" aria-live="polite"></p></div></div>`,
+      wire(el) {
+        const set = v => {
+          rollNum($('[data-v2]', el), v); const dark = v < 50;
+          $$('.path', el).forEach(p => { const on = (p.dataset.p === 'then') === dark; p.classList.toggle('run', on); p.classList.toggle('idle', !on); });
+          $('.fork-say', el).textContent = `${v} ${dark ? '細過' : '不細過'} 50，所以${dark ? '亮燈' : '熄燈'}。`;
+        };
+        $$('[data-l]', el).forEach(b => b.addEventListener('click', () => { set(+b.dataset.l); AU.click(); }));
+        set(200);
+      } },
+    { seg: 2, title: '手一遮，燈就亮', say: '把滑桿拉向左邊，就像用手遮住。',
+      html: `<div class="sim"><div class="code pop">${L2code()}</div><div class="stagecard pop">${stageHTML('<div class="result"><span class="pill">4 粒燈：熄</span></div>')}
+        <div class="inputs">${lightRow('l2s', 180, 50)}<div class="btnrow"><button class="btn" data-l="200">亮處 200</button><button class="btn" data-l="30">手遮 30</button><button class="btn" data-l="5">關燈 5</button></div></div></div></div>`,
+      wire(el) {
+        resetHW({ assembled: true, stripLinked: false, power: true });
+        wireCollapse(el);
+        const inp = $('#l2s', el), out = $('[data-val]', el);
+        const ev = () => {
+          const v = +inp.value; HW.light = v; out.textContent = v; const dark = v < 50;
+          HW.rgb = Array(4).fill(dark ? '#FFFFFF' : null); branchHL(el, dark ? 'then' : 'else');
+          $('.result', el).innerHTML = `<span class="pill">${dark ? '4 粒燈：亮（白色）' : '4 粒燈：熄'}</span>`; hwChanged();
+        };
+        inp.addEventListener('input', ev);
+        $$('[data-l]', el).forEach(b => b.addEventListener('click', () => { inp.value = b.dataset.l; ev(); }));
+        mountStage(el, { mode: 'robot', cards: false }).then(() => { if (has3D) Stage3D.snapAssembled(); ev(); });
+        ev();
+      } },
+    { seg: 3, title: '親手砌夜燈', say: '先用 Microsoft 登入，再加入 neopixel 擴展。', ...stepsPage([
+      { title: '登入，加入 neopixel 擴展', html: LOGIN + `<p>新增專案後按 <span class="ui-chip">擴展（Extensions）</span> → 搜尋 <span class="ui-chip">neopixel</span> → 按它一下</p>` },
+      { title: '設定 4 粒燈', text: '放在「當開始」入面：', html: `<div class="blocks">${ONSTART(SETSTRIP('P16', 4))}</div>` },
+      { title: '重複 + 如果否則', text: '在「循環」拖「重複無限次」，在「邏輯」拖「如果…否則」放進去：', html: `<div class="blocks">${cblk('loops', '重複無限次', ifelse(P('?', 'num'), '', ''))}</div>` },
+      { title: '填條件和顏色', text: '條件用「光線強度 &lt; 50」：', html: `<div class="blocks">${ifelse(CMP(SENS('光線強度'), '&lt;', NUM('50')), blk('neo', `${P('strip')} 顯示顏色 ${DOT('白色', 'var(--paper)')}`), blk('neo', `${P('strip')} 顯示顏色 ${DOT('黑色', 'var(--ink)')}`))}</div><p>再加一段，按 A 就看到讀數（工作紙第 4 題用）：</p><div class="blocks">${cblk('input', '當按鈕 ' + P('A') + ' 被按下', blk('basic', '顯示數字 ' + SENS('光線強度')), { hat: true })}</div>` },
+      DL_CARD], [
+      ['登入不到？', ['電郵格式：261d00@mssch.edu.hk', '揀「Microsoft」登入']],
+      ['燈不亮？', ['Robotbit 有沒有放電池、開關推到 ON 沒有', 'micro:bit 方向：LED 屏要和 RGB 燈（0–3）都向前', '程式寫的是 P16 和 4 粒燈']],
+      ['找不到 neopixel 積木？', ['先按「擴展」加入 neopixel', '加入後看左邊的「Neopixel」分類']],
+      ['燈一直亮或一直熄？', ['用手完全遮住 LED 屏', '把 50 改大或改細試試']]]) },
+    { seg: 4, title: '兩級亮度', say: '很暗、有點暗、光亮：想想要分幾段。', ...hintsPage('很暗：燈最亮；有點暗：燈暗一點；光亮：熄燈。', [
+      `<p>點「如果」積木左下角的 ⊕，會多一段「否則如果」。</p>`,
+      `<p>條件可以這樣分：</p><div class="blocks">${blk('logic', '如果 ' + CMP(SENS('光線強度'), '&lt;', NUM('20')))}${blk('logic', '否則如果 ' + CMP(SENS('光線強度'), '&lt;', NUM('50')))}</div>`,
+      `<p>在顯示顏色前，先設定亮度：很暗用 255，有點暗用 60。</p><div class="blocks">${blk('neo', `${P('strip')} 設定亮度 ${NUM('60')}`)}</div>`]) },
+    { seg: 5, title: '小測：4 條題目', say: '選一個答案，答對了 LED 會出笑臉。', ...quizPage([
+      ['「光線強度」會不停改變，它是一個…', ['按鈕', '變數', '燈'], 1, '會變的數就是變數。'],
+      ['光線強度 = 30，夜燈會怎樣？', ['亮白色', '熄燈'], 0, '30 細過 50，所以亮燈。'],
+      ['光線強度 = 200，會執行哪一段？', ['那麼', '否則'], 1, '200 不細過 50，所以走「否則」。'],
+      ['燈完全不亮，第一樣要檢查甚麼？', ['換一部電腦', '刪除程式', 'Robotbit 電池和開關'], 2, '先檢查電源最快。']]) },
+    { seg: 5, title: '今日學了甚麼', say: '離開前答一答最後一題。', ...summaryPage([
+      '變數：會變的數，例如光線強度。', '重複無限次：不停檢查，燈才會即時反應。', '如果…那麼…否則：條件成立做這邊，不成立做那邊。'],
+      ['光線強度 = 80，夜燈亮不亮？', ['亮', '不亮'], 1, '80 不細過 50，所以熄燈。']) }
+  ]
+};
+
+/* ================= LESSON 3 ================= */
+const L3code = () => `<div class="blocks">
+  ${ONSTART(SETSTRIP('P1', 10) + blk('neo', `${P('strip')} 設定亮度 ${NUM('50')}`), true)}
+  ${cblk('loops', '重複無限次', blk('neo', `${P('strip')} 顯示長條圖 ${SENS('聲音強度')} 最大 ${NUM('255')}`, 'bar') +
+    ifelse(CMP(SENS('聲音強度'), '&gt;', NUM('150')), blk('basic', '顯示圖示 ' + ICONP('x', '交叉')) + blk('music', '播放音效 ' + P('警報聲')), blk('basic', '清空畫面')), { id: 'loop' })}</div>`;
+const hsl2hex = (h, s, l) => { s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l), f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return '#' + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join(''); };
+const barColor = i => hsl2hex(120 - i * 13, 100, 50);
+function soundRow(id, val, mark, mic = true) {
+  return `<div class="inrow">${SENS('聲音強度')}${sliderHTML('sound', id, val, mark)}<span class="bignum num" data-val>${val}</span></div>${mic ? `<div class="btnrow"><button class="btn" data-s="30">細聲</button><button class="btn" data-s="100">正常</button><button class="btn" data-s="220">大叫</button><button class="btn" data-mic aria-pressed="false">用電腦咪高峰</button></div>` : ''}`;
+}
+function wireMic(el, inp, ev) {
+  const b = $('[data-mic]', el); if (!b) return;
+  b.addEventListener('click', async () => {
+    if (Mic.on) { Mic.stop(); b.textContent = '用電腦咪高峰'; b.setAttribute('aria-pressed', 'false'); b.classList.remove('on'); inp.disabled = false; return; }
+    const ok = await Mic.start(v => { inp.value = v; ev(); }, () => toast('用不到咪高峰，改用滑桿。'));
+    if (ok) { b.textContent = '停止咪高峰'; b.setAttribute('aria-pressed', 'true'); b.classList.add('on'); inp.disabled = true; }
+  });
+}
+const L3 = {
+  name: '課室噪音警報燈條', full: '第 3 課　課室噪音警報燈條', cat: 'neo',
+  segs: [['引入', 4], ['接駁燈條', 5], ['模擬', 4], ['動手', 14], ['展示', 6], ['總結', 2]],
+  pages: [
+    { seg: 0, title: '課室太吵了', say: '分組討論時，大家常常越講越大聲。', ...introPage(3, '怎樣讓大家<br>一看就知道<br>太吵了？') },
+    { seg: 1, title: '燈條插 P1', say: '按「接燈條」，留意 G、V、S 怎樣對準。',
+      html: `<div class="lab"><div class="stagecard pop">${stageHTML()}</div><div class="controls pop">
+        <h3>動手試</h3><div class="btnrow"><button class="btn big" data-link>接燈條</button><button class="btn big" data-pow aria-pressed="false">電源：關</button></div>
+        <h3>記住 3 件事</h3>
+        <div class="card"><span class="chip">1</span> <b>插在 P1 插口</b></div>
+        <div class="card"><span class="chip">2</span> <b>黃 S、紅 V、黑 G：顏色對準</b></div>
+        <div class="card"><span class="chip">3</span> <b>打開電源才會亮</b></div></div></div>`,
+      wire(el) {
+        resetHW({ assembled: true, stripLinked: false, strip: [...Array(10)].map((_, i) => hsl2hex(i * 36, 100, 50)) });
+        mountStage(el, { mode: 'strip', onPart(id) { if (id === 'rbSwitch') powBtn(); } }).then(() => { if (has3D) Stage3D.snapAssembled(); hwChanged(); });
+        const pb = $('[data-pow]', el); const powBtn = () => { pb.textContent = HW.power ? '電源：開' : '電源：關'; pb.setAttribute('aria-pressed', HW.power); pb.classList.toggle('on', HW.power); };
+        pb.addEventListener('click', () => { HW.power = !HW.power; hwChanged(); powBtn(); AU.click(); });
+        $('[data-link]', el).addEventListener('click', e => { e.target.disabled = true; Stage.linkStrip(() => { e.target.disabled = false; hwChanged(); }); });
+      } },
+    { seg: 2, title: '聲音越大，亮越多', say: '按 0、128、255，數數亮幾粒，再填工作紙第 2 題。',
+      html: `<div class="card pop" style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+        <p><b>長條圖</b>：數值越大，亮的燈越多。最大 255 = 10 粒全亮。</p><p class="muted">試試工作紙第 2 題的三個數：0、128、255。</p>
+        <div class="bars big" aria-hidden="true">${'<i></i>'.repeat(10)}</div><p class="barsay" aria-live="polite" style="font-size:24px;font-weight:700"></p>
+        <div style="width:100%;max-width:760px">${soundRow('l3c', 128, null, false)}</div>
+        <div class="btnrow"><button class="btn big" data-s="0">0</button><button class="btn big" data-s="128">128</button><button class="btn big" data-s="255">255</button></div></div>`,
+      wire(el) {
+        const inp = $('#l3c', el);
+        const ev = () => { const v = +inp.value, n = Math.round(v / 255 * 10); $('[data-val]', el).textContent = v;
+          $$('.bars i', el).forEach((b, i) => b.classList.toggle('on', i < n));
+          $('.barsay', el).textContent = `聲音強度 ${v} → 亮 ${n} 粒`; };
+        inp.addEventListener('input', ev); $$('[data-s]', el).forEach(b => b.addEventListener('click', () => { inp.value = b.dataset.s; ev(); AU.click(); })); ev();
+      } },
+    { seg: 2, title: '噪音警報燈條', say: '拉滑桿或者按「用電腦咪高峰」，對着電腦講話。',
+      html: `<div class="sim"><div class="code pop">${L3code()}</div><div class="stagecard pop">${stageHTML('<div class="result"></div>')}
+        <div class="inputs">${soundRow('l3s', 60, 150)}</div></div></div>`,
+      wire(el) {
+        resetHW({ assembled: true, stripLinked: true, power: true, stripBright: 50 / 255 }); wireCollapse(el);
+        const inp = $('#l3s', el); let lastAlarm = 0;
+        const ev = () => {
+          const v = +inp.value; HW.sound = v; $('[data-val]', el).textContent = v; const n = Math.round(v / 255 * 10), loud = v > 150;
+          HW.strip = [...Array(10)].map((_, i) => i < n ? barColor(i) : null); HW.leds = loud ? pat('x') : Array(25).fill(0);
+          $('[data-id="bar"]', el).classList.add('run'); branchHL(el, loud ? 'then' : 'else');
+          $('.result', el).innerHTML = `<span class="pill">燈條：亮 ${n} 粒</span><span class="pill">${loud ? 'LED：✕ 警報聲' : 'LED：清空'}</span>`;
+          if (loud && performance.now() - lastAlarm > 700) { AU.alarm(); lastAlarm = performance.now(); }
+          hwChanged();
+        };
+        inp.addEventListener('input', ev); $$('[data-s]', el).forEach(b => b.addEventListener('click', () => { inp.value = b.dataset.s; ev(); }));
+        wireMic(el, inp, ev);
+        mountStage(el, { mode: 'strip', cards: false }).then(() => { if (has3D) Stage3D.snapStrip(); ev(); }); ev();
+      } },
+    { seg: 3, title: '親手砌警報燈條', say: '先用 Microsoft 登入。記得燈條是 P1、10 粒，不是 P16。', ...stepsPage([
+      { title: '登入，加入 neopixel 擴展', html: LOGIN + `<p>新增專案後按 <span class="ui-chip">擴展（Extensions）</span> → 搜尋 <span class="ui-chip">neopixel</span> → 按它一下</p>` },
+      { title: '設定燈條', text: '在「當開始」放：', html: `<div class="blocks">${ONSTART(SETSTRIP('P1', 10) + blk('neo', `${P('strip')} 設定亮度 ${NUM('50')}`))}</div>` },
+      { title: '長條圖和警報', text: '在「重複無限次」放：', html: `<div class="blocks">${cblk('loops', '重複無限次', blk('neo', `${P('strip')} 顯示長條圖 ${SENS('聲音強度')} 最大 ${NUM('255')}`) + ifelse(CMP(SENS('聲音強度'), '&gt;', NUM('150')), blk('basic', '顯示圖示 ' + ICONP('x', '交叉')) + blk('music', '播放音效 ' + P('警報聲')), blk('basic', '清空畫面')))}</div>` },
+      DL_CARD,
+      { title: '測試三種聲音', text: '細聲說話、正常說話、大叫，看看燈條亮幾粒，記在工作紙第 4 題。', html: `<div class="bars" aria-hidden="true">${[...Array(10)].map((_, i) => `<i class="${i < 4 ? 'on' : ''}"></i>`).join('')}</div>` }], [
+      ['登入不到？', ['電郵格式：261d00@mssch.edu.hk', '揀「Microsoft」登入']],
+      ['燈條不亮？', ['Robotbit 電池和開關', 'GVS 有沒有插反：黑色那一行是 G', '插在 P1，程式也要寫 P1、10 粒']],
+      ['長條圖不動？', ['「聲音強度」要用 micro:bit V2', '對着 micro:bit 正面講話']],
+      ['警報一直響？', ['課室本身很吵：把 150 改大一點']]]) },
+    { seg: 3, title: '搖一搖變彩虹', say: '做完主任務才做挑戰。', ...hintsPage('搖一搖 micro:bit，燈條變彩虹。', [
+      `<p>用「輸入」的「當搖動」：</p><div class="blocks">${cblk('input', '當 ' + P('搖動'), '', { hat: true })}</div>`,
+      `<p>在「Neopixel」找彩虹積木，放進去：</p><div class="blocks">${blk('neo', `${P('strip')} 顯示彩虹 ${NUM('1')} 至 ${NUM('360')}`)}</div>`,
+      `<p>彩虹一閃就不見？因為長條圖又蓋過了。試把彩虹放進「重複無限次」最上面：</p><div class="blocks">${ifelse(SENS('是否 搖動 手勢'), blk('neo', `${P('strip')} 顯示彩虹`) + blk('basic', `暫停（毫秒）${NUM('2000')}`), '').replace(/<div class="cmid"[^]*?<div class="cfoot">/, '<div class="cfoot">')}</div>`]) },
+    { seg: 4, title: '小組展示', say: '每組一分鐘：先講問題，再示範。',
+      html: `<div class="two"><div class="card pop" style="display:flex;flex-direction:column;gap:14px"><span class="chip">展示次序</span>
+          <ol style="margin:0;padding-left:30px;display:flex;flex-direction:column;gap:8px"><li>我們想解決甚麼問題？</li><li>示範：細聲 → 大叫</li><li>說出輸入、處理、輸出</li></ol>
+          <div class="ipo" style="grid-template-columns:1fr;gap:8px"><div class="box"><b>輸入：聲音強度</b></div><div class="box"><b>處理：如果 &gt; 150</b></div><div class="box"><b>輸出：燈條、✕、警報聲</b></div></div></div>
+        <div class="card pop"><span class="chip">檢查清單</span><div class="checks" style="margin-top:12px">${['燈條跟住聲音變化', '大聲時出現 ✕ 和警報聲', '講得出輸入、處理、輸出'].map(t => `<button class="check" type="button" aria-pressed="false"><span class="box"><svg viewBox="0 0 24 24"><path d="M4 12l5 5 11-11" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>${t}</button>`).join('')}</div>
+          <button class="btn" type="button" data-clear style="margin-top:12px">下一組（清除剔號）</button></div></div>`,
+      wire(el) {
+        $$('.check', el).forEach(c => c.addEventListener('click', () => { c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') !== 'true'); AU.click(); }));
+        $('[data-clear]', el).addEventListener('click', () => $$('.check', el).forEach(c => c.setAttribute('aria-pressed', 'false')));
+      } },
+    { seg: 5, title: '小測：4 條題目', say: '選一個答案，答對了 LED 會出笑臉。', ...quizPage([
+      ['燈條插在 Robotbit 哪一個插口？', ['P16', 'P1', 'P0'], 1, 'P16 是板上那 4 粒燈。'],
+      ['聲音越大，長條圖會怎樣？', ['亮越多粒', '亮越少粒', '變彩虹'], 0, '數值越大，亮越多。'],
+      ['聲音強度 = 200，micro:bit 會怎樣？', ['清空畫面', '顯示 ✕ 和響警報', '熄燈條'], 1, '200 大過 150。'],
+      ['插燈條時要對準甚麼？', ['A、B', '0、1', 'G、V、S'], 2, 'G 對 G、V 對 V、S 對 S。']]) },
+    { seg: 5, title: '今日學了甚麼', say: '離開前答一答最後一題。', ...summaryPage([
+      '數值可以控制輸出：聲音越大，燈條亮越多。', '如果聲音強度 &gt; 150，就顯示 ✕ 和響警報。', '輸入 + 處理 + 輸出，可以解決生活問題。'],
+      ['聲音強度 = 100，燈條大約亮幾粒？', ['2 粒', '4 粒', '10 粒'], 1, '100 ÷ 255 × 10 ≈ 4。']) }
+  ]
+};
+const LESSONS = { 1: L1, 2: L2, 3: L3 };
+
+/* ================= LAB ================= */
+const LAB = {
+  say: '拖動模型轉一轉；兩隻手指捏合可以放大。點部件看看它做甚麼。',
+  html: `<div class="lab"><div class="stagecard pop">${stageHTML('<div class="result"></div>')}</div><div class="controls pop">
+    <h3>轉動和查看</h3><div class="btnrow"><button class="btn" data-v="front">正面</button><button class="btn" data-v="back">背面</button><button class="btn" data-auto aria-pressed="false">自動旋轉</button></div>
+    <h3>找部件</h3><div class="btnrow"><button class="btn" data-f="input" aria-pressed="false">只看輸入</button><button class="btn" data-f="output" aria-pressed="false">只看輸出</button></div>
+    <h3>試輸入</h3><div class="btnrow"><button class="btn" data-shake>搖一搖</button><button class="btn" data-mic aria-pressed="false">用電腦咪高峰</button></div>
+    <div class="ctlrow">${SENS('光線')}${sliderHTML('light', 'labL', 180)}<span class="num" data-lv>180</span></div>
+    <div class="ctlrow">${SENS('聲音')}${sliderHTML('sound', 'labS', 40)}<span class="num" data-sv>40</span></div>
+    <h3>Robotbit 擴展板</h3><div class="btnrow"><button class="btn" data-asm>組裝</button><button class="btn" data-link>接燈條</button><button class="btn" data-pow aria-pressed="false">電源：關</button></div></div></div>`,
+  wire(el) {
+    resetHW({ assembled: false, stripLinked: false, rgb: ['#FF3B2F', '#00AA00', '#1E90FF', '#FFFFFF'], strip: [...Array(10)].map((_, i) => hsl2hex(i * 36, 100, 50)) });
+    const res = t => $('.result', el).innerHTML = t ? `<span class="pill">${t}</span>` : '';
+    mountStage(el, { mode: 'mb', onPart(id) {
+      if (id === 'btnA') { HW.leds = pat('heart'); res('LED 屏：心形'); hwChanged(); }
+      if (id === 'btnB') { HW.leds = pat('smile'); res('LED 屏：笑臉'); hwChanged(); }
+      if (id === 'logo') { AU.melody(); res('喇叭：播放旋律'); }
+      if (id === 'rbSwitch') powBtn();
+    } });
+    wireViewFilter(el);
+    const auto = $('[data-auto]', el);
+    auto.addEventListener('click', () => { const on = auto.getAttribute('aria-pressed') !== 'true'; auto.setAttribute('aria-pressed', on); auto.classList.toggle('on', on); Stage.auto(on); });
+    $('[data-shake]', el).addEventListener('click', () => { const n = 1 + Math.floor(Math.random() * 6); Stage.shake(); AU.dice(); setTimeout(() => { HW.leds = pat(n); hwChanged(); res('骰仔：' + n); }, reducedMotion() ? 0 : 450); });
+    const L = $('#labL', el), S = $('#labS', el);
+    L.addEventListener('input', () => { HW.light = +L.value; $('[data-lv]', el).textContent = L.value; hwChanged(); });
+    const sv = () => { HW.sound = +S.value; $('[data-sv]', el).textContent = S.value; };
+    S.addEventListener('input', sv); wireMic(el, S, sv);
+    const pb = $('[data-pow]', el); const powBtn = () => { pb.textContent = HW.power ? '電源：開' : '電源：關'; pb.setAttribute('aria-pressed', HW.power); pb.classList.toggle('on', HW.power); };
+    pb.addEventListener('click', () => { HW.power = !HW.power; hwChanged(); powBtn(); AU.click(); });
+    const asm = $('[data-asm]', el), link = $('[data-link]', el);
+    asm.addEventListener('click', () => {
+      if (HW.assembled) { HW.assembled = false; HW.stripLinked = false; Stage.setMode('mb'); if (has3D) Stage3D.mount(Stage.slot, Stage.opts); hwChanged(); asm.textContent = '組裝'; Stage.opts.onMsg(null); return; }
+      asm.disabled = link.disabled = true; Stage.assemble(() => { asm.disabled = link.disabled = false; asm.textContent = '拆開'; });
+    });
+    link.addEventListener('click', () => { asm.disabled = link.disabled = true; Stage.linkStrip(() => { asm.disabled = link.disabled = false; asm.textContent = '拆開'; hwChanged(); }); });
+  }
+};
+
+/* ================= TIMER ================= */
+const Timer = {
+  lesson: null, el: [], hidden: store.get('timerHidden') === '1', iv: 0,
+  start(n) { if (this.lesson !== n) { this.lesson = n; this.el = LESSONS[n].segs.map(() => 0); } clearInterval(this.iv); this.iv = setInterval(() => this.tick(), 1000); this.render(); },
+  stop() { clearInterval(this.iv); },
+  tick() { if (R.lesson && !document.hidden) { this.el[R.cur.seg]++; this.render(); } },
+  fmt(s) { const a = Math.abs(s); return `${a < 0 ? '' : ''}${String(Math.floor(a / 60)).padStart(2, '0')}:${String(a % 60).padStart(2, '0')}`; },
+  render() {
+    const box = $('#timer'); box.classList.toggle('hidden', this.hidden || !R.lesson); if (!R.lesson) return;
+    const L = LESSONS[R.lesson], si = R.cur.seg, [nm, mins] = L.segs[si], left = mins * 60 - this.el[si];
+    const pill = $('#timerPill'); pill.classList.toggle('over', left < 0);
+    pill.innerHTML = `${nm} · 建議 ${mins} 分鐘　<b>${left < 0 ? '+' : ''}${this.fmt(left)}</b>`;
+    $('#timerList').innerHTML = L.segs.map((s, i) => `<li class="${i === si ? 'cur' : ''}"><span>${s[0]}</span><span>建議 ${s[1]} 分鐘 · 已用 ${this.fmt(this.el[i])}</span></li>`).join('');
+  }
+};
+
+/* ================= ROUTER / SHELL ================= */
+const R = { view: 'home', lesson: 0, page: 0, get cur() { return LESSONS[this.lesson].pages[this.page]; } };
+function setHelper(t) { $('#say').textContent = t; }
+function xfer() {
+  const x = $('#xfer'); const cells = $$('i', x);
+  if (reducedMotion()) { cells.forEach((c, i) => c.classList.toggle('on', [6, 8, 10, 11, 12, 13, 14, 16, 17, 18, 22].includes(i))); x.classList.add('show'); setTimeout(() => x.classList.remove('show'), 150); return; }
+  x.classList.add('show'); cells.forEach(c => c.classList.remove('on'));
+  for (let col = 0; col < 5; col++) setTimeout(() => cells.forEach((c, i) => { if (i % 5 === col) c.classList.add('on'); }), col * 40);
+  setTimeout(() => cells.forEach(c => c.classList.remove('on')), 230); setTimeout(() => x.classList.remove('show'), 300);
+}
+function render(dirn = 1) {
+  Stage.unmount(); Mic.stop();
+  const main = $('main'), app = $('#app');
+  app.className = 'view-' + (R.view === 'lesson' ? 'lesson' : R.view);
+  let page, title, say;
+  if (R.view === 'home') {
+    $('#lname').textContent = 'micro:bit 小實驗室'; title = 'micro:bit 小實驗室'; say = '揀一張卡開始。今日用 micro:bit 做小發明。';
+    const cards = [['lab', 'basic', '3D 實驗室', '轉動 micro:bit，看清每個部件。', '自由探索'], ['1', 'input', '第 1 課', '認識 micro:bit：會思考的小電腦', '35 分鐘'], ['2', 'logic', '第 2 課', '智能夜燈：天黑自動亮', '35 分鐘'], ['3', 'neo', '第 3 課', '課室噪音警報燈條', '35 分鐘']];
+    page = { html: `<div class="home-grid">${cards.map(c => `<button class="entry pop" type="button" data-go="${c[0]}" style="--c:var(--${c[1]})"><span class="band"></span><span class="body">${HOMEICON[c[0]]}<span><h2>${c[2]}</h2><p>${c[3]}</p><span class="meta">${c[4]}</span></span></span></button>`).join('')}</div>`,
+      wire(el) { $$('[data-go]', el).forEach(b => b.addEventListener('click', () => { location.hash = b.dataset.go === 'lab' ? '#/lab' : `#/${b.dataset.go}/1`; })); } };
+  } else if (R.view === 'lab') { $('#lname').textContent = '3D 實驗室'; title = '3D 實驗室'; page = LAB; say = LAB.say; }
+  else { const L = LESSONS[R.lesson]; page = R.cur; title = page.title; say = page.say; $('#lname').textContent = L.full; }
+  main.innerHTML = `<div class="page ${dirn > 0 ? 'slide-in-r' : 'slide-in-l'}">${R.view === 'home' ? `<h1>${title}</h1>` : `<h1>${title}</h1>`}${page.html}</div>`;
+  main.scrollTop = 0; setHelper(say);
+  page.wire && page.wire(main.firstElementChild);
+  document.title = (R.view === 'lesson' ? LESSONS[R.lesson].full.replace('　', ' ') + ' · ' : '') + 'micro:bit 小實驗室';
+  // progress & nav
+  if (R.view === 'lesson') {
+    const n = LESSONS[R.lesson].pages.length;
+    $('#pblocks').innerHTML = [...Array(n)].map((_, i) => `<span class="pb ${i < R.page ? 'done' : i === R.page ? 'cur' : ''}"></span>`).join('');
+    $('#pcount').textContent = `${R.page + 1} / ${n}`;
+    $('#prev').disabled = R.page === 0;
+    $('#next .lbl2').textContent = R.page === n - 1 ? '完成' : '下一頁';
+    Timer.start(R.lesson);
+  } else { Timer.stop(); Timer.render(); }
+}
+function parse() {
+  const h = location.hash.replace(/^#\/?/, '').split('/');
+  if (h[0] === 'lab') { R.view = 'lab'; }
+  else if (LESSONS[h[0]]) { R.view = 'lesson'; R.lesson = +h[0]; R.page = Math.max(0, Math.min(LESSONS[h[0]].pages.length - 1, (+h[1] || 1) - 1)); }
+  else { R.view = 'home'; R.lesson = 0; }
+}
+let lastKey = '';
+function onHash() {
+  const before = lastKey; parse(); const key = R.view + R.lesson + '/' + R.page;
+  const dir = before && R.view === 'lesson' && before.startsWith('lesson' + R.lesson) && +before.split('/')[1] > R.page ? -1 : 1;
+  if (before && before !== key) xfer();
+  lastKey = key; render(dir);
+}
+function go(d) {
+  if (R.view !== 'lesson') return; const n = LESSONS[R.lesson].pages.length, p = R.page + d;
+  AU.click();
+  if (p >= n) { location.hash = '#/'; return; }
+  if (p < 0) return; location.hash = `#/${R.lesson}/${p + 1}`;
+}
+
+/* ================= BOOT ================= */
+document.body.insertAdjacentHTML('afterbegin', `<div id="app" class="view-home">
+  <header class="topbar"><button class="btn back" type="button" id="back">← 返回</button><span class="lesson-name" id="lname"></span><span class="spacer"></span>
+    <div class="progress only-lesson"><div class="pblocks" id="pblocks" aria-hidden="true"></div><span class="pcount" id="pcount"></span></div>
+    <div class="timer only-lesson" id="timer"><button class="timer-pill" id="timerPill" type="button" aria-expanded="false" aria-controls="timerPanel" title="教師計時器（按 T 隱藏）"></button>
+      <div class="timer-panel" id="timerPanel" hidden><h3>各環節建議時間（共 35 分鐘）</h3><ol id="timerList"></ol>
+        <div class="row"><span>按 T 隱藏計時器</span><button class="btn small" type="button" id="timerReset">重設計時</button></div></div></div></header>
+  <main id="main" tabindex="-1"></main>
+  <footer class="bottombar"><button class="keybtn" id="prev" type="button" aria-label="上一頁"><span class="cap">A</span>上一頁</button>
+    <div class="helper" id="helper"><div class="avatar" id="avatar">${AVATAR_SRC ? `<img src="${AVATAR_SRC}" alt="">` : '呂'}</div><p class="bubble" id="say" aria-live="polite"></p></div>
+    <div class="tools"><button class="btn icon-btn" id="muteBtn" type="button"></button><button class="btn icon-btn" id="helpBtn" type="button" aria-pressed="true"></button></div>
+    <button class="keybtn next" id="next" type="button" aria-label="下一頁"><span class="lbl2">下一頁</span><span class="cap">B</span></button></footer>
+</div><div class="xfer" id="xfer" aria-hidden="true">${'<i></i>'.repeat(25)}</div><div class="toast" id="toast" hidden role="status"></div>`);
+$('#back').addEventListener('click', () => { location.hash = '#/'; });
+$('#prev').addEventListener('click', () => go(-1)); $('#next').addEventListener('click', () => go(1));
+$('#timerPill').addEventListener('click', () => { const p = $('#timerPanel'); p.hidden = !p.hidden; $('#timerPill').setAttribute('aria-expanded', !p.hidden); });
+$('#timerReset').addEventListener('click', () => { Timer.el = Timer.el.map(() => 0); Timer.render(); });
+const muteUI = () => { const b = $('#muteBtn'); b.innerHTML = (AU.muted ? IC.mute : IC.sound) + `<span class="sr">${AU.muted ? '聲音：關' : '聲音：開'}</span>`; b.title = AU.muted ? '聲音已關（按一下打開）' : '聲音已開（按一下靜音）'; b.setAttribute('aria-pressed', AU.muted); };
+$('#muteBtn').addEventListener('click', () => { AU.muted = !AU.muted; store.set('mute', AU.muted ? '1' : '0'); muteUI(); });
+const helpUI = () => { const on = store.get('helper') !== '0'; $('#helper').classList.toggle('hidden', !on); const b = $('#helpBtn'); b.innerHTML = IC.helper + `<span class="sr">${on ? '隱藏呂Sir 小助手' : '顯示呂Sir 小助手'}</span>`; b.title = on ? '隱藏小助手' : '顯示小助手'; b.setAttribute('aria-pressed', on); };
+$('#helpBtn').addEventListener('click', () => { store.set('helper', store.get('helper') === '0' ? '1' : '0'); helpUI(); });
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea, [contenteditable]')) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  if (e.key === 't' || e.key === 'T') { Timer.hidden = !Timer.hidden; store.set('timerHidden', Timer.hidden ? '1' : '0'); Timer.render(); }
+});
+document.addEventListener('pointerdown', () => AU.ensure(), { once: true });
+window.addEventListener('hashchange', onHash);
+muteUI(); helpUI(); onHash();
+
+</script>
+</body>
+</html>
