@@ -346,6 +346,11 @@ main{overflow:auto;padding:10px 32px 10px;position:relative}
 .lscene .bulb{fill:#FFD43B;transition:fill .3s}
 .lscene.dark .bulb{fill:#5C6370}
 .lscene .lamp{cursor:pointer}
+.lscene .rgb{fill:#334155;stroke:#64748B;transition:fill .25s}
+.lscene .glow{opacity:0;transition:opacity .25s;pointer-events:none}
+.lscene.lit .rgb{fill:#FFFFFF;stroke:#FFFFFF}
+.lscene.lit .glow{opacity:1}
+.lstate{font-size:20px}
 .lscene .hand{position:absolute;font-size:76px;line-height:1;cursor:grab;touch-action:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25));transition:left .35s,top .35s}
 .lscene .hand.drag{cursor:grabbing;transition:none}
 .lscene .lhint{position:absolute;left:10px;top:8px;font-size:15px;font-weight:700;background:var(--paper);border:2px solid var(--line);border-radius:999px;padding:2px 10px}
@@ -1562,7 +1567,7 @@ const L2dim = () => `<div class="blocks">
   ${cblk('loops', '重複無限次', blk('neo', `${P('strip')} 設定亮度 ${P(`${NUM('255')} − ${SENS('光線強度')}`, 'cmp')}`) + blk('neo', `${P('strip')} 顯示顏色 ${DOT('白色', 'var(--paper)')}`), { id: 'loop' })}</div>`;
 /* 枱燈 + 手：拖手遮住 micro:bit，按枱燈開關 */
 function lampScene() {
-  const led = Array.from({ length: 25 }, (_, i) => `<rect x="${224 + (i % 5) * 12}" y="${146 + Math.floor(i / 5) * 9}" width="5" height="6" rx="1" fill="#E8EDF2" opacity=".9"/>`).join('');
+  const led = Array.from({ length: 25 }, (_, i) => `<rect x="${224 + (i % 5) * 12}" y="${128 + Math.floor(i / 5) * 9}" width="5" height="6" rx="1" fill="#E8EDF2" opacity=".9"/>`).join('');
   return `<div class="lscene"><svg viewBox="0 0 360 240" aria-hidden="true">
     <rect class="room" x="0" y="0" width="360" height="240" rx="14"/>
     <polygon class="beam" points="86,74 138,74 340,214 150,214"/>
@@ -1570,9 +1575,13 @@ function lampScene() {
     <g class="lamp"><rect x="18" y="202" width="74" height="10" rx="4" fill="#1F2937"/>
       <path d="M55 202 L66 118 L104 74" stroke="#1F2937" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M84 50 L136 50 L148 76 L74 76 Z" fill="#475569"/><circle class="bulb" cx="111" cy="80" r="9"/></g>
-    <rect x="200" y="128" width="120" height="84" rx="9" fill="#1F2937"/>
-    <circle cx="214" cy="170" r="6" fill="#64748B"/><circle cx="306" cy="170" r="6" fill="#64748B"/>
-    <rect class="ledzone" x="218" y="140" width="66" height="54" rx="4" fill="#111827"/>${led}
+    <defs><radialGradient id="lglow"><stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/><stop offset=".4" stop-color="#FFF9C4" stop-opacity=".8"/><stop offset="1" stop-color="#FFF9C4" stop-opacity="0"/></radialGradient></defs>
+    <rect x="200" y="108" width="120" height="84" rx="9" fill="#1F2937"/>
+    <circle cx="214" cy="150" r="6" fill="#64748B"/><circle cx="306" cy="150" r="6" fill="#64748B"/>
+    <rect class="ledzone" x="218" y="122" width="66" height="54" rx="4" fill="#111827"/>${led}
+    <rect x="184" y="190" width="152" height="22" rx="5" fill="#0F172A"/>
+    ${[0, 1, 2, 3].map(i => `<circle class="glow" cx="${207 + i * 35}" cy="201" r="26" fill="url(#lglow)"/>`).join('')}
+    ${[0, 1, 2, 3].map(i => `<rect class="rgb" x="${200 + i * 35}" y="195" width="14" height="12" rx="2"/>`).join('')}
     <text x="260" y="232" font-size="12" font-weight="700" text-anchor="middle" fill="#1F2937">LED 屏 = 光線感應器</text></svg>
     <span class="lhint">拖 ✋ 遮住 LED 屏</span><button class="btn lampbtn" type="button">💡 枱燈：開</button>
     <div class="hand" tabindex="0" role="button" aria-label="手：按一下遮住或移開">✋</div></div>`;
@@ -1662,10 +1671,10 @@ const L2 = {
         $('[data-asm]', el).addEventListener('click', e => { e.target.disabled = true; Stage.assemble(() => e.target.disabled = false); });
         wireViewFilter(el);
       } },
-    { seg: 2, title: '變數和如果…否則', say: '拖手遮住 LED 屏，或者關枱燈。先估一估燈會亮還是熄，寫在工作紙第 3 題，才揭曉。',
+    { seg: 2, title: '變數和如果…否則', say: '先在工作紙第 3 題估一估。然後拖手遮住 LED 屏，或者關枱燈：光線強度低過 50，下面 4 粒燈就會亮。',
       html: `<div class="two"><div class="card varbox2 pop"><p><b>變數</b>：一個會變的數，好像一個盒。<span class="muted">（工作紙第 2 題）</span></p>
           ${lampScene()}
-          <div class="box3d"><span class="p sensor name">光線強度</span><div class="v" data-v2>200</div></div><p class="muted">0 = 最暗，255 = 最光</p></div>
+          <div class="box3d"><span class="p sensor name">光線強度</span><div class="v" data-v2>200</div></div><p class="muted">0 = 最暗，255 = 最光</p><span class="pill lstate" data-st>Robotbit 4 粒燈：熄</span></div>
         <div class="card fork pop"><p><b>如果…那麼…否則</b>：二選一。</p><div class="q">光線強度 &lt; 50 ？</div>
           <div class="paths"><div class="path" data-p="then"><b>是 → 那麼</b><span>燈亮白色</span></div><div class="path" data-p="else"><b>否 → 否則</b><span>熄燈</span></div></div>
           <p class="fork-say" aria-live="polite"></p><button class="btn big" type="button" data-show>揭曉：程式走哪一條路？</button></div></div>`,
@@ -1673,6 +1682,7 @@ const L2 = {
         let shown = false, last = 200;
         const set = v => {
           last = v; rollNum($('[data-v2]', el), v); const dark = v < 50;
+          $('.lscene', el).classList.toggle('lit', dark); $('[data-st]', el).textContent = dark ? 'Robotbit 4 粒燈：亮（白色）' : 'Robotbit 4 粒燈：熄';
           $$('.path', el).forEach(p => { const on = (p.dataset.p === 'then') === dark; p.classList.toggle('run', shown && on); p.classList.toggle('idle', shown && !on); });
           $('.fork-say', el).textContent = shown ? `${v} ${dark ? '細過' : '不細過'} 50，所以${dark ? '亮燈' : '熄燈'}。` : `光線強度 = ${v}。燈會亮還是熄？先估一估。`;
         };
