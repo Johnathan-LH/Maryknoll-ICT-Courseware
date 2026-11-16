@@ -378,6 +378,29 @@ table.rec td:first-child{text-align:left;font-weight:700}
 .cans .btn{min-height:0;padding:4px 14px}
 .cans .ans{flex-basis:100%}
 .keys.recap{grid-template-columns:1fr;gap:10px}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:17px}
+.roles div{border:2px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--paper)}
+.tps{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:17px;margin-top:6px}
+.tps span{border:2px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--paper)}
+.tps .btn{min-height:0;padding:4px 12px}
+.swap{border:3px dashed var(--ink);border-radius:10px;padding:6px 12px;font-weight:700;font-size:19px;margin-bottom:8px}
+.peer{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;height:100%;min-height:0}
+.peer .card{overflow:auto}
+.chk{display:flex;flex-direction:column;gap:6px}
+.chk .it{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;border:2px solid var(--line);border-radius:12px;padding:4px 10px;background:var(--paper)}
+.chk .it .no{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);font-weight:700}
+.chk .it p{margin:0;font-size:18px;line-height:1.3}.chk .it small{display:block;color:var(--ink-2);font-size:14px}
+.chk .yn{display:flex;gap:6px}.chk .yn .btn{min-height:0;padding:6px 14px;font-size:18px}
+.chk .it.ok{border-color:var(--ok);background:#EAF8EE}.chk .it.no-ok{border-color:#E03131;background:#FFF0F0}
+.chk .yn .btn.sel{background:var(--ink);color:var(--paper)}
+.peer-sum{font-size:18px;font-weight:700;padding:6px 12px;border-radius:12px;border:2px solid var(--line);margin-top:8px}
+.pr2{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:6px}.pr2 p{margin:0}
+.praise{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.praise .btn{min-height:0;padding:4px 12px;font-size:17px}
+.praise .btn.sel{background:var(--ink);color:var(--paper)}
+.draw-n{font-size:64px;font-weight:800;text-align:center;line-height:1.1;margin:6px 0}
+.cnt{display:flex;align-items:center;gap:10px;justify-content:center;font-size:19px}
+.cnt .btn{min-height:0;padding:2px 14px}
 .keys.recap .keycard{padding:12px 16px;display:grid;grid-template-columns:1fr auto;column-gap:12px;row-gap:6px;align-items:end}
 .keys.recap .keycard .chip{grid-column:1/-1;justify-self:start}
 .keys.recap .keycard p{font-size:19px;margin:0}
@@ -1687,15 +1710,18 @@ function lightRow(id, val, mark) {
 }
 const L2 = {
   name: '智能夜燈', full: '第 2 課　智能夜燈', cat: 'logic',
-  segs: [['引入', 2], ['組裝 Robotbit', 4], ['變數和條件', 5], ['模擬', 3], ['動手', 12], ['測試／挑戰', 4], ['總結', 5]],
+  segs: [['引入', 2], ['組裝 Robotbit', 4], ['變數和條件', 5], ['模擬', 3], ['動手', 11], ['測試／挑戰', 3], ['同儕互評', 3], ['總結', 4]],
   pages: [
     { seg: 0, title: '天黑了，燈自己亮', say: '想想你家的走廊燈：天黑就會亮。', ...introPage(2, '房間變黑，<br>燈怎樣知道<br>要亮起來？') },
-    { seg: 1, title: '組裝 Robotbit', say: '按「組裝」→「接燈帶」→「電源」，再拉光線滑桿：這就是今日要做到的效果。然後答工作紙第 1 題。',
+    { seg: 1, title: '組裝 Robotbit', say: '兩人一組，先分好駕駛員和領航員。按「組裝」→「接燈帶」→「電源」，再拉光線滑桿：這就是今日要做到的效果。然後答工作紙第 1 題。',
       html: `<div class="lab"><div class="stagecard pop">${stageHTML('<div class="result"></div>')}
         <div class="inputs">${lightRow('l2a', 200, 50)}</div></div><div class="controls pop">
         <h3>看看今日的成品</h3>
         <div class="btnrow"><button class="btn big" data-asm>① 組裝</button><button class="btn big" data-link>② 接燈帶</button><button class="btn big" data-pow aria-pressed="false">③ 電源：關</button></div>
         <p class="muted">開電後把光線拉暗（像用手遮住）：低過 50，燈就亮。</p>
+        <h3>兩人一組：分角色</h3>
+        <div class="roles"><div><b>🧑‍✈️ 駕駛員</b><br>操作電腦、砌積木</div><div><b>🧭 領航員</b><br>讀工作紙步驟、剔格，說「OK」才可以下一步</div></div>
+        <p class="muted">做到「親手砌夜燈」步驟 5 就交換角色。</p>
         <h3>工作紙第 1 題</h3>
         <div class="card rv rvq"><p><b>(a)</b> 哪一個插法正確？${ANS('圖 A')}<br><span class="muted">動畫先插錯（圖 B），再插對（圖 A）。</span></p>
           <p><b>(b)</b> micro:bit 的 LED 屏要和 RGB 燈 ${ANS('都向前')}</p>
@@ -1722,12 +1748,13 @@ const L2 = {
         });
         ev();
       } },
-    { seg: 2, title: '變數和如果…否則', say: '先在工作紙第 3 題估一估。然後拖手遮住 LED 屏，或者關枱燈：光線強度低過 50，下面 4 粒燈就會亮。',
+    { seg: 2, title: '變數和如果…否則', say: '工作紙第 3 題：自己估一估，再和同伴對答案，不同就要說服對方。然後拖手遮住 LED 屏或關枱燈看看，最後老師揭曉。',
       html: `<div class="two"><div class="card varbox2 pop"><p><b>變數</b>：一個會變的數，好像一個盒。<span class="muted">（工作紙第 2 題）</span></p>
           ${lampScene()}
           <div class="box3d"><span class="p sensor name">光線強度</span><div class="v" data-v2>200</div></div><p class="muted">0 = 最暗，255 = 最光</p><span class="pill lstate" data-st>Robotbit 4 粒燈：熄</span></div>
         <div class="card fork pop"><p><b>如果…那麼…否則</b>：二選一。</p><div class="q">光線強度 &lt; 50 ？</div>
           <div class="paths"><div class="path" data-p="then"><b>是 → 那麼</b><span>燈亮白色</span></div><div class="path" data-p="else"><b>否 → 否則</b><span>熄燈</span></div></div>
+          <div class="tps"><span>① 自己估</span><span>② 和同伴對答案</span><span>③ 老師揭曉</span><button class="btn" type="button" data-tps>⏱ 30 秒</button></div>
           <p class="fork-say" aria-live="polite"></p><button class="btn big" type="button" data-show>揭曉：程式走哪一條路？</button></div></div>`,
       wire(el) {
         let shown = false, last = 200;
@@ -1738,6 +1765,10 @@ const L2 = {
           $('.fork-say', el).textContent = shown ? `${v} ${dark ? '細過' : '不細過'} 50，所以${dark ? '亮燈' : '熄燈'}。` : `光線強度 = ${v}。燈會亮還是熄？先估一估。`;
         };
         $('[data-show]', el).addEventListener('click', e => { shown = !shown; e.target.textContent = shown ? '隱藏答案' : '揭曉：程式走哪一條路？'; set(last); AU.click(); });
+        let tt = null; $('[data-tps]', el).addEventListener('click', e => {
+          clearInterval(tt); let n = 30; const b = e.target; b.textContent = `⏱ ${n}`; AU.click();
+          tt = setInterval(() => { n--; b.textContent = n > 0 ? `⏱ ${n}` : '⏱ 夠鐘'; if (n <= 0) clearInterval(tt); if (!document.contains(b)) clearInterval(tt); }, 1000);
+        });
         wireLampScene(el, v => set(v));
       } },
     { seg: 3, title: '手一遮，燈就亮', say: '工作紙第 4 題：看着程式，填好空格。按「用手遮住」「枱燈」，再按 A 看 LED 屏顯示的讀數。',
@@ -1779,7 +1810,7 @@ const L2 = {
       { title: '設定板上 4 粒燈', html: `<ol><li>按左邊 <span class="ui-chip">Neopixel</span>，把最頂那塊「設定 strip 為 NeoPixel…」拖入「當開始」</li><li>按 <b>P0</b> 改成 <b>P16</b>；按 <b>24</b> 改成 <b>4</b></li></ol>
         <div class="before-after"><span class="tag">拖出來時</span>${SETSTRIP('P0', 24)}</div><div class="before-after"><span class="tag">改好後</span>${SETSTRIP('P16', 4)}</div>
         <p class="muted">P16 = Robotbit 板上 4 粒 RGB 燈的插腳。</p>` },
-      { title: '如果…否則和條件', html: `<ol><li>按 <span class="ui-chip">邏輯</span>，拖「如果…那麼…否則」放入「重複無限次」</li><li>按 <span class="ui-chip">邏輯</span>，拖比較積木「0 = 0」放入「如果」的口，把 <b>=</b> 改成 <b>&lt;</b></li><li>按 <span class="ui-chip">輸入</span>，拖「光線強度」放入左邊的格，右邊的格打 <b>50</b></li></ol>
+      { title: '如果…否則和條件', html: `<p class="swap">🔄 交換角色：領航員坐到電腦前做駕駛員，原本的駕駛員改做領航員。</p><ol><li>按 <span class="ui-chip">邏輯</span>，拖「如果…那麼…否則」放入「重複無限次」</li><li>按 <span class="ui-chip">邏輯</span>，拖比較積木「0 = 0」放入「如果」的口，把 <b>=</b> 改成 <b>&lt;</b></li><li>按 <span class="ui-chip">輸入</span>，拖「光線強度」放入左邊的格，右邊的格打 <b>50</b></li></ol>
         <div class="blocks">${ifelse(CMP(SENS('光線強度'), '&lt;', NUM('50')), '', '')}</div>` },
       { title: '亮燈、熄燈和讀數', html: `<ol><li>按 <span class="ui-chip">Neopixel</span>，拖「strip 顯示顏色」放入「那麼」，顏色揀 <b>白色</b></li><li>再拖一塊放入「否則」，顏色揀 <b>黑色</b>（黑色 = 熄燈）</li></ol>
         <ol start="3"><li>按 <span class="ui-chip">輸入</span>，拖「當按鈕 A 被按下」放在空白位置</li><li>按 <span class="ui-chip">基本</span>，拖「顯示數字」放入；再放 <span class="ui-chip">輸入</span> 的「光線強度」。按 A 就看到讀數（工作紙第 6 題用）</li></ol>
@@ -1802,7 +1833,7 @@ const L2 = {
           <tr><td>✋ 用手遮住</td><td>${ANS('約 10–50')}</td><td>${ANS('亮')}</td><td>${ANS('那麼')}</td></tr>
           <tr><td>🌙 關燈</td><td>${ANS('約 0–10')}</td><td>${ANS('亮')}</td><td>${ANS('那麼')}</td></tr></tbody></table>
           <p class="muted">你的讀數不一定一樣，課室光線不同就會不同。</p>${RVBTN}
-          <p class="warn">做完了？做挑戰 1（工作紙第 7 題）。</p></div></div>` },
+          <p class="warn">做完了？做挑戰 1（工作紙第 7 題）。老師叫「互評」時，帶工作紙去鄰組。</p></div></div>` },
     { seg: 5, title: '挑戰 1：越暗越亮', say: '做完測試記錄才做。先拉滑桿看效果，再從供詞選答案填 ?。卡住了才逐張打開提示。',
       html: `<div class="sim"><div class="code pop">
         <div class="card cgoal"><p class="muted">目標（工作紙第 7 題）</p><p><b>不用「如果」：房間越暗，4 粒燈越亮。</b></p><p class="muted">亮度：0 = 熄，255 = 最亮。先建立一個英文變數 <b>brightness</b>（亮度）。</p></div>
@@ -1860,7 +1891,56 @@ const L2 = {
         mountStage(el, { mode: 'strip', onPart(id) { if (id === 'rbSwitch') { powBtn(); ev(); } } }).then(() => { if (has3D) Stage3D.snapAssembled(); ev(); });
         ev();
       } },
-    { seg: 6, title: '今日學了甚麼', say: '工作紙第 9 題：先自己答，老師才揭曉。最後答離場題。', ...recapPage([
+    { seg: 6, title: '同儕互評：測試鄰組的夜燈', say: '帶工作紙去鄰組，測試他們的夜燈。逐項試，按 ✔ 或 ✘，結果寫在工作紙第 9 題。',
+      html: `<div class="peer"><div class="card pop"><div class="cnt" style="justify-content:flex-start">我們測試第 <select data-grp class="btn" style="min-height:0;padding:2px 8px;font-size:19px"></select> 組的夜燈</div>
+        <div class="chk" style="margin-top:10px">${[
+          ['用手遮住 LED 屏，4 粒燈亮', '手要完全遮住 LED 屏', '檢查條件是不是「&lt;」、50；「那麼」是不是白色'],
+          ['手移開，燈熄', '在光管或枱燈下試', '檢查「否則」是不是黑色'],
+          ['按 A，LED 屏顯示讀數', '看完整個滾動數字', '加「當按鈕 A 被按下 → 顯示數字 光線強度」'],
+          ['說得出：光線強度 ___ 50 時，程式走「那麼」', '請對方講，不可以看工作紙', '再看工作紙第 3 題，和同伴討論']].map((it, i) =>
+          `<div class="it" data-i="${i}" data-fix="${it[2]}"><span class="no">${i + 1}</span><p>${it[0]}<small>怎樣測：${it[1]}</small></p><span class="yn"><button class="btn" type="button" data-v="1">✔</button><button class="btn" type="button" data-v="0">✘</button></span></div>`).join('')}</div>
+        <div class="peer-sum" aria-live="polite">逐項測試，按 ✔ 或 ✘。</div>
+        <div class="pr2"><div><p><b>一個讚</b></p><div class="praise" data-kind="good">${['程式正確', '合作得好', '解釋清楚', '做到挑戰'].map(t => `<button class="btn" type="button">${t}</button>`).join('')}</div></div>
+        <div><p><b>一個建議</b></p><div class="praise" data-kind="tip">${['檢查 P16、4 粒', '檢查 &lt; 號', '加按 A 讀數', '再試一次'].map(t => `<button class="btn" type="button">${t}</button>`).join('')}</div></div></div>
+        <div class="btnrow" style="margin-top:8px"><button class="btn" type="button" data-reset>重設，測下一組</button></div></div>
+        <div class="card pop" style="text-align:center"><h3>抽一組分享</h3><div class="cnt">全班 <button class="btn" type="button" data-n="-1">−</button><b data-total>15</b> 組<button class="btn" type="button" data-n="1">＋</button></div>
+          <div class="draw-n" data-draw>?</div><button class="btn big" type="button" data-pick>🎲 抽一組</button>
+          <p class="muted" data-done style="margin-top:10px"></p>
+          <p class="muted">被抽中的組：說出鄰組做得好的地方，和你們給的建議。</p></div></div>`,
+      wire(el) {
+        let total = 15; try { total = +localStorage.getItem('mb-l2-groups') || 15; } catch (e) { }
+        const sel = $('[data-grp]', el), tot = $('[data-total]', el);
+        const fillSel = () => { const v = sel.value; sel.innerHTML = Array.from({ length: total }, (_, i) => `<option>${i + 1}</option>`).join(''); if (v && +v <= total) sel.value = v; tot.textContent = total; };
+        fillSel();
+        const res = {};
+        const sum = () => {
+          const items = $$('.it', el), done = Object.keys(res).length, okN = Object.values(res).filter(Boolean).length;
+          const out = $('.peer-sum', el);
+          if (done < items.length) { out.textContent = `已測 ${done} / ${items.length} 項`; out.style.borderColor = ''; return; }
+          if (okN === items.length) { out.textContent = `🎉 第 ${sel.value} 組 4 項全部齊全！`; out.style.borderColor = 'var(--ok)'; AU.ok?.(); }
+          else { const fixes = items.filter(it => res[it.dataset.i] === false).map(it => '・' + it.dataset.fix); out.innerHTML = `未齊全（${okN} / 4）。建議他們：<br>${fixes.join('<br>')}`; out.style.borderColor = '#E03131'; }
+        };
+        $$('.it', el).forEach(it => $$('.yn .btn', it).forEach(b => b.addEventListener('click', () => {
+          const ok = b.dataset.v === '1'; res[it.dataset.i] = ok;
+          $$('.yn .btn', it).forEach(x => x.classList.toggle('sel', x === b)); it.classList.toggle('ok', ok); it.classList.toggle('no-ok', !ok); AU.click(); sum();
+        })));
+        $$('.praise', el).forEach(g => $$('.btn', g).forEach(b => b.addEventListener('click', () => { $$('.btn', g).forEach(x => x.classList.toggle('sel', x === b)); AU.click(); })));
+        $('[data-reset]', el).addEventListener('click', () => {
+          for (const k in res) delete res[k]; $$('.it', el).forEach(it => it.classList.remove('ok', 'no-ok')); $$('.sel', el).forEach(x => x.classList.remove('sel'));
+          sel.selectedIndex = (sel.selectedIndex + 1) % total; sum(); AU.click();
+        });
+        let drawn = [];
+        $$('[data-n]', el).forEach(b => b.addEventListener('click', () => { total = Math.max(2, Math.min(30, total + +b.dataset.n)); try { localStorage.setItem('mb-l2-groups', total); } catch (e) { } drawn = drawn.filter(n => n <= total); fillSel(); AU.click(); }));
+        $('[data-pick]', el).addEventListener('click', e => {
+          const left = Array.from({ length: total }, (_, i) => i + 1).filter(n => !drawn.includes(n));
+          if (!left.length) { drawn = []; $('[data-done]', el).textContent = '全部抽過了，重新開始。'; return; }
+          e.target.disabled = true; let k = 0; const box = $('[data-draw]', el);
+          const spin = setInterval(() => { box.textContent = left[Math.floor(Math.random() * left.length)]; AU.click(); if (++k > 12) {
+            clearInterval(spin); const n = left[Math.floor(Math.random() * left.length)]; box.textContent = `第 ${n} 組`; drawn.push(n);
+            $('[data-done]', el).textContent = '已抽：' + drawn.join('、'); e.target.disabled = false; } }, 80);
+        });
+      } },
+    { seg: 7, title: '今日學了甚麼', say: '工作紙第 10 題：先自己答，老師才揭曉。最後答離場題。', ...recapPage([
       `<b>變數</b>：「光線強度」會不停改變，所以它是一個 ${ANS('變數')}。最暗是 ${ANS('0')}，最光是 ${ANS('255')}。`,
       `<b>如果…否則</b>（條件：光線強度 &lt; 50）<br>🌙 晚上關了燈，光線強度 = 5：條件 ${ANS('成立')}，程式走 ${ANS('那麼')}，燈 ${ANS('亮')}。<br>☀️ 白天，光線強度 = 180：條件 ${ANS('不成立')}，程式走 ${ANS('否則')}，燈 ${ANS('熄')}。`,
       `<b>重複無限次</b>：令 micro:bit ${ANS('不停檢查')}，燈才會即時反應。`],
