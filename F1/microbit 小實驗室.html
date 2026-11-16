@@ -367,6 +367,9 @@ table.rec th,table.rec td{border:2px solid var(--line);padding:8px 10px;text-ali
 table.rec th{background:#F3F5F8}
 table.rec td:first-child{text-align:left;font-weight:700}
 .cgoal p{margin:0 0 4px;font-size:19px}
+.p.qblank{color:var(--ink-2);border-style:dashed}
+.wbank{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.wbank span{border:2px solid var(--line);border-radius:10px;padding:2px 12px;font-weight:700;background:var(--paper)}
 .chints{display:flex;flex-direction:column;gap:10px;margin:12px 0}
 .chint{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:10px 14px;padding:10px 14px}
 .chint .btn{min-height:0;padding:4px 14px;justify-self:start}
@@ -1579,7 +1582,11 @@ const L2code = (elif) => `<div class="blocks">
   ${cblk('input', '當按鈕 ' + P('A') + ' 被按下', blk('basic', '顯示數字 ' + SENS('光線強度')), { hat: true, id: 'A' })}</div>`;
 const L2dim = () => `<div class="blocks">
   ${ONSTART(SETSTRIP('P16', 4))}
-  ${cblk('basic', '重複無限次', blk('neo', `${P('strip', 'vr')} 設定亮度 ${P(`${NUM('255')} − ${SENS('光線強度')}`, 'math')}`) + blk('neo', `${P('strip', 'vr')} 顯示顏色 ${DOT('白色', 'var(--paper)')}`), { id: 'loop' })}</div>`;
+  ${cblk('basic', '重複無限次', blk('var', `設定 ${P('brightness ▾', 'vr')} 為 ${P(`${NUM('255')} − ${SENS('光線強度')}`, 'math')}`) + blk('neo', `${P('strip', 'vr')} 設定亮度 ${P('brightness', 'vr')}`) + blk('neo', `${P('strip', 'vr')} 顯示顏色 ${DOT('白色', 'var(--paper)')}`), { id: 'loop' })}</div>`;
+const Q = () => P('　?　', 'num qblank');
+const L2dimSkel = () => `<div class="blocks">
+  ${cblk('basic', '重複無限次', blk('var', `設定 ${Q()} 為 ${P(`${Q()} ${Q()} ${Q()}`, 'math')}`) + blk('neo', `${P('strip', 'vr')} 設定亮度 ${Q()}`) + blk('neo', `${P('strip', 'vr')} 顯示顏色 ${Q()}`))}</div>`;
+const WORDBANK = ['255', '50', '光線強度', 'brightness', '+', '−', '白色', '黑色'];
 /* LED 屏顯示數字：3×5 字形，逐個數字顯示 */
 const DIG = ['111101101101111', '010110010010111', '111001111100111', '111001111001111', '101101111001001', '111100111001111', '111100111101111', '111001010010010', '111101111101111', '111101111001111'];
 const digitPat = d => { const a = Array(25).fill(0); [...DIG[d]].forEach((c, i) => { if (c === '1') a[Math.floor(i / 3) * 5 + 1 + (i % 3)] = 1; }); return a; };
@@ -1796,13 +1803,14 @@ const L2 = {
           <tr><td>🌙 關燈</td><td>${ANS('約 0–10')}</td><td>${ANS('亮')}</td><td>${ANS('那麼')}</td></tr></tbody></table>
           <p class="muted">你的讀數不一定一樣，課室光線不同就會不同。</p>${RVBTN}
           <p class="warn">做完了？做挑戰 1（工作紙第 7 題）。</p></div></div>` },
-    { seg: 5, title: '挑戰 1：越暗越亮', say: '做完測試記錄才做。先拉滑桿看看效果，自己想程式。卡住了才逐張打開提示。',
+    { seg: 5, title: '挑戰 1：越暗越亮', say: '做完測試記錄才做。先拉滑桿看效果，再從供詞選答案填 ?。卡住了才逐張打開提示。',
       html: `<div class="sim"><div class="code pop">
-        <div class="card cgoal"><p class="muted">目標（工作紙第 7 題）</p><p><b>不用「如果」：房間越暗，4 粒燈越亮。</b></p><p class="muted">亮度：0 = 熄，255 = 最亮</p></div>
+        <div class="card cgoal"><p class="muted">目標（工作紙第 7 題）</p><p><b>不用「如果」：房間越暗，4 粒燈越亮。</b></p><p class="muted">亮度：0 = 熄，255 = 最亮。先建立一個英文變數 <b>brightness</b>（亮度）。</p></div>
+        <div class="card"><b>從供詞選出答案，填入 ?</b><div class="wbank">${WORDBANK.map(w => `<span>${w}</span>`).join('')}</div><div style="margin-top:10px">${L2dimSkel()}</div></div>
         <div class="chints">${[
-          '亮度積木在 <span class="ui-chip">Neopixel</span> → <span class="ui-chip">⋯ 更多</span>：「strip 設定亮度」。把它放入「重複無限次」，下面再放「strip 顯示顏色 白色」。',
+          '建立變數：按 <span class="ui-chip">變數</span> → <span class="ui-chip">建立一個變數...</span> → 用<b>英文</b>打 <b>brightness</b> → 確定。不用打中文。',
           '看右邊：光線強度 200 → 亮度 55；光線強度 10 → 亮度 245。兩個數加起來是多少？',
-          '用 <span class="ui-chip">數學</span> 的「0 − 0」放入亮度的格。左格放甚麼？右格放甚麼？'].map((h, i) => `<div class="card chint" data-h="${i}"><b>提示 ${i + 1}</b><button class="btn" type="button" ${i ? 'disabled' : ''}>打開</button><div class="open" hidden>${h}</div></div>`).join('')}</div>
+          '「0 − 0」在 <span class="ui-chip">數學</span>；「strip 設定亮度」在 <span class="ui-chip">Neopixel</span> → <span class="ui-chip">⋯ 更多</span>；brightness 積木在 <span class="ui-chip">變數</span>。'].map((h, i) => `<div class="card chint" data-h="${i}"><b>提示 ${i + 1}</b><button class="btn" type="button" ${i ? 'disabled' : ''}>打開</button><div class="open" hidden>${h}</div></div>`).join('')}</div>
         <div class="card rv cans"><b>答案（老師揭曉）</b>${RVBTN}<div class="ans">${L2dim()}</div></div></div>
         <div class="stagecard pop">${stageHTML('<div class="result"></div>')}
         <div class="inputs">${lightRow('l2d', 200, null)}<div class="btnrow"><button class="btn" data-l="200">亮處 200</button><button class="btn" data-l="100">陰暗 100</button><button class="btn" data-l="10">遮住 10</button></div></div></div></div>`,
@@ -1817,7 +1825,7 @@ const L2 = {
         const ev = () => {
           const v = +inp.value, b = 255 - v; HW.light = v; out.textContent = v;
           HW.rgb = Array(4).fill(b > 0 ? grey(b) : null);
-          $('.result', el).innerHTML = `<span class="pill">光線強度 ${v} → 燈的亮度 ${b}</span>`; hwChanged();
+          $('.result', el).innerHTML = `<span class="pill">光線強度 ${v} → brightness（亮度）${b}</span>`; hwChanged();
         };
         inp.addEventListener('input', ev);
         $$('[data-l]', el).forEach(btn => btn.addEventListener('click', () => { inp.value = btn.dataset.l; ev(); AU.click(); }));
