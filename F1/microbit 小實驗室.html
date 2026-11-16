@@ -1291,9 +1291,10 @@ const MK_BAR = (t) => `<rect x="0" y="0" width="300" height="24" rx="6" fill="#3
 const NEO_GUIDE = `<div class="mk">
   <figure><svg viewBox="0 0 300 210" aria-hidden="true">${MK_BAR('micro:bit　　　積木　JavaScript')}
     <text x="276" y="17" font-size="15" fill="#fff">⚙</text>
-    ${mkTool([['⋯', ''], ['數學', '#9013FE'], ['進階 ▾', 'var(--ink-2)', 1], ['函式', '#3455DB'], ['引腳', '#B22222'], ['＋ 擴展', '', 1]], true)}
-    <path d="M226 182 H174 M186 172 L174 182 L186 192" stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="230" y="188" font-size="15" font-weight="700" fill="var(--ink)">按這裏</text></svg>
-    <figcaption><span class="n">1</span>積木選單拉到<b>最底</b>，按 <span class="ui-chip">進階</span> 打開，再按最底的 <span class="ui-chip">＋ 擴展</span>。<br><span class="muted">另一個方法：右上角 ⚙ → 擴展</span></figcaption></figure>
+    ${mkTool([['⋯', ''], ['邏輯', '#00A4A6'], ['變數', '#DC143C'], ['數學', '#9013FE'], ['＋ 擴展', '', 1]], true)}
+    <rect x="10" y="174" width="150" height="24" rx="5" fill="#F3F5F8" stroke="var(--line)"/><text x="20" y="191" font-size="13" font-weight="700" fill="var(--ink)">進階 ▸</text>
+    <path d="M226 154 H174 M186 144 L174 154 L186 164" stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="230" y="160" font-size="15" font-weight="700" fill="var(--ink)">按這裏</text></svg>
+    <figcaption><span class="n">1</span>在積木選單找 <span class="ui-chip">＋ 擴展</span>（在「數學」下面、「進階」上面），按一下。<br><span class="muted">另一個方法：右上角 ⚙ → 擴展</span></figcaption></figure>
   <figure><svg viewBox="0 0 300 210" aria-hidden="true">${MK_BAR('←　擴展')}
     <rect x="20" y="58" width="210" height="40" rx="8" fill="var(--paper)" stroke="var(--ink-2)" stroke-width="2"/>
     <text x="34" y="84" font-size="18" font-weight="700" fill="var(--ink)">neopixel</text><rect x="113" y="66" width="2" height="24" fill="var(--ink)"/>
@@ -1315,7 +1316,7 @@ const NEO_GUIDE = `<div class="mk">
     <figcaption><span class="n">4</span>左邊積木選單多了 <b>Neopixel</b>，就是成功了。按它就找到所有燈的積木。</figcaption></figure>
 </div>`;
 const NEO_FAQ = [
-  ['找不到「擴展」？', ['先按積木選單最底的「進階」打開，「擴展」在最最底', '或者按右上角 ⚙ 齒輪 → 「擴展」']],
+  ['找不到「擴展」？', ['在積木選單「數學」下面、「進階」上面', '或者按右上角 ⚙ 齒輪 → 「擴展」']],
   ['搜尋後沒有 neopixel？', ['檢查拼法：n-e-o-p-i-x-e-l', '等幾秒，網絡慢時會遲一點出現', '仍然沒有：重新整理網頁（不用重新登入）']],
   ['按錯了另一個擴展？', ['不要緊，再按一次「擴展」，加入 neopixel 就可以']]];
 const IPO_DEFS = [['input', '輸入', '把外面發生的事，告訴 micro:bit。'], ['process', '處理', 'micro:bit 想一想，決定要做甚麼。'], ['output', '輸出', 'micro:bit 做出結果，給人看到或聽到。']];
