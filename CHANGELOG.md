@@ -2,6 +2,10 @@
 
 最新的記錄放在最上方。格式及規則見 [AGENTS.md](AGENTS.md) 第 5 節。
 
+## 2026-11-16
+- 修改：中一 micro:bit 小實驗室（F1/microbit 小實驗室.html）第 2 課。「親手砌夜燈」拆成 8 步，加入 neopixel 擴展改為 4 格示意圖（進階 → 擴展 → 搜尋 neopixel → 按卡 → 見到 Neopixel 分類），並逐步說明積木位置和要改的數值（P0→P16、24→4、= 改 <）。「兩級亮度」挑戰改為「挑戰 1：越暗越亮」（亮度 = 255 − 光線強度，有模擬）及「挑戰 2：換上燈帶」（P1、10 粒，有接燈帶動畫）。第 3 課加入擴展的步驟用同一套示意圖。工作紙第 2 課同步改為 4 頁。
+- 未同步：Teacher 倉庫（ICT/F1/microbit 小實驗室.html）本次未有推送權限，需由 Johnathan 手動更新。
+
 ## 2026-11-01
 - 上架（由 Johnathan 提供，已同步到 Teacher）：中一「microbit」課題「micro:bit」— micro:bit 小實驗室，第 1–3 課合併（F1/microbit 小實驗室.html）。
 
