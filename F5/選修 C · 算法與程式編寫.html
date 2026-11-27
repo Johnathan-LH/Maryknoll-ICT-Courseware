@@ -6791,6 +6791,1662 @@ document.addEventListener('DOMContentLoaded', () => {
 </html>
 
 </script>
+<script type="text/x-chapter" id="src-ch5">
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>選修 C 第 5 章 · 檢索算法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --floor:#07213a; --floor-dot:#0c2c4a; --paper:#eef6f4; --paper2:#dcebe8;
+  --ink:#0a1e2e; --ink2:#3d5566; --steel:#0d3b5c; --steel2:#2c6283;
+  --yellow:#7ff0c3; --yellow-soft:#c8f7e4; --orange:#c2410c; --ok:#0f6a3c; --bad:#b4231b;
+  --card:#cfe5ef; --card-dark:#2c6283; --code:#04131f; --codefg:#dff5ee; --codedim:#6f8fa0;
+  --sonar:#46f0a8; --amber:#ffc857; --deep:#041427;
+  --mono:"IBM Plex Mono",Consolas,Menlo,"Courier New",monospace;
+  --sans:"Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;
+  --stencil:"Orbitron","Arial Black",sans-serif;
+  --fs-scale:1;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{font-size:calc(clamp(16px, .6vw + 10.5px, 23px) * var(--fs-scale)); scroll-behavior:smooth; -webkit-text-size-adjust:100%}
+body{margin:0; color:var(--ink); font-family:var(--sans); line-height:1.6; overflow-x:hidden;
+  background-color:var(--floor);
+  background-image:linear-gradient(180deg,#0b3355 0,#07213a 40rem,#041427 100%);}
+code,pre,.mono,kbd,samp,textarea.mono,input.mono{font-family:var(--mono); font-variant-ligatures:none; font-feature-settings:"liga" 0,"calt" 0}
+h1,h2,h3,h4{line-height:1.25; margin:.2em 0 .5em}
+a{color:inherit}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:3px dashed var(--orange); outline-offset:3px}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.hazard{background:repeating-linear-gradient(-45deg,var(--yellow) 0 14px,var(--ink) 14px 28px)}
+
+/* ===== 系列橫額 ===== */
+.series{background:var(--ink); color:#f3f1ea; font-size:.82rem; display:flex; align-items:center; gap:1rem; padding:.35rem 1rem; flex-wrap:wrap}
+.series a{color:var(--yellow); text-decoration:none; font-weight:700}
+.series a:hover,.series a:focus-visible{text-decoration:underline}
+.series .tools{margin-left:auto; display:flex; gap:.5rem; flex-wrap:wrap}
+.tog{background:transparent; color:#f3f1ea; border:2px solid #77746a; padding:.1rem .6rem; cursor:pointer; font-size:.8rem; min-height:36px}
+.tog[aria-pressed="true"]{border-color:var(--yellow); color:var(--yellow)}
+
+/* ===== 封面 ===== */
+.hero{max-width:1100px; margin:0 auto; padding:1.6rem 1rem .8rem; text-align:center}
+.hero .kicker{font-family:var(--stencil); letter-spacing:.14em; color:var(--ink2); font-size:1rem}
+.hero h1{font-size:clamp(2rem,3.6vw,3.2rem); font-weight:900; margin:.1em 0 .2em; letter-spacing:.06em}
+.hero h1 .plate{display:inline-block; background:var(--yellow); border:3px solid var(--ink); padding:0 .3em; margin-right:.25em}
+.hero p{margin:.2rem auto; max-width:44em; color:var(--ink2)}
+
+/* ===== 分區按鈕 ===== */
+.zones{display:flex; justify-content:center; gap:.8rem; flex-wrap:wrap; padding:.8rem 1rem; position:sticky; top:0; z-index:40; background:var(--floor); border-bottom:3px solid var(--ink)}
+.zone{position:relative; background:var(--paper); border:3px solid var(--ink); padding:.35rem 1rem; cursor:pointer; text-align:left; min-height:52px}
+.zone b{display:block; font-size:1.02rem}
+.zone small{font-family:var(--stencil); letter-spacing:.12em; color:var(--ink2)}
+.zone[aria-current="true"]{background:var(--yellow); box-shadow:4px 4px 0 var(--ink)}
+.zone[aria-current="true"] b::before{content:"▶ "}
+.zone .badge{position:absolute; top:-.75rem; right:-.5rem; background:var(--ink); color:var(--yellow); font-size:.72rem; padding:0 .4rem; font-weight:700; font-family:var(--mono)}
+
+main{max-width:1180px; margin:0 auto; padding:0 1rem 3rem}
+.sec{display:none; scroll-margin-top:6rem}
+.sec.on{display:block}
+.sec-banner{text-align:center; margin:1.4rem 0 .6rem}
+.sec-banner h2{display:inline-block; font-size:clamp(1.5rem,2.6vw,2.2rem); font-weight:900; margin:0; border-bottom:6px solid var(--yellow); padding:0 .2em}
+.sec-banner p{margin:.4rem 0 0; color:var(--ink2)}
+.chips{display:flex; justify-content:center; flex-wrap:wrap; gap:.5rem; margin:.6rem 0 1.2rem}
+.chips button{background:transparent; border:2px dashed var(--ink2); padding:.25rem .8rem; cursor:pointer; min-height:42px}
+.chips button:hover{border-style:solid; background:var(--paper)}
+
+/* ===== 每個重點一張卡 ===== */
+.card{background:var(--paper); border:3px solid var(--ink); margin:2rem 0 1.6rem; position:relative; padding:1.5rem 1.2rem 1.1rem; scroll-margin-top:6.5rem; min-width:0}
+.card-tag{position:absolute; top:-1rem; left:1rem; background:var(--yellow); border:3px solid var(--ink); padding:0 .7rem; font-weight:900; font-size:1.02rem}
+.book{border-left:8px solid var(--ink); background:var(--paper2); padding:.45rem .9rem; margin:0 0 1rem}
+.book::before{content:"課本"; display:inline-block; font-size:.75rem; font-weight:900; background:var(--ink); color:#fff; padding:0 .35rem; margin-bottom:.2rem}
+.book ul{margin:.1rem 0 0; padding-left:1.2em}
+.book li{margin:.15rem 0}
+.book table{border-collapse:collapse; margin:.5rem 0 .2rem; font-size:.95rem}
+.book th,.book td{border:2px solid var(--ink); padding:.2rem .6rem; text-align:left; vertical-align:top}
+.book th{background:var(--ink); color:#fff}
+.try{font-weight:900; margin:.2rem 0 .5rem}
+.try::before{content:"試一試 ▸ "; color:var(--ink2)}
+.takeaway{border:2px solid var(--ink); background:#fffdf5; padding:.45rem .8rem; margin-top:1rem; font-weight:700}
+.takeaway::before{content:"重點："; background:var(--yellow); padding:0 .3rem; margin-right:.3rem}
+.hint{font-size:.9rem; color:var(--ink2)}
+.ctl{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin-bottom:.8rem}
+.grid2{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.callout{border:2px solid var(--ink); background:var(--yellow-soft); padding:.5rem .8rem; margin:.6rem 0}
+
+/* 按鈕 */
+.btn{background:var(--yellow); color:var(--ink); border:3px solid var(--ink); padding:.3rem .8rem; min-height:44px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:.35em; touch-action:manipulation}
+.btn:active{transform:translate(1px,1px)}
+.btn.alt{background:var(--paper)}
+.btn.dark{background:var(--steel); color:#fff}
+.btn:disabled{opacity:.4; cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--ink); color:var(--yellow)}
+.chk{display:inline-flex; align-items:center; gap:.4em; border:2px solid var(--ink); padding:.2rem .6rem; background:var(--paper); cursor:pointer; min-height:44px}
+.chk input{width:1.2em; height:1.2em; accent-color:var(--ink)}
+.chk.bug{border-style:dashed; background:#f5d2c3}
+.field{display:inline-flex; align-items:center; gap:.4em; flex-wrap:wrap}
+.field input,.field select{border:2px solid var(--ink); background:#fff; padding:.25rem .45rem; min-height:40px; max-width:100%}
+
+/* ===== 程式碼 ===== */
+.codebox{background:var(--code); color:var(--codefg); border:3px solid var(--ink); overflow-x:auto; font-family:var(--mono); font-variant-ligatures:none; font-size:.92rem}
+.codetab{border-collapse:collapse; width:100%; font-family:var(--mono); font-variant-ligatures:none}
+.codetab td{padding:.08rem .5rem; vertical-align:top; white-space:pre; border-bottom:1px solid #2a2d30}
+.codetab .gut{width:1.6em; text-align:center; color:var(--yellow); font-family:var(--sans); font-weight:900}
+.codetab .ln{width:2.2em; text-align:right; color:var(--codedim); user-select:none}
+.codetab .pc{border-left:2px dashed #555; color:#d9d6c8}
+.codetab tr.cur td{background:var(--yellow); color:var(--ink)}
+.codetab tr.cur td *{color:var(--ink)!important}
+.codetab tr.cur .ln{color:var(--ink); font-weight:700}
+.codetab tr.err td{background:#f3c7b4; color:var(--ink); text-decoration:underline wavy var(--bad)}
+.codetab tr.err td *{color:var(--ink)!important}
+.codetab tr.err .gut{text-decoration:none}
+.codetab th{font-family:var(--sans); font-size:.8rem; text-align:left; color:var(--yellow); padding:.2rem .5rem; border-bottom:2px solid #555; font-weight:700}
+.k{color:#ffcc66; font-weight:600}.b{color:#8fd3ff}.s{color:#b6e39a}.c{color:#a5a39a; font-style:italic}.n{color:#ffa98a}.cn{color:#ffd8f0; text-decoration:underline dotted}
+.pk{color:#ffcc66; font-weight:600}.arr{color:#fff; font-weight:700; font-family:var(--sans); font-size:1.1em}
+.pre{margin:0; padding:.6rem .8rem; white-space:pre; overflow-x:auto}
+
+/* ===== 逐步執行器 ===== */
+.stepper{min-width:0}
+.st-grid{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:1rem; align-items:start}
+.st-codehead{display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.3rem; flex-wrap:wrap}
+.st-codehead b{font-size:.95rem}
+.viewsw{display:none}
+.stepper.novars .st-grid{grid-template-columns:minmax(0,1fr)}
+.stepper.novars .console{min-height:2.4rem}
+.st-side{display:flex; flex-direction:column; gap:.8rem; min-width:0}
+.vars{display:flex; flex-wrap:wrap; gap:.55rem; min-height:4.2rem; align-content:flex-start}
+.vars .empty{color:var(--ink2); font-size:.9rem}
+.crate{border:3px solid var(--card-dark); background:var(--card); min-width:5.5rem; max-width:100%; position:relative; padding:0 .55rem .35rem; box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.crate .lbl{margin:-2px -.55rem .2rem; background:#fffdf5; border:2px solid var(--ink); font-family:var(--mono); font-variant-ligatures:none; font-size:.78rem; padding:0 .35rem; white-space:nowrap; font-weight:600; overflow-wrap:normal}
+.crate .val{font-family:var(--mono); font-variant-ligatures:none; font-size:1.05rem; font-weight:600; word-break:break-all; color:var(--ink)}
+.crate.chg{outline:3px solid var(--ink); outline-offset:2px}
+.crate.chg::after{content:"★ 剛更新"; position:absolute; right:-.3rem; bottom:-1.05rem; font-size:.7rem; background:var(--ink); color:var(--yellow); padding:0 .3rem; font-weight:700}
+.crate.anim{animation:drop .35s ease-out}
+@keyframes drop{from{transform:translateY(-10px)} to{transform:none}}
+.console{background:#0f1011; color:#e8e6df; border:3px solid var(--ink); font-family:var(--mono); font-variant-ligatures:none; padding:.4rem .6rem; min-height:3.2rem; font-size:.95rem; white-space:pre-wrap; word-break:break-all}
+.console .pr{color:var(--yellow)}
+.console .er{color:#ffb4a0; font-weight:600}
+.console .new{text-decoration:underline; text-decoration-color:var(--yellow); text-underline-offset:3px}
+.boxtitle{font-weight:900; font-size:.92rem; display:flex; align-items:center; gap:.4rem; margin-bottom:.25rem}
+.note{border:3px solid var(--ink); background:#fffdf5; padding:.5rem .8rem; margin:.8rem 0 .6rem; min-height:2.8rem; display:flex; gap:.6rem}
+.note::before{content:"解說"; font-weight:900; background:var(--ink); color:var(--yellow); padding:0 .4rem; height:fit-content; white-space:nowrap}
+.note.err{background:#f6d7ca; border-style:dashed}
+.note.err::before{content:"✘ 錯誤"}
+.ctrl{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center}
+.ctrl .cnt{font-family:var(--mono); font-variant-ligatures:none; font-weight:600; padding:0 .4rem; border:2px solid var(--ink); background:#fff; min-height:44px; display:flex; align-items:center}
+.ctrl label{display:inline-flex; align-items:center; gap:.3rem; font-size:.9rem}
+.ctrl input[type=range]{width:7rem; accent-color:var(--ink)}
+.trace-wrap{overflow-x:auto; margin-top:.5rem; border:2px solid var(--ink); background:#fff; max-height:20rem; overflow-y:auto}
+details.trace-box{margin-top:.8rem}
+details.trace-box > summary{cursor:pointer; font-weight:900; padding:.3rem 0; list-style:none}
+details.trace-box > summary::before{content:"▶ "} details.trace-box[open] > summary::before{content:"▼ "}
+.trace{border-collapse:collapse; width:100%; font-family:var(--mono); font-variant-ligatures:none; font-size:.9rem}
+.trace th{position:sticky; top:0; background:var(--ink); color:var(--yellow); font-family:var(--sans); padding:.3rem .5rem; text-align:center; font-size:.82rem; white-space:nowrap}
+.trace td{border:1px solid #9a968a; padding:.2rem .5rem; text-align:center; white-space:nowrap}
+.trace tr.cur td{background:var(--yellow-soft); font-weight:700; border-top:3px solid var(--ink); border-bottom:3px solid var(--ink)}
+.trace tr.cur td:first-child::before{content:"▶ "}
+.trace tr.fut{display:none}
+.trace td.er{color:var(--bad); font-weight:700}
+.predict{border:3px dashed var(--ink); background:var(--paper2); padding:.6rem .8rem; margin-bottom:.8rem}
+.predict .q{font-weight:900; margin-bottom:.4rem}
+.predict .q::before{content:"① 先預測 "; background:var(--ink); color:var(--yellow); padding:0 .35rem; margin-right:.3rem}
+.predict .opts{display:flex; flex-wrap:wrap; gap:.5rem}
+.opt{border:2px solid var(--ink); background:#fff; padding:.3rem .7rem; cursor:pointer; min-height:44px; text-align:left; font-family:var(--mono); font-variant-ligatures:none; white-space:pre-wrap}
+.opt[aria-pressed="true"]{background:var(--ink); color:var(--yellow)}
+.opt[aria-pressed="true"]::before{content:"☛ "}
+.verdict{margin-top:.5rem; font-weight:700}
+.verdict.ok::before{content:"✔ "; } .verdict.no::before{content:"✘ "}
+.verdict.ok{color:var(--ok)} .verdict.no{color:var(--bad)}
+.stamp{display:inline-block; border:3px solid currentColor; padding:.05rem .5rem; font-weight:900; transform:rotate(-2deg); letter-spacing:.05em}
+.stamp.ok{color:var(--ok)} .stamp.no{color:var(--bad); border-style:dashed}
+
+/* ===== 重構工作台 ===== */
+.refopts{display:flex; flex-wrap:wrap; gap:.5rem; margin:.4rem 0 .7rem}
+.shipcheck{display:grid; grid-template-columns:repeat(3,minmax(0,auto)); gap:.6rem; align-items:center; border:3px solid var(--ink); background:#fff; padding:.5rem .8rem; margin:.6rem 0}
+.shipcheck .out{font-family:var(--mono); font-variant-ligatures:none; font-size:1.25rem; font-weight:700; border:2px solid var(--ink); padding:.1rem .6rem; background:var(--paper)}
+.meter{display:flex; gap:3px; align-items:center}
+.meter i{width:1.1rem; height:1.1rem; border:2px solid var(--ink); display:inline-block}
+.meter i.on{background:var(--ink)}
+
+/* ===== 整理前後 ===== */
+.ba{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.ba h4{margin:0 0 .3rem; font-size:1rem}
+.steps-list{list-style:none; padding:0; margin:.6rem 0; display:flex; flex-wrap:wrap; gap:.4rem}
+.steps-list li{border:2px solid var(--ink2); padding:.1rem .6rem; font-size:.92rem; background:#fff}
+.steps-list li.done{border-color:var(--ink); background:var(--ink); color:var(--yellow)}
+.steps-list li.done::before{content:"✔ "}
+.steps-list li.now{outline:3px solid var(--yellow); outline-offset:1px}
+.result{display:flex; flex-wrap:wrap; gap:1rem; align-items:center; border:2px solid var(--ink); background:#fff; padding:.5rem .8rem; margin-top:.8rem}
+.result .out{font-family:var(--mono); font-variant-ligatures:none; font-size:1.2rem; font-weight:700; border:2px solid var(--ink); padding:0 .6rem; background:var(--paper)}
+.chg-line{background:rgba(242,194,20,.28); box-shadow:-6px 0 0 var(--yellow)}
+.cmt{border:2px solid var(--ink); background:#fff; padding:.6rem .8rem; margin:.6rem 0}
+.cmt .copts{display:grid; gap:.4rem; margin-top:.4rem}
+.cmt .why{margin-top:.4rem; font-weight:700}
+.cmt .why.ok{color:var(--ok)} .cmt .why.no{color:var(--bad)}
+.cmt .why.ok::before{content:"✔ "} .cmt .why.no::before{content:"✘ "}
+/* ===== 標籤機 ===== */
+.labeler{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.ship-label{background:#fffdf5; border:3px solid var(--ink); padding:.6rem .8rem; clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%)}
+.ship-label .bar{height:26px; background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 7px,transparent 7px 9px,var(--ink) 9px 10px,transparent 10px 13px); margin:.3rem 0}
+.ship-label input{width:100%; font-size:1.3rem; padding:.3rem .5rem; border:3px solid var(--ink)}
+.checks{list-style:none; padding:0; margin:.5rem 0}
+.checks li{padding:.25rem .3rem .25rem 2.1rem; position:relative; border-bottom:1px dashed #a8a395}
+.checks li::before{position:absolute; left:.2rem; top:.2rem; font-weight:900; width:1.5rem; text-align:center; border:2px solid var(--ink); line-height:1.25}
+.checks li.ok::before{content:"✔"; background:var(--ink); color:#fff}
+.checks li.no::before{content:"✘"; background:#fff; color:var(--bad); border-style:dashed}
+.checks li.na::before{content:"–"}
+.pyreact{border:2px solid var(--ink); background:var(--code); color:var(--codefg); padding:.4rem .6rem; font-family:var(--mono); font-variant-ligatures:none; white-space:pre-wrap; word-break:break-all}
+
+/* ===== 風格巡倉 / 找錯 ===== */
+.linepick{list-style:none; margin:0; padding:0; background:var(--code); border:3px solid var(--ink)}
+.linepick li{display:flex; align-items:stretch; border-bottom:1px solid #2e3134}
+.linepick button{flex:1; text-align:left; background:transparent; color:var(--codefg); border:0; padding:.25rem .5rem; cursor:pointer; white-space:pre; overflow-x:auto; font-family:var(--mono); font-variant-ligatures:none; min-height:40px; display:flex; gap:.6rem; align-items:center}
+.linepick .ln{color:var(--codedim); width:1.8em; text-align:right; flex:0 0 auto}
+.linepick .flag{flex:0 0 auto; width:4.6rem; font-family:var(--sans); font-size:.78rem; font-weight:900; text-align:center}
+.linepick li.sel button{background:#3a3016; box-shadow:inset 6px 0 0 var(--yellow)}
+.linepick li.sel .flag::before{content:"⚑ 已標記"; color:var(--yellow)}
+.linepick li.r-ok .flag::before{content:"✔ 正確"!important; color:#9fe0a8}
+.linepick li.r-no .flag::before{content:"✘ 判斷錯"!important; color:#ffb4a0}
+.linepick li.r-ok button,.linepick li.r-no button{box-shadow:none}
+.explist{list-style:none; padding:0; margin:.6rem 0 0}
+.explist li{border:2px solid var(--ink); background:#fff; padding:.35rem .6rem; margin:.35rem 0}
+.explist li b.badtag{background:var(--ink); color:var(--yellow); padding:0 .3rem; margin-right:.3rem}
+.explist li b.goodtag{border:2px solid var(--ink); padding:0 .3rem; margin-right:.3rem}
+
+/* ===== 貨格 ===== */
+.yard{border:3px dashed var(--ink); background:var(--paper2); padding:.6rem; display:flex; flex-wrap:wrap; gap:.6rem; min-height:4.5rem}
+.parcel{border:3px solid var(--card-dark); background:var(--card); padding:.35rem .6rem .4rem; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; max-width:20rem; position:relative; box-shadow:2px 2px 0 rgba(0,0,0,.3); font-weight:700; font-size:.95rem}
+.parcel small{display:block; font-weight:400; font-family:var(--mono); font-variant-ligatures:none; font-size:.8rem}
+.parcel.sel{outline:4px solid var(--ink); outline-offset:2px}
+.parcel.sel::after{content:"已選取"; position:absolute; top:-.9rem; right:.3rem; background:var(--ink); color:var(--yellow); font-size:.7rem; padding:0 .3rem}
+.parcel.done{cursor:default; background:#d9c49d; border-style:solid}
+.parcel.done::before{content:"✔ "; font-weight:900}
+.parcel.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.ghost{position:fixed; pointer-events:none; z-index:999; opacity:.92; transform:rotate(-3deg)}
+.racks{display:grid; grid-template-columns:minmax(0,3fr) minmax(0,5fr) minmax(0,1.3fr); gap:.8rem; margin-top:.8rem}
+.rack{border:4px solid var(--steel); border-top-width:10px; background:linear-gradient(#bdb8aa,#bdb8aa) bottom/100% 6px no-repeat, var(--paper2); padding:.4rem .4rem .8rem}
+.rack h4{margin:0 0 .4rem; font-size:.95rem; background:var(--steel); color:#fff; padding:.1rem .4rem; display:inline-block}
+.slots{display:grid; grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr)); gap:.45rem}
+.slot{border:3px dashed var(--ink2); min-height:5.2rem; background:#ece8dc; padding:.3rem; display:flex; flex-direction:column; gap:.3rem; cursor:pointer; position:relative}
+.slot .sname{font-weight:900; font-size:.95rem}
+.slot .sname i{font-style:normal; font-family:var(--mono); font-variant-ligatures:none; font-size:.75rem; font-weight:400; display:block}
+.slot.hov{border-style:solid; background:var(--yellow-soft)}
+.slot.ready{border-color:var(--ink)}
+.slot .parcel{font-size:.78rem; padding:.2rem .4rem; max-width:none}
+
+/* ===== 堆疊 / 隊列 ===== */
+.sq{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.stackviz{display:flex; flex-direction:column-reverse; align-items:center; gap:4px; min-height:13rem; border:3px solid var(--ink); border-top:0; background:var(--paper2); padding:.4rem; justify-content:flex-start}
+.pallet{width:70%; text-align:center; background:var(--card); border:3px solid var(--card-dark); font-weight:900; padding:.15rem; position:relative}
+.pallet.top::after{content:"◀ 頂 (top)"; position:absolute; left:100%; margin-left:.4rem; white-space:nowrap; font-size:.8rem; background:var(--ink); color:var(--yellow); padding:0 .3rem}
+.queueviz{display:flex; gap:6px; align-items:center; min-height:5.5rem; border:3px solid var(--ink); background:var(--paper2); padding:.4rem; overflow-x:auto}
+.truck{flex:0 0 auto; border:3px solid var(--ink); background:#fff; padding:.2rem .5rem; font-weight:700; position:relative; margin-top:1.2rem}
+.truck .pos{position:absolute; top:-1.3rem; left:0; font-size:.72rem; background:var(--ink); color:var(--yellow); padding:0 .3rem; white-space:nowrap}
+.oplog{max-height:9rem; overflow-y:auto; margin-top:.5rem}
+
+/* ===== 作用範圍倉 ===== */
+.scope{border:3px solid var(--ink); background:#fff; padding:.6rem; margin-top:.8rem}
+.board{border:4px double var(--ink); background:#f6eecf; padding:.4rem .6rem .6rem}
+.board h4,.bayx h4,.mainx h4{margin:0 0 .4rem; font-size:.98rem; display:flex; gap:.4rem; flex-wrap:wrap; align-items:center}
+.pin{font-size:.75rem; border:2px solid var(--ink); padding:0 .3rem; font-weight:700; background:#fff}
+.scope-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); gap:.7rem; margin-top:.7rem}
+.mainx{border:3px solid var(--ink); padding:.5rem; background:var(--paper2); position:relative}
+.bayx{border:4px solid var(--ink); background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(0,0,0,.04) 30px 31px), var(--paper2); padding:.5rem; position:relative; min-height:9rem}
+.bayx.closed{background:repeating-linear-gradient(90deg,#9ea3a8 0 6px,#b8bcc0 6px 12px)}
+.bayx.closed .shelf{visibility:hidden}
+.door{font-weight:900; font-size:.8rem; padding:0 .4rem; border:2px solid var(--ink); background:#fff}
+.here{background:var(--ink); color:var(--yellow); font-size:.78rem; padding:0 .4rem; font-weight:900}
+.shelf{display:flex; flex-wrap:wrap; gap:.5rem; align-items:flex-start; padding:.3rem 0 .5rem; border-bottom:6px solid var(--steel2); margin-bottom:.4rem; min-height:3.6rem}
+.shelf > .sl{flex:0 0 100%; font-size:.78rem; font-weight:700}
+.crate.g{border-style:double; border-width:5px}
+.crate.p{border-style:dashed}
+.crate.in{animation:boxin .7s ease-out}
+@keyframes boxin{from{transform:translateX(-160%) rotate(-6deg); opacity:.2} to{transform:none; opacity:1}}
+.waybill{border:2px dashed var(--ink); background:#fffdf5; padding:.2rem .5rem; font-family:var(--mono); font-variant-ligatures:none; font-size:.85rem; display:inline-block; margin:.2rem 0}
+.lookup{margin-top:.6rem; border:3px dashed var(--bad); background:#f8e0d6; padding:.4rem .6rem; font-weight:700}
+.legend{display:flex; flex-wrap:wrap; gap:.8rem; font-size:.85rem; margin-top:.5rem}
+.legend span{display:inline-flex; align-items:center; gap:.3rem}
+.legend i{display:inline-block; width:1.6rem; height:1rem; background:var(--card)}
+
+/* ===== 練習 ===== */
+.drill{border:4px solid var(--ink); background:var(--paper); margin:1.6rem 0}
+.drill > .dh{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; padding:.5rem .9rem; background:var(--steel); color:#fff}
+.drill > .dh h3{margin:0; font-size:1.2rem}
+.score{margin-left:auto; display:flex; gap:.6rem; flex-wrap:wrap; font-weight:700}
+.score span{background:var(--ink); padding:.05rem .5rem; border:2px solid var(--yellow)}
+.qs{padding:.8rem; display:grid; gap:1rem}
+.q{border:3px solid var(--ink); background:#fff; padding:.7rem .9rem; min-width:0}
+.q .qh{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:.4rem}
+.q .qn{font-family:var(--stencil); font-weight:900; font-size:1.3rem; background:var(--yellow); border:2px solid var(--ink); padding:0 .4rem; line-height:1.3}
+.q .qt{font-size:.8rem; font-weight:700; border:2px solid var(--ink); padding:0 .4rem}
+.q .qstat{margin-left:auto; font-size:.85rem; font-weight:700}
+.q .stem{margin:.2rem 0 .5rem; font-weight:700}
+.q .opts{display:grid; gap:.4rem}
+.q .opt{font-family:var(--sans); width:100%}
+.q .opt.mono{font-family:var(--mono)}
+.q .opt.right{border-width:4px; background:#e1f0e3}
+.q .opt.right::after{content:"  ✔ 正確答案"; font-weight:900; color:var(--ok); font-family:var(--sans)}
+.q .opt.wrong{border-style:dashed; background:#f8e0d6}
+.q .opt.wrong::after{content:"  ✘ 你的選擇"; font-weight:900; color:var(--bad); font-family:var(--sans)}
+.q .acts{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem}
+.fb{margin-top:.6rem; border-left:8px solid var(--ink); padding:.4rem .7rem; background:var(--paper2)}
+.fb.ok{border-left-style:solid} .fb.no{border-left-style:dashed; background:#f8e6de}
+.fb .vd{font-weight:900}
+.fb.ok .vd{color:var(--ok)} .fb.no .vd{color:var(--bad)}
+.fb.ok .vd::before{content:"✔ "} .fb.no .vd::before{content:"✘ "}
+.tt{border-collapse:collapse; font-family:var(--mono); font-variant-ligatures:none; margin:.4rem 0; max-width:100%}
+.tt-wrap{overflow-x:auto}
+.tt th{background:var(--ink); color:var(--yellow); font-family:var(--sans); padding:.25rem .5rem; font-size:.85rem; white-space:nowrap}
+.tt td{border:2px solid var(--ink); padding:.15rem .3rem; text-align:center}
+.tt td.given{background:var(--paper2)}
+.tt input{width:6.2rem; font-family:var(--mono); font-variant-ligatures:none; text-align:center; border:2px solid var(--ink2); padding:.2rem; min-height:38px; font-size:.95rem}
+.tt input.wide{width:9rem}
+.tt td.cok{background:#e1f0e3} .tt td.cok::after{content:" ✔"; color:var(--ok); font-weight:900}
+.tt td.cno{background:#f8e0d6} .tt td.cno::after{content:" ✘"; color:var(--bad); font-weight:900}
+.fillcode{background:var(--code); color:var(--codefg); border:3px solid var(--ink); padding:.5rem .7rem; font-family:var(--mono); font-variant-ligatures:none; white-space:pre; overflow-x:auto; line-height:2}
+.fillcode input{font-family:var(--mono); font-variant-ligatures:none; background:#fff; color:var(--ink); border:3px solid var(--yellow); width:7.5rem; padding:0 .3rem; font-size:.95rem; min-height:34px}
+.fillcode input.cok{border-color:#7fd08a; border-style:solid; background:#e1f0e3}
+.fillcode input.cno{border-color:#ff9b80; border-style:dashed; background:#f8e0d6}
+.parsons{list-style:none; margin:0; padding:0; border:3px solid var(--ink); background:var(--code)}
+.parsons li{display:flex; align-items:center; gap:.3rem; border-bottom:1px solid #2e3134; color:var(--codefg); background:var(--code); touch-action:none}
+.parsons li.dragging{opacity:.35}
+.parsons li.dropmark{box-shadow:inset 0 4px 0 var(--yellow)}
+.parsons .grip{cursor:grab; padding:.3rem .5rem; color:var(--yellow); font-weight:900; user-select:none; -webkit-user-select:none; min-height:44px; display:flex; align-items:center}
+.parsons code{flex:1; white-space:pre; overflow-x:auto; padding:.2rem 0}
+.parsons .mv{display:flex; gap:2px}
+.parsons .mv button{background:#33373b; color:#fff; border:2px solid #5a6066; width:40px; height:40px; cursor:pointer; font-size:.9rem}
+.parsons li.pok{box-shadow:inset 6px 0 0 #7fd08a} .parsons li.pok code::after{content:"   ✔"; color:#9fe0a8; font-family:var(--sans)}
+.parsons li.pno{box-shadow:inset 6px 0 0 #ff9b80} .parsons li.pno code::after{content:"   ✘ 位置不對"; color:#ffb4a0; font-family:var(--sans)}
+.typed{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center}
+.typed input{font-family:var(--mono); font-variant-ligatures:none; border:3px solid var(--ink); padding:.3rem .5rem; min-height:44px; width:14rem; max-width:100%}
+
+.report{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:1rem}
+.manifest{border:3px solid var(--ink); background:#fff; padding:.7rem .9rem; position:relative}
+.manifest .big{font-family:var(--stencil); font-weight:900; font-size:2.6rem; line-height:1}
+.bar2{height:14px; border:2px solid var(--ink); background:#fff; margin:.4rem 0}
+.bar2 i{display:block; height:100%; background:repeating-linear-gradient(-45deg,var(--ink) 0 5px,var(--steel2) 5px 10px)}
+.map{width:100%; border-collapse:collapse; font-size:.92rem}
+.map th,.map td{border:2px solid var(--ink); padding:.3rem .5rem; vertical-align:top; text-align:left}
+.map th{background:var(--ink); color:#fff}
+.map-wrap{overflow-x:auto}
+details.teacher > summary{cursor:pointer; font-weight:900; padding:.5rem .8rem; background:var(--ink); color:var(--yellow); list-style:none}
+details.teacher > summary::before{content:"▶ "} details.teacher[open] > summary::before{content:"▼ "}
+footer{max-width:1180px; margin:0 auto; padding:1rem; font-size:.85rem; color:var(--ink2)}
+
+/* ===== 響應式 ===== */
+@media (max-width: 1100px){
+  .st-grid{grid-template-columns:minmax(0,1fr)}
+  .racks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .racks .rack:nth-child(2){grid-column:1 / -1; grid-row:1}
+}
+@media (max-width: 820px){
+  .report,.ba{grid-template-columns:minmax(0,1fr)}
+  .grid2,.labeler,.sq,.scope-row{grid-template-columns:minmax(0,1fr)}
+  .racks{grid-template-columns:minmax(0,1fr)}
+  .racks .rack:nth-child(2){grid-column:auto; grid-row:auto}
+  .viewsw{display:inline-flex}
+  .codetab.only-py .pc,.codetab.only-py th.pch{display:none}
+  .codetab.only-pc .py,.codetab.only-pc th.pyh{display:none}
+  
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important; transition:none!important}
+}
+body.big{--fs-scale:1.15}
+
+/* ===== 第 5 章：深海聲納探測潛艇 ===== */
+.hero{color:#e6fff6}
+.hero .kicker{color:var(--sonar); font-family:var(--stencil); letter-spacing:.3em}
+.hero h1 .plate{background:transparent; color:#e6fff6; border:3px solid var(--sonar); box-shadow:0 0 0 6px rgba(70,240,168,.15), inset 0 0 18px rgba(70,240,168,.25); border-radius:999px; padding:.05em .7em}
+.hero p{color:#bfe3d6}
+.zones{background:var(--deep); border-bottom:3px solid var(--sonar)}
+.zone{background:#0d2c46; color:#e6fff6; border-color:#2c6283}
+.zone small{color:var(--sonar); font-family:var(--stencil); letter-spacing:.15em}
+.zone[aria-current="true"]{background:var(--sonar); color:var(--ink); box-shadow:0 0 14px rgba(70,240,168,.6)}
+.zone[aria-current="true"] small{color:var(--ink)}
+.zone .badge{background:var(--amber); color:var(--ink)}
+.sec-banner h2{color:#e6fff6; border-bottom-color:var(--sonar)}
+.sec-banner p{color:#9cc7bb}
+.chips button{color:#e6fff6; border-color:#5d8aa3}
+.chips button:hover{background:#0d2c46}
+.card{border-color:var(--ink); border-radius:14px; box-shadow:0 0 0 3px #2c6283}
+.card-tag{background:var(--sonar); border-color:var(--ink); border-radius:999px; font-family:var(--sans)}
+.book{border-left-color:var(--steel)}
+.book::before{background:var(--steel)}
+.takeaway::before{content:"聲納回報："; background:var(--sonar)}
+.try::before{content:"下潛 ▸ "}
+.btn{background:var(--yellow); border-radius:6px}
+.btn.dark{background:var(--steel)}
+.codetab tr.cur td{background:#7ff0c3}
+.drill{border-radius:14px; overflow:hidden}
+.drill > .dh{background:var(--steel)}
+#report{color:var(--ink)}
+footer{color:#9cc7bb}
+.q .stem{white-space:pre-line}
+.stepper.wide .st-grid{grid-template-columns:minmax(0,1fr)}
+.stepper.wide .st-side{flex-direction:row; flex-wrap:wrap}
+.stepper.wide .st-side > div{flex:1 1 18rem; min-width:0}
+/* 海床格子 */
+.seabed{background:radial-gradient(ellipse at 50% 0, #0f3d63, var(--deep)); border:3px solid var(--ink); border-radius:10px; padding:2.6rem .6rem .5rem; overflow-x:auto; position:relative}
+.cells{display:flex; gap:6px; min-width:max-content; margin:0 auto; width:max-content}
+.cell{width:3.4rem; position:relative; text-align:center}
+.cell .v{height:3rem; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:1.1rem; background:#123d5e; color:#e6fff6; border:2px solid #3e7aa0; border-radius:6px}
+.cell .i{font-family:var(--mono); font-size:.8rem; color:#9cc7bb; margin-top:2px}
+.cell.chk .v{background:#0b2a40; color:#7b98aa; border-style:dashed}
+.cell.chk .v::after{content:"✓"; position:absolute; top:-2px; right:3px; font-size:.7rem; color:#7b98aa}
+.cell.cur .v{background:var(--amber); color:var(--ink); border-color:#fff; box-shadow:0 0 0 4px rgba(255,200,87,.35)}
+.cell.found .v{background:var(--sonar); color:var(--ink); border:3px solid #fff; box-shadow:0 0 0 5px rgba(70,240,168,.45)}
+.cell.found .v::before{content:"◎ "; font-size:.8rem}
+.cell.elim .v{background:repeating-linear-gradient(45deg,#0a2235 0 5px,#15364f 5px 10px); color:#58758a; border-color:#264a63}
+.cell .buoy{position:absolute; left:50%; transform:translateX(-50%); font-family:var(--mono); font-weight:800; font-size:.78rem; padding:0 .3rem; border-radius:4px; white-space:nowrap; background:#e6fff6; color:var(--ink); border:2px solid var(--ink)}
+.cell .buoy.b0{top:-2.4rem} .cell .buoy.b1{top:-1.3rem}
+.cell .buoy.m{background:var(--amber)}
+.cell.ping .v{animation:ping .6s ease-out}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(255,200,87,.8)} 100%{box-shadow:0 0 0 14px rgba(255,200,87,0)}}
+.sonar-count{display:inline-flex; align-items:center; gap:.4rem; font-family:var(--mono); font-weight:700; background:var(--deep); color:var(--sonar); border:2px solid var(--sonar); border-radius:6px; padding:.1rem .6rem}
+.legend5{display:flex; flex-wrap:wrap; gap:.9rem; font-size:.85rem; margin-top:.5rem; color:var(--ink)}
+.legend5 span{display:inline-flex; gap:.35rem; align-items:center}
+.legend5 i{display:inline-block; width:1.4rem; height:1rem; border-radius:3px; border:2px solid #3e7aa0}
+/* 比賽 */
+.race{display:grid; gap:.8rem}
+.lane{background:var(--deep); border:2px solid var(--ink); border-radius:8px; padding:.5rem .7rem; color:#e6fff6}
+.lane h4{margin:0 0 .3rem; display:flex; justify-content:space-between; gap:.6rem; flex-wrap:wrap}
+.strip{display:flex; height:2.2rem; border:1px solid #3e7aa0; background:#123d5e; position:relative; overflow:hidden}
+.strip i{flex:1 1 0; min-width:0; border-right:1px solid rgba(255,255,255,.06)}
+.strip i.chk{background:#2b4c63} .strip i.elim{background:repeating-linear-gradient(45deg,#0a2235 0 3px,#1a3a52 3px 6px)} .strip i.cur{background:var(--amber)} .strip i.found{background:var(--sonar)}
+.chartbox{background:#fff; border:2px solid var(--ink); border-radius:8px; padding:.4rem}
+.chartbox svg{width:100%; height:auto; display:block}
+.ntable{border-collapse:collapse; width:100%; font-family:var(--mono); font-variant-ligatures:none; font-size:.92rem}
+.ntable th,.ntable td{border:2px solid var(--ink); padding:.2rem .5rem; text-align:center}
+.ntable th{background:var(--steel); color:#fff; font-family:var(--sans)}
+.ntable td.hi{font-weight:800; background:var(--yellow-soft)}
+.arrayops .console{min-height:4rem}
+</style>
+</head>
+<body>
+<div class="series" role="banner">
+  <span>第 5 章 · 深海聲納探測潛艇</span>
+  <span class="tools">
+    <button class="tog" id="sndBtn" aria-pressed="false">🔇 音效：關</button>
+    <button class="tog" id="bigBtn" aria-pressed="false">A+ 放大字體</button>
+  </span>
+</div>
+
+<header class="hero">
+  <div class="kicker">SONAR · DEEP SEARCH</div>
+  <h1><span class="plate">深海聲納探測潛艇</span></h1>
+  <p>海床上一排排格子就是<b>列表</b>，格子下的編號是<b>索引</b>。線性檢索是聲納<b>逐格掃描</b>；對分檢索是每次<b>把海域減半</b>，用 left、mid、right 三個<b>浮標</b>標示範圍。</p>
+</header>
+
+<nav class="zones" aria-label="探測區">
+  <button class="zone" data-go="s51"><b>5.1 檢索算法</b><small>SEARCH</small><span class="badge" data-score="51"></span></button>
+  <button class="zone" data-go="s52"><b>5.2 線性檢索</b><small>LINEAR SCAN</small><span class="badge" data-score="52"></span></button>
+  <button class="zone" data-go="s53"><b>5.3 對分檢索</b><small>BINARY SPLIT</small><span class="badge" data-score="53"></span></button>
+  <button class="zone" data-go="s54"><b>5.4 時間和空間複雜度</b><small>BIG O</small><span class="badge" data-score="54"></span></button>
+</nav>
+
+<main>
+<\!-- ================= 5.1 ================= -->
+<section class="sec" id="s51">
+  <div class="sec-banner"><h2>5.1 檢索算法</h2><p>找到傳回索引 · 找不到傳回 -1 · 列表作為類似陣列的結構</p></div>
+  <div class="chips"><button data-jump="c51a">① 檢索的結果</button><button data-jump="c51b">② 類似陣列的列表</button><button data-jump="drill51">🎯 練習</button></div>
+
+  <article class="card" id="c51a">
+    <div class="card-tag">① 檢索：傳回索引或 -1</div>
+    <div class="book"><ul>
+      <li>檢索算法旨在尋找列表中是否存在<b>目標值</b>。如果找到，它們通常會傳回<b>索引（位置）</b>；否則，它們會傳回一個表示失敗的值（例如 <b>-1</b>）。</li>
+      <li>本章涵蓋兩種特定的算法：<b>線性檢索</b>和<b>對分檢索</b>。</li></ul></div>
+    <p class="try">輸入要找的深度（目標值），看看檢索函數傳回甚麼。</p>
+    <div class="ctl"><label class="field">target <input type="number" id="pTarget" value="15" style="width:6rem"></label><span class="sonar-count" id="pResult"></span></div>
+    <div class="seabed"><div class="cells" id="pCells"></div></div>
+    <div class="codebox" style="margin-top:.6rem"><pre class="pre" id="pCode"></pre></div>
+    <div class="console" id="pOut" style="margin-top:.4rem"></div>
+    <div class="takeaway">找到 → 傳回索引（0 或以上）；找不到 → 傳回 -1。主程式用 if result == -1 判斷是否找到。</div>
+  </article>
+
+  <article class="card arrayops" id="c51b">
+    <div class="card-tag">② Python 列表：類似陣列的結構</div>
+    <div class="book"><ul><li>在這種情況下，Python 列表被用作<b>類似陣列的結構</b>，因為它們支援<b>依索引存取、依索引更新以及遍歷</b>。</li></ul></div>
+    <p class="try">對 <code>depths</code> 做三種操作。索引由 0 開始；試試超出範圍的索引，或 -1。</p>
+    <div class="ctl">
+      <label class="field">索引 <input type="number" id="aIdx" value="2" style="width:5rem"></label>
+      <label class="field">新數值 <input type="number" id="aVal" value="50" style="width:5rem"></label>
+      <button class="btn" data-aop="get">依索引存取</button>
+      <button class="btn" data-aop="set">依索引更新</button>
+      <button class="btn" data-aop="walk">遍歷</button>
+      <button class="btn alt" data-aop="reset">⟲ 還原</button>
+    </div>
+    <div class="seabed"><div class="cells" id="aCells"></div></div>
+    <div class="console" id="aOut" style="margin-top:.5rem"></div>
+    <div class="takeaway">存取 depths[i]、更新 depths[i] = x、用 for 循環遍歷——檢索算法就是用這三種操作寫成的。</div>
+  </article>
+
+  <div class="drill" id="drill51"></div>
+</section>
+
+<\!-- ================= 5.2 ================= -->
+<section class="sec" id="s52">
+  <div class="sec-banner"><h2>5.2 線性檢索</h2><p>由左到右逐一檢查 · 適用於任何列表 · 提早結束</p></div>
+  <div class="chips"><button data-jump="c52a">① 逐格掃描</button><button data-jump="c52b">② 提早結束</button><button data-jump="drill52">🎯 練習</button></div>
+
+  <article class="card" id="c52a">
+    <div class="card-tag">① 機制與通用性</div>
+    <div class="book"><ul>
+      <li><b>機制</b>：線性檢索<b>從左到右逐一檢查</b>列表中的項目，直到找到目標或到達列表末尾為止。</li>
+      <li><b>通用性</b>：它適用於<b>未排序或已排序</b>的列表。它不需要數據處於任何特定順序。</li></ul></div>
+    <p class="try">改列表（不用排序）和目標值，先預測，再逐行執行。</p>
+    <div class="ctl">
+      <label class="field">depths <input class="mono" id="lnList" value="42, 17, 63, 8, 25" size="18"></label>
+      <label class="field">target <input type="number" id="lnTarget" value="8" style="width:5rem"></label>
+    </div>
+    <div id="lnStepper"></div>
+    <div class="takeaway">逐格檢查，找到便立即傳回；全部看完都沒有，才傳回 -1。數據不用排序。</div>
+  </article>
+
+  <article class="card" id="c52b">
+    <div class="card-tag">② 提早結束</div>
+    <div class="book"><ul>
+      <li><b>提早結束</b>：如果列表<b>已排序</b>，線性檢索可以優化為提早結束。如果當前元素<b>超過目標值</b>，檢索會立即終止，因為目標不可能存在於列表的其餘部分中。</li>
+      <li><b>優點和缺點</b>：它易於實現，且不需要額外的記憶體，但對於大型數據集來說速度較慢，因為它可能會掃描整個列表（時間複雜度：<b>O(n)</b>）。</li></ul></div>
+    <p class="try">開關「提早結束」，比較聲納探測次數。再試錯誤示範：在未排序的列表上提早結束。</p>
+    <div class="ctl">
+      <label class="field">depths <input class="mono" id="erList" value="5, 12, 19, 27, 34, 41, 56, 63" size="24"></label>
+      <label class="field">target <input type="number" id="erTarget" value="20" style="width:5rem"></label>
+      <label class="chk"><input type="checkbox" id="erOn" checked> 提早結束</label>
+      <button class="btn alt" id="erBad" style="border-style:dashed">✘ 錯誤示範：未排序的列表</button>
+    </div>
+    <div id="erCompare" class="ctl"></div>
+    <div id="erStepper"></div>
+    <div class="takeaway">已排序時，一遇到比目標大的數便可停止；未排序的列表不可以這樣做，否則會錯過目標。</div>
+  </article>
+
+  <div class="drill" id="drill52"></div>
+</section>
+
+<\!-- ================= 5.3 ================= -->
+<section class="sec" id="s53">
+  <div class="sec-banner"><h2>5.3 對分檢索</h2><p>檢查中間項目 · 每次保留一半 · 先決條件：已排序</p></div>
+  <div class="chips"><button data-jump="c53a">① 把海域減半</button><button data-jump="c53b">② 先決條件</button><button data-jump="drill53">🎯 練習</button></div>
+
+  <article class="card" id="c53a">
+    <div class="card-tag">① 機制與過程</div>
+    <div class="book"><ul>
+      <li><b>機制</b>：對分檢索透過<b>檢查中間的項目</b>來不斷縮小檢索區間。它只保留可能包含目標的那一半（左邊或右邊）。</li>
+      <li><b>過程</b>：假設列表已經按升序排列，使用 <code>left</code> 和 <code>right</code> 索引來定義檢索範圍。在每一步中，它會將目標 <code>target</code> 與中間元素 <code>list[mid]</code> 進行比較。
+        <ul><li>如果 <code>target &lt; list[mid]</code>，則在左半部分繼續檢索（<code>right = mid - 1</code>）。</li>
+        <li>如果 <code>target &gt; list[mid]</code>，則在右半部分繼續檢索（<code>left = mid + 1</code>）。</li></ul></li>
+      <li><b>效率</b>：對於大型列表，它比線性檢索快得多，因為它在每次比較後都會將檢索空間減半（時間複雜度：<b>O(log n)</b>）。</li></ul></div>
+    <p class="try">三個浮標標示 left、mid、right，斜紋格子是已排除的海域。逐行執行，追蹤表會記下每一輪。</p>
+    <div class="ctl">
+      <label class="field">depths（已排序）<input class="mono" id="bnList" value="3, 8, 15, 21, 34, 42, 57, 66" size="26"></label>
+      <label class="field">target <input type="number" id="bnTarget" value="57" style="width:5rem"></label>
+    </div>
+    <p class="hint">註：課本用 <code>list</code> 作列表的名稱，這裏照用；實際編程時最好不要與 Python 內置的 list 同名。</p>
+    <div id="bnStepper"></div>
+    <div class="takeaway">每一輪看中間那格：相等便找到；目標較小便丟棄右半（right = mid - 1）；目標較大便丟棄左半（left = mid + 1）；left &gt; right 即找不到。</div>
+  </article>
+
+  <article class="card" id="c53b">
+    <div class="card-tag">② 先決條件：列表必須已排序</div>
+    <div class="book"><ul><li><b>先決條件</b>：列表<b>必須已排序</b>（例如按升序排列），對分檢索才能正常運作。</li></ul></div>
+    <p class="try">錯誤示範：在未排序的數據上用對分檢索。目標明明在列表中，結果如何？</p>
+    <div class="ctl">
+      <label class="field">depths（未排序）<input class="mono" id="buList" value="42, 8, 66, 15, 3, 57, 21, 34" size="26"></label>
+      <label class="field">target <input type="number" id="buTarget" value="15" style="width:5rem"></label>
+    </div>
+    <div id="buStepper"></div>
+    <div class="takeaway">對分檢索靠「左邊全部較小、右邊全部較大」來決定丟棄哪一半；數據未排序，便可能把目標連同那一半一起丟棄。</div>
+  </article>
+
+  <div class="drill" id="drill53"></div>
+</section>
+
+<\!-- ================= 5.4 ================= -->
+<section class="sec" id="s54">
+  <div class="sec-banner"><h2>5.4 時間和空間複雜度</h2><p>O(1) · O(n) · O(log n) · 線性 vs 對分</p></div>
+  <div class="chips"><button data-jump="c54a">① 聲納比賽</button><button data-jump="c54b">② 增長趨勢</button><button data-jump="c54c">③ 揀選檢索方法</button><button data-jump="drill54">🎯 練習</button></div>
+
+  <article class="card" id="c54a">
+    <div class="card-tag">① 時間和空間複雜度：聲納比賽</div>
+    <div class="book"><ul>
+      <li><b>時間複雜度</b>描述了算法的運行時間如何隨着輸入大小 (n) 的增加而增長。</li>
+      <li><b>空間複雜度</b>描述了算法的記憶體使用量如何隨着輸入大小的增加而增長。</li></ul></div>
+    <p class="try">同一個已排序的列表，兩艘潛艇同時找同一個目標。改變 n，看看各需要多少次聲納探測（比較次數）。</p>
+    <div class="ctl">
+      <label class="field">n <select id="rcN"><option>8</option><option>16</option><option>32</option><option selected>64</option><option>128</option><option>256</option><option>512</option><option>1024</option></select></label>
+      <label class="field">目標 <select id="rcT"><option value="last">最後一個（線性最壞情況）</option><option value="none">不在列表中</option><option value="first">第一個</option><option value="rand">隨機</option></select></label>
+      <button class="btn" id="rcGo">▶ 開始比賽</button><button class="btn alt" id="rcStep">下一次探測</button><button class="btn alt" id="rcReset">⟲</button>
+    </div>
+    <div class="race" id="rcLanes"></div>
+    <div class="callout" id="rcSpace"></div>
+    <div class="takeaway">線性檢索：n 越大，探測次數一同增加；對分檢索：n 再大，探測次數也只增加一點點。兩者都只用幾個變量，額外記憶體不隨 n 增加。</div>
+  </article>
+
+  <article class="card" id="c54b">
+    <div class="card-tag">② 大 O 符號：從數字看增長趨勢</div>
+    <div class="book"><ul><li><b>大 O 符號</b>用於對這些複雜度進行分類：
+      <ul><li><b>O(1)（常數）</b>：無論輸入大小如何，時間 / 空間都不會改變。</li>
+      <li><b>O(n)（線性）</b>：時間 / 空間與輸入大小成正比增長。</li>
+      <li><b>O(log n)（對數）</b>：時間 / 空間增長緩慢（例如，輸入加倍只增加 1 步）。</li></ul></li></ul></div>
+    <p class="try">最壞情況下的比較次數。把 n 由 8 加倍到 1024，留意對分檢索每次只多 1 步。</p>
+    <div class="ctl"><label class="chk"><input type="checkbox" id="chZoom"> 放大 y 軸（只看 0–12 步）</label></div>
+    <div class="grid2">
+      <div class="chartbox" id="chart"></div>
+      <div style="overflow-x:auto"><table class="ntable" id="nTable"></table></div>
+    </div>
+    <div class="takeaway">O(n)：n 加倍，步數也加倍；O(log n)：n 加倍，只多 1 步；O(1)：n 怎樣變，步數都不變。</div>
+  </article>
+
+  <article class="card" id="c54c">
+    <div class="card-tag">③ 線性檢索 vs 對分檢索</div>
+    <div class="book">
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>方面</th><th>線性檢索</th><th>對分檢索</th></tr></thead>
+        <tbody>
+          <tr><td>先決條件</td><td>無（適用於已排序或未排序）</td><td>需要已排序的數據</td></tr>
+          <tr><td>實現</td><td>簡單；易於除錯</td><td>較複雜；需要小心處理索引</td></tr>
+          <tr><td>時間複雜度</td><td>O(n)（線性）</td><td>O(log n)（對數）</td></tr>
+          <tr><td>空間複雜度</td><td>O(1)（常數）</td><td>O(1)（常數）</td></tr>
+          <tr><td>適用情況</td><td>最適合小型列表或未排序的數據。</td><td>最適合需要重複查找的大型、已排序數據集。</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="try">每個任務，揀較合適的檢索方法。</p>
+    <div id="scnBox"></div>
+    <div class="takeaway">未排序或很小 → 線性檢索；大型、已排序、要重複查找 → 對分檢索。</div>
+  </article>
+
+  <div class="drill" id="drill54"></div>
+</section>
+
+<section class="card" id="report" style="margin-top:3rem">
+  <div class="card-tag">✔ 探測報告</div>
+  <div class="report" id="reportCards"></div>
+  <div class="ctl" style="margin-top:.8rem"><span class="hint" id="reportTotal"></span><button class="btn alt" id="clearAll" style="margin-left:auto">清除本裝置上的紀錄</button></div>
+  <details class="teacher" style="margin-top:1rem">
+    <summary>教師用：課本重點 → 對應的互動或練習</summary>
+    <div class="map-wrap" style="padding-top:.5rem"><table class="map" id="mapTable"></table></div>
+  </details>
+</section>
+</main>
+<footer>深海聲納探測潛艇 · DSE ICT 選修單元 C 第 5 章 · 呂Sir 的 ICT 互動課件</footer>
+<script>
+const CONFIG = { INDEX_URL: "./", STORAGE_KEY: "electiveC-ch5-progress-v1" };
+const SECTIONS = [
+  { id: '51', name: '5.1 檢索算法', anchor: '#s51' },
+  { id: '52', name: '5.2 線性檢索', anchor: '#s52' },
+  { id: '53', name: '5.3 對分檢索', anchor: '#s53' },
+  { id: '54', name: '5.4 時間和空間複雜度', anchor: '#s54' }
+];
+const BIN_CODE = 'def binary_search(list, target):\n    left = 0\n    right = len(list) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if list[mid] == target:\n            return mid\n        elif target < list[mid]:\n            right = mid - 1\n        else:\n            left = mid + 1\n    return -1';
+const QUESTIONS = [
+  /* ---------- 5.1 ---------- */
+  { id: 'q1', sec: '51', type: 'mc', tag: '概念', stem: '檢索函數找不到目標值時，通常會傳回甚麼？',
+    options: [
+      { t: '0', why: '0 是第一個有效索引，表示「在第一格找到」。' },
+      { t: '-1', ok: 1, why: '-1 不是檢索會傳回的位置，用來表示失敗。' },
+      { t: '列表的長度', why: '課本以 -1 表示失敗。' },
+      { t: '目標值本身', why: '傳回目標值無法分辨找到與否。' }] },
+  { id: 'q2', sec: '51', type: 'mc', tag: '預測輸出', stem: '以下程式的輸出是甚麼？', code: 'depths = [30, 80, 15, 60]\nprint(depths[2])',
+    options: [
+      { t: '80', mono: 1, why: '80 是 depths[1]；索引由 0 開始。' },
+      { t: '15', mono: 1, ok: 1, why: '索引 0、1、2 分別是 30、80、15。' },
+      { t: '60', mono: 1, why: '60 是 depths[3]。' },
+      { t: 'IndexError', mono: 1, why: '列表有 4 個元素，索引 2 存在。' }] },
+  { id: 'q3', sec: '51', type: 'mc', tag: '預測輸出', stem: '以下程式的輸出是甚麼？', code: 'depths = [30, 80, 15, 60]\ndepths[1] = 45\nprint(depths)',
+    options: [
+      { t: '[45, 80, 15, 60]', mono: 1, why: 'depths[1] 是第二個元素，不是第一個。' },
+      { t: '[30, 45, 15, 60]', mono: 1, ok: 1, why: '依索引更新：把索引 1 的 80 改為 45。' },
+      { t: '[30, 80, 45, 60]', mono: 1, why: '索引 1 是 80，不是 15。' },
+      { t: '[30, 45, 80, 15, 60]', mono: 1, why: '賦值是「更新」，不是插入，列表長度不變。' }] },
+  { id: 'q4', sec: '51', type: 'mc', tag: '概念', stem: '為甚麼 Python 列表可以用作「類似陣列的結構」來實現檢索算法？',
+    options: [
+      { t: '因為列表會自動排序', why: '列表不會自動排序。' },
+      { t: '因為列表支援依索引存取、依索引更新及遍歷', ok: 1, why: '檢索算法需要用索引讀取元素並逐個遍歷，列表都支援。' },
+      { t: '因為列表只可以存放整數', why: '列表可以存放任何類型的數據。' },
+      { t: '因為列表的大小不可改變', why: 'Python 列表的大小可以改變；這不是原因。' }] },
+
+  /* ---------- 5.2 ---------- */
+  { id: 'q5', sec: '52', type: 'trace', tag: '填寫追蹤表', stem: '完成線性檢索的追蹤表（布爾值寫 True / False），並寫出輸出。',
+    code: 'def linear_search(list, target):\n    for i in range(len(list)):\n        if list[i] == target:\n            return i\n    return -1\n\nprint(linear_search([42, 17, 63, 8, 25], 8))',
+    cols: ['i', 'list[i]', 'list[i] == target'],
+    rows: [
+      { c: [{ g: '0' }, { a: ['42'] }, { a: ['False'] }], why: 'list[0] 是 42，不等於 8。' },
+      { c: [{ g: '1' }, { a: ['17'] }, { a: ['False'] }], why: 'list[1] 是 17。' },
+      { c: [{ g: '2' }, { a: ['63'] }, { a: ['False'] }], why: 'list[2] 是 63。' },
+      { c: [{ g: '3' }, { a: ['8'] }, { a: ['True'] }], why: 'list[3] 是 8，找到，立即傳回 3。' }],
+    output: { a: ['3'], why: '函數傳回索引 3（索引 4 的 25 不會被檢查）。' } },
+  { id: 'q6', sec: '52', type: 'mc', tag: '概念', stem: '線性檢索適用於哪些列表？',
+    options: [
+      { t: '只適用於已排序的列表', why: '需要已排序的是對分檢索。' },
+      { t: '未排序或已排序的列表都適用', ok: 1, why: '線性檢索逐個檢查，不需要數據處於任何特定順序。' },
+      { t: '只適用於未排序的列表', why: '已排序的列表當然也可以逐個檢查。' },
+      { t: '只適用於長度是 2 的次方的列表', why: '線性檢索對列表長度沒有要求。' }] },
+  { id: 'q7', sec: '52', type: 'mc', tag: '預測輸出', stem: '以下是有提早結束的線性檢索。輸出的 count 是多少？',
+    code: 'depths = [5, 12, 19, 27, 34]\ntarget = 20\ncount = 0\nfor i in range(len(depths)):\n    count = count + 1\n    if depths[i] == target:\n        break\n    elif depths[i] > target:\n        break\nprint(count)',
+    options: [
+      { t: '3', mono: 1, why: '19 不大於 20，還要再檢查下一個。' },
+      { t: '4', mono: 1, ok: 1, why: '檢查 5、12、19 後，第 4 個是 27 > 20，提早結束。' },
+      { t: '5', mono: 1, why: '提早結束令檢索在 27 停止，不用檢查 34。' },
+      { t: '0', mono: 1, why: '每次循環一開始 count 便加 1。' }] },
+  { id: 'q8', sec: '52', type: 'fill', tag: '程式碼填空', stem: '完成線性檢索函數。',
+    code: 'def linear_search(list, target):\n    for i in range([[0]]):\n        if list[i] == target:\n            return i\n    return [[1]]',
+    blanks: [
+      { a: ['len(list)'], wrong: { 'list': 'range() 需要整數，不是列表。', 'len(list)-1': 'range(len(list) - 1) 會漏掉最後一個元素。', 'len(list) - 1': 'range(len(list) - 1) 會漏掉最後一個元素。', 'len(list)+1': '多了一個，list[len(list)] 會出現 IndexError。' }, model: 'len(list)', why: 'range(len(list)) 產生 0 至 len(list) - 1 的每一個索引。' },
+      { a: ['-1'], wrong: { '0': '0 是有效索引，會被誤會為在第一格找到。', 'None': '課本以 -1 表示失敗。', 'i': '循環結束後傳回 i 會誤導成找到了。' }, model: '-1', why: '整個列表都檢查完仍未找到，才傳回 -1。' }] },
+  { id: 'q9', sec: '52', type: 'find', tag: '找錯', stem: 'linear_search([42, 17, 8], 8) 傳回 -1，但 8 在列表中。點選出錯的一行。',
+    lines: [
+      { c: 'def linear_search(list, target):', why: '函數定義正確。' },
+      { c: '    for i in range(len(list)):', why: '循環範圍正確。' },
+      { c: '        if list[i] == target:', why: '比較正確。' },
+      { c: '            return i', why: '找到便傳回索引，正確。' },
+      { c: '        else:', ok: 1, why: '只要第一個元素不相等，便進入 else 立即傳回 -1，其餘元素沒有被檢查。return -1 應放在循環之後，不應有這個 else。' },
+      { c: '            return -1', why: '問題在於上一行的 else 令這行在第一次不相等時便執行；這行應移到循環之後。' }] },
+  { id: 'q10', sec: '52', type: 'parsons', tag: '排列程式碼', stem: '排列程式碼，完成線性檢索函數。',
+    lines: [
+      { c: 'def linear_search(list, target):', why: '函數定義在最前。' },
+      { c: '    for i in range(len(list)):', why: '逐個索引檢查。' },
+      { c: '        if list[i] == target:', why: '在循環內比較。' },
+      { c: '            return i', why: '找到便立即傳回索引。' },
+      { c: '    return -1', why: '整個循環完成仍未找到，才傳回 -1（與 for 同一層）。' }] },
+
+  /* ---------- 5.3 ---------- */
+  { id: 'q11', sec: '53', type: 'trace', tag: '填寫追蹤表', stem: '完成每一輪的追蹤表（記錄該輪開始時的 left、right），並寫出輸出。',
+    code: BIN_CODE + '\n\nprint(binary_search([3, 8, 15, 21, 34, 42, 57, 66], 57))',
+    cols: ['輪', 'left', 'right', 'mid', 'list[mid]', '下一步'], wide: 1,
+    rows: [
+      { c: [{ g: '1' }, { g: '0' }, { g: '7' }, { a: ['3'] }, { a: ['21'] }, { g: '57 > 21，left = 4' }], why: 'mid = (0 + 7) // 2 = 3，list[3] = 21。' },
+      { c: [{ g: '2' }, { a: ['4'] }, { a: ['7'] }, { a: ['5'] }, { a: ['42'] }, { g: '57 > 42，left = 6' }], why: 'left = 4，mid = (4 + 7) // 2 = 5，list[5] = 42。' },
+      { c: [{ g: '3' }, { a: ['6'] }, { a: ['7'] }, { a: ['6'] }, { a: ['57'] }, { g: '相等，找到' }], why: 'left = 6，mid = (6 + 7) // 2 = 6，list[6] = 57。' }],
+    output: { a: ['6'], why: '第 3 輪找到，傳回 mid = 6。' } },
+  { id: 'q12', sec: '53', type: 'mc', tag: '預測輸出', stem: '用同一個對分檢索函數，在 [3, 8, 15, 21, 34, 42, 57, 66] 中檢索 20。共比較了多少輪，傳回甚麼？',
+    options: [
+      { t: '3 輪，傳回 -1', ok: 1, why: 'mid 依次是 3（21）、1（8）、2（15），之後 left = 3 > right = 2，傳回 -1。' },
+      { t: '8 輪，傳回 -1', why: '8 輪是線性檢索的最壞情況；對分檢索每輪減半。' },
+      { t: '1 輪，傳回 -1', why: '第一輪只知道 20 < 21，要繼續在左半找。' },
+      { t: '3 輪，傳回 3', why: '20 不在列表中；21 在索引 3，但 20 ≠ 21。' }] },
+  { id: 'q13', sec: '53', type: 'fill', tag: '程式碼填空', stem: '填寫空格，完成對分檢索縮小範圍的兩行。',
+    code: '        elif target < list[mid]:\n            right = mid [[0]] 1\n        else:\n            left = mid [[1]] 1',
+    blanks: [
+      { a: ['-'], wrong: { '+': 'target 較小，要在左半繼續，right 應移到 mid 左邊一格。' }, model: '-', why: '目標在左半：right = mid - 1。' },
+      { a: ['+'], wrong: { '-': 'target 較大，要在右半繼續，left 應移到 mid 右邊一格。' }, model: '+', why: '目標在右半：left = mid + 1。' }] },
+  { id: 'q14', sec: '53', type: 'mc', tag: '概念', stem: '對分檢索的先決條件是甚麼？',
+    options: [
+      { t: '列表的長度必須是雙數', why: '任何長度都可以，mid 用 // 取整。' },
+      { t: '列表必須已排序', ok: 1, why: '靠「左邊較小、右邊較大」才可以決定丟棄哪一半。' },
+      { t: '目標必須在列表中', why: '目標不在列表中時，對分檢索會傳回 -1。' },
+      { t: '列表不可以有重複的數值', why: '有重複值也可以運作（會找到其中一個）。' }] },
+  { id: 'q15', sec: '53', type: 'find', tag: '找錯', stem: 'binary_search([5], 5) 傳回 -1，但 5 在列表中。點選出錯的一行。',
+    lines: [
+      { c: 'def binary_search(list, target):', why: '函數定義正確。' },
+      { c: '    left = 0', why: '正確。' },
+      { c: '    right = len(list) - 1', why: '正確，最後一個索引是 len(list) - 1。' },
+      { c: '    while left < right:', ok: 1, why: '只有一個元素時 left = right = 0，left < right 是 False，一次也不檢查。應為 left <= right。' },
+      { c: '        mid = (left + right) // 2', why: '正確。' },
+      { c: '        if list[mid] == target:', why: '正確（但根本未執行到）。' }] },
+  { id: 'q16', sec: '53', type: 'mc', tag: '預測輸出', stem: '某一輪開始時 left = 4、right = 7。這一輪的 mid 是多少？',
+    options: [
+      { t: '5', ok: 1, why: '(4 + 7) // 2 = 11 // 2 = 5（// 取整數商）。' },
+      { t: '5.5', why: '// 是整數除法，結果是 5，不是 5.5。' },
+      { t: '6', why: '// 向下取整，11 // 2 = 5。' },
+      { t: '3', why: '7 - 4 = 3 是範圍的差距，不是 mid。' }] },
+  { id: 'q17', sec: '53', type: 'parsons', tag: '排列程式碼', stem: '排列 while 循環內的程式碼（已縮排好）。',
+    lines: [
+      { c: '        mid = (left + right) // 2', why: '每一輪先計算 mid。' },
+      { c: '        if list[mid] == target:', why: '再比較中間元素。' },
+      { c: '            return mid', why: '相等便傳回 mid。' },
+      { c: '        elif target < list[mid]:', why: '不相等時，判斷目標在哪一半。' },
+      { c: '            right = mid - 1', why: '目標較小：保留左半。' },
+      { c: '        else:', why: '否則目標較大。' },
+      { c: '            left = mid + 1', why: '保留右半。' }] },
+
+  /* ---------- 5.4 ---------- */
+  { id: 'q18', sec: '54', type: 'mc', tag: '概念', stem: '已排序列表的大小由 512 加倍至 1024。對分檢索在最壞情況下的比較次數會怎樣？',
+    options: [
+      { t: '加倍', why: '加倍的是線性檢索 O(n)。' },
+      { t: '只增加 1 次', ok: 1, why: 'O(log n)：輸入加倍只增加 1 步（10 次變 11 次）。' },
+      { t: '不變', why: '不變的是 O(1)。' },
+      { t: '增加 512 次', why: '增加 512 次是線性檢索的情況。' }] },
+  { id: 'q19', sec: '54', type: 'mc', tag: '概念', stem: '線性檢索的空間複雜度是甚麼？',
+    options: [
+      { t: 'O(1)', ok: 1, why: '只用一個索引變量 i，額外記憶體不隨 n 增加。' },
+      { t: 'O(n)', why: 'O(n) 是線性檢索的時間複雜度，不是空間複雜度。' },
+      { t: 'O(log n)', why: 'O(log n) 是對分檢索的時間複雜度。' },
+      { t: 'O(n²)', why: '線性檢索不需要額外的大量記憶體。' }] },
+  { id: 'q20', sec: '54', type: 'mc', tag: '情境選擇', stem: '圖書館有 100 萬本按書號排序的書，每日要按書號查找數千次。應選用哪種檢索方法？',
+    options: [
+      { t: '線性檢索，因為它簡單易於除錯', why: '數據大型而且查找次數多，線性檢索每次最多要看 100 萬本，太慢。' },
+      { t: '對分檢索，因為數據大型、已排序而且要重複查找', ok: 1, why: '每次最多約 20 次比較，最適合大型、已排序、需重複查找的數據。' },
+      { t: '線性檢索，因為它的空間複雜度較低', why: '兩者的空間複雜度都是 O(1)。' },
+      { t: '對分檢索，因為它不需要已排序的數據', why: '對分檢索需要已排序的數據（這裏剛好已排序）。' }] },
+  { id: 'q21', sec: '54', type: 'mc', tag: '情境選擇', stem: '老師有 30 個未排序的測驗分數，只想查找一次某個分數是否存在。應選用哪種檢索方法？',
+    options: [
+      { t: '線性檢索', ok: 1, why: '小型、未排序、只查找一次：線性檢索最合適。' },
+      { t: '對分檢索，直接在未排序的分數上進行', why: '數據未排序，對分檢索可能錯過目標。' },
+      { t: '先排序，再用對分檢索', why: '只查找一次，排序所花的時間比逐個檢查 30 個分數更多。' },
+      { t: '兩種都不可以', why: '線性檢索適用於未排序的數據。' }] },
+  { id: 'q22', sec: '54', type: 'mc', tag: '概念', stem: '「時間複雜度是 O(n)」的意思是：',
+    options: [
+      { t: '無論輸入大小如何，時間都不會改變', why: '這是 O(1)。' },
+      { t: '時間與輸入大小成正比增長', ok: 1, why: 'n 加倍，時間大約加倍。' },
+      { t: '輸入加倍時，時間只增加一步', why: '這是 O(log n)。' },
+      { t: '程式剛好執行 n 秒', why: '大 O 描述增長趨勢，不是實際秒數。' }] }
+];
+const MAPPING = [
+  ['5.1 (1) 找到傳回索引，找不到傳回 -1', '5.1 ① 輸入目標看傳回值', 'Q1'],
+  ['5.1 (2) 列表作為類似陣列的結構：依索引存取、更新、遍歷', '5.1 ② 三種操作（含 IndexError 及負數索引）', 'Q2、Q3、Q4'],
+  ['5.1 (3) 本章涵蓋線性檢索和對分檢索', '5.2、5.3 兩節；5.4 比賽', '—'],
+  ['5.2 (1) 機制：由左到右逐一檢查', '5.2 ① 逐步執行＋聲納格子＋追蹤表', 'Q5、Q8、Q9、Q10'],
+  ['5.2 (2) 通用性：未排序或已排序都適用', '5.2 ① 可輸入未排序列表', 'Q6'],
+  ['5.2 (3) 提早結束（已排序時）', '5.2 ② 開關提早結束、比較探測次數；錯誤示範：未排序時提早結束', 'Q7'],
+  ['5.2 (4) 優缺點：易實現、無額外記憶體；大型數據慢，O(n)', '5.2 ② 課本句；5.4 ① 比賽、② 增長圖', 'Q19、Q22'],
+  ['5.3 (1) 機制：檢查中間項目，保留一半', '5.3 ① left／mid／right 浮標、已排除海域、每輪追蹤表', 'Q11、Q12、Q17'],
+  ['5.3 (2) 先決條件：已排序', '5.3 ② 錯誤示範：未排序數據上用對分檢索', 'Q14'],
+  ['5.3 (3) 過程：right = mid - 1；left = mid + 1', '5.3 ① 逐步執行', 'Q13、Q15、Q16'],
+  ['5.3 (4) 效率：O(log n)', '5.4 ① 比賽；② 增長圖及加倍表', 'Q18'],
+  ['5.4 (1)(2) 時間複雜度、空間複雜度', '5.4 ① 探測次數與空間說明', 'Q19'],
+  ['5.4 (3) 大 O：O(1)、O(n)、O(log n)（加倍只增加 1 步）', '5.4 ② n 由 8 至 1024 的圖表（可放大）及表格', 'Q18、Q22'],
+  ['5.4 表：先決條件、實現、時間、空間、適用情況', '5.4 ③ 比較表及四個情境揀選', 'Q20、Q21']
+];
+<\/script>
+<script>
+
+/* ================= 共用工具 ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function parseIntList(s, max = 12) {
+  const out = [];
+  String(s).split(/[,，\s]+/).forEach(t => { if (t === '') return; const n = Number(t); if (Number.isInteger(n) && Math.abs(n) <= 9999) out.push(n); });
+  return out.slice(0, max);
+}
+function clampInt(v, lo, hi, d) { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; }
+
+const store = {
+  read() { try { return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '{}') || {}; } catch (e) { return {}; } },
+  get(k, d) { const o = this.read(); return (o && k in o) ? o[k] : d; },
+  set(k, v) { try { const o = this.read(); o[k] = v; localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(o)); } catch (e) { /* 寫入失敗也照常運作 */ } },
+  clear() { try { localStorage.removeItem(CONFIG.STORAGE_KEY); } catch (e) {} }
+};
+
+const Sound = {
+  on: false, ctx: null,
+  beep(f = 600, d = .06, type = 'square', vol = .06) {
+    if (!this.on) return;
+    try {
+      this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g); g.connect(this.ctx.destination); o.start(t); o.stop(t + d + .02);
+    } catch (e) {}
+  },
+  step() { this.beep(520, .04); }, ok() { this.beep(880, .14, 'triangle', .09); }, bad() { this.beep(170, .2, 'sawtooth', .05); }
+};
+
+/* ================= Python 值的表示（與 Python 3 repr 一致） ================= */
+const PY = {
+  int: n => String(n),
+  float(x) {
+    if (Number.isNaN(x)) return 'nan';
+    if (!Number.isFinite(x)) return x > 0 ? 'inf' : '-inf';
+    if (x === 0) return Object.is(x, -0) ? '-0.0' : '0.0';
+    const a = Math.abs(x);
+    if (a >= 1e16 || a < 1e-4) {
+      let [m, e] = x.toExponential().split('e');
+      const sign = e[0] === '-' ? '-' : '+'; let d = e.replace(/^[+-]/, ''); if (d.length < 2) d = '0' + d;
+      return m + 'e' + sign + d;
+    }
+    if (Number.isInteger(x)) return x.toFixed(0) + '.0';
+    return String(x);
+  },
+  str(s) {
+    s = String(s);
+    const q = (s.includes("'") && !s.includes('"')) ? '"' : "'";
+    let b = s.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\t/g, '\\t').replace(/\r/g, '\\r');
+    if (q === "'") b = b.replace(/'/g, "\\'");
+    return q + b + q;
+  },
+  bool: b => b ? 'True' : 'False',
+  list: arr => '[' + arr.join(', ') + ']'
+};
+function noisyFloat(s) { const m = /\.(\d+)/.exec(s); return !!(m && m[1].length >= 10); }
+
+/* ================= 語法顯示 ================= */
+const PY_KW = new Set(['def', 'return', 'for', 'in', 'if', 'elif', 'else', 'while', 'class', 'True', 'False', 'None', 'and', 'or', 'not', 'import', 'with', 'as', 'pass', 'global']);
+const PY_BI = new Set(['print', 'len', 'int', 'float', 'str', 'range', 'input', 'self', 'append', 'pop', 'sum']);
+function hlPy(src) {
+  const re = /("""[\s\S]*?"""|"[^"]*"|'[^']*'|#[^\n]*|\b\d+(?:\.\d+)?\b|\b[A-Za-z_]\w*\b)/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index)); const t = m[0];
+    if (t[0] === '#') out += `<span class="c">${esc(t)}</span>`;
+    else if (t[0] === '"' || t[0] === "'") out += `<span class="s">${esc(t)}</span>`;
+    else if (/^\d/.test(t)) out += `<span class="n">${esc(t)}</span>`;
+    else if (PY_KW.has(t)) out += `<span class="k">${t}</span>`;
+    else if (PY_BI.has(t)) out += `<span class="b">${t}</span>`;
+    else if (/^[A-Z][A-Z0-9_]+$/.test(t)) out += `<span class="cn">${t}</span>`;
+    else out += esc(t);
+    last = m.index + t.length;
+  }
+  return out + esc(src.slice(last));
+}
+const PC_KW = /\b(FUNCTION|END|RETURN|FOR|EACH|IN|NEXT|IF|THEN|ELSE|OUTPUT|WHILE|DO|TYPE|ENDTYPE|NEW|AND|OR|NOT|TRUE|FALSE|OPEN|READ|WRITE|APPEND|AS|CLOSE|REPLACE|WITH|SPLIT|TRIM|INT|LENGTH)\b/g;
+function hlPc(src) {
+  const ci = src.indexOf('//');
+  const code = ci >= 0 ? src.slice(0, ci) : src, com = ci >= 0 ? src.slice(ci) : '';
+  let h = esc(code).replace(PC_KW, '<span class="pk">$1</span>').replace(/←/g, '<span class="arr">←</span>');
+  return h + (com ? `<span class="c">${esc(com)}</span>` : '');
+}
+
+/* ================= 執行記錄器 ================= */
+class Rec {
+  constructor(startNote) { this.steps = []; this.v = {}; this.out = []; this.touched = new Set(); this.push(null, startNote || '按「▶ 下一步」開始逐行執行。'); }
+  set(k, val) { this.v[k] = val; this.touched.add(k); }
+  del(...ks) { ks.forEach(k => delete this.v[k]); }
+  print(s) { this.out.push(String(s)); }
+  push(line, note, extra = {}) {
+    const prev = this.steps[this.steps.length - 1];
+    const vars = Object.assign({}, this.v), changed = [];
+    for (const k in vars) if (this.touched.has(k) || !prev || prev.vars[k] !== vars[k]) changed.push(k);
+    const newOut = prev ? this.out.slice(prev.out.length) : [];
+    this.steps.push(Object.assign({ line, vars, out: this.out.slice(), newOut, note, changed: prev ? changed : [] }, extra));
+    this.touched = new Set();
+  }
+}
+
+/* ================= 逐步執行器 ================= */
+class Stepper {
+  /* prog: { rows(p), cols(p), run(p), predict?(p), explain?(p), varLabel?(k) }  getP: () => params  hooks: { onStep(step, i, steps) } */
+  constructor(root, prog, getP, hooks = {}) {
+    this.root = root; this.prog = prog; this.getP = getP; this.hooks = hooks; this.timer = null; this.view = 'py';
+    root.classList.add('stepper'); if (hooks.breakpoints) root.classList.add('bp-on'); if (hooks.wide) root.classList.add('wide'); if (hooks.noVars) root.classList.add('novars');
+    root.innerHTML = `
+      <div class="st-pred"></div>
+      <div class="st-grid">
+        <div>
+          <div class="st-codehead"><b>程式碼（Python ｜ 偽代碼）</b>
+            <span class="viewsw" role="group" aria-label="切換顯示"><button class="btn alt" data-v="py" aria-pressed="true">Python</button><button class="btn alt" data-v="pc" aria-pressed="false">偽代碼</button></span></div>
+          <div class="codebox"><table class="codetab only-py"><thead><tr><th></th><th></th><th class="pyh">Python</th><th class="pch">偽代碼</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="st-side">
+          <div${hooks.noVars ? ' hidden' : ''}><div class="boxtitle">📦 變量（貨箱）</div><div class="vars"></div></div>
+          <div><div class="boxtitle">🖨 輸出</div><div class="console" aria-live="polite"></div></div>
+        </div>
+      </div>
+      <div class="note" aria-live="polite"></div>
+      <div class="ctrl">
+        <button class="btn alt" data-a="reset" title="重設">⟲ 重設</button>
+        <button class="btn alt" data-a="prev" title="上一步">◀ 上一步</button>
+        <button class="btn" data-a="next" title="下一步">▶ 下一步</button>
+        <button class="btn dark" data-a="play" aria-pressed="false">⏵ 自動播放</button>
+        ${hooks.breakpoints ? '<button class="btn alt" data-a="bp">⏩ 執行到斷點</button>' : ''}
+        <label>速度 <input type="range" min="1" max="5" value="3" data-a="speed" aria-label="自動播放速度"></label>
+        <span class="cnt" aria-live="off"></span>
+      </div>
+      <div class="hook"></div>
+      <details class="trace-box"${hooks.traceOpen ? ' open' : ''}><summary>📋 追蹤表 <span class="hint">（只記下該步改變了的值；▶ 為目前一步）</span></summary>
+      <div class="trace-wrap"><table class="trace"></table></div></details>`;
+    this.$ = s => root.querySelector(s);
+    root.querySelector('.ctrl').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const a = b.dataset.a;
+      if (a === 'next') { this.stop(); this.step(1); } else if (a === 'prev') { this.stop(); this.step(-1); }
+      else if (a === 'reset') { this.stop(); this.go(0); } else if (a === 'bp') { this.stop(); this.runToBp(); } else if (a === 'play') { this.timer ? this.stop() : this.play(); }
+    });
+    root.querySelector('.viewsw').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return; this.view = b.dataset.v;
+      $$('.viewsw button', root).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const t = this.$('.codetab'); t.classList.toggle('only-py', this.view === 'py'); t.classList.toggle('only-pc', this.view === 'pc');
+    });
+    this.bps = new Set();
+    if (hooks.breakpoints) root.querySelector('.codetab tbody').addEventListener('click', e => {
+      const td = e.target.closest('td.ln'); if (!td || !td.textContent) return;
+      const id = td.parentElement.dataset.id; this.bps.has(id) ? this.bps.delete(id) : this.bps.add(id); this.paintBps();
+    });
+    this.rebuild();
+  }
+  paintBps() {
+    $$('.codetab tbody tr', this.root).forEach(tr => { const on = this.bps.has(tr.dataset.id); tr.classList.toggle('bp', on); tr.querySelector('.ln').setAttribute('aria-pressed', on); });
+    if (this.hooks.onBp) this.hooks.onBp(this);
+  }
+  runToBp() {
+    if (this.i === 0 && this.pred && this.choice == null) this.skipPred = true;
+    // 斷點：在該行「執行之前」暫停 → 顯示上一步的狀態，並標示即將執行的行
+    let k = this.i + 1;
+    if (this.pauseLine != null) k = this.i + 2;
+    while (k < this.steps.length && !this.bps.has(this.steps[k].line)) k++;
+    if (this.bps.size === 0 || k >= this.steps.length) {
+      this.go(this.steps.length - 1);
+      this.$('.note').textContent = (this.bps.size === 0 ? '未設定斷點：先點選左邊的行號（出現 ●）。' : '之後再沒有經過斷點的步驟，') + '程式已執行到最後。';
+      return;
+    }
+    this.go(k - 1);
+    this.pauseLine = this.steps[k].line;
+    $$('.codetab tbody tr', this.root).forEach(tr => { const on = tr.dataset.id === this.pauseLine; tr.classList.toggle('pause', on); if (on) tr.querySelector('.gut').textContent = '⏸'; });
+    this.$('.note').textContent = `⏸ 在斷點暫停：第 ${this.lineNo[this.pauseLine]} 行「即將執行」，還未執行。右邊是此刻的變量，檢查後再按「⏩ 執行到斷點」繼續。`;
+  }
+  rebuild() {
+    this.stop();
+    this.p = this.getP();
+    this.rows = this.prog.rows(this.p).filter(Boolean);
+    this.cols = this.prog.cols(this.p);
+    this.steps = this.prog.run(this.p);
+    this.pred = this.prog.predict ? this.prog.predict(this.p) : null;
+    this.choice = null; this.skipPred = false;
+    // Python 行號
+    let n = 0; this.lineNo = {};
+    this.rows.forEach(r => { if (r.py !== '' || r.blank) { n++; this.lineNo[r.id] = n; } });
+    const tb = this.$('.codetab tbody');
+    tb.innerHTML = this.rows.map(r => `<tr data-id="${r.id}"><td class="gut"></td><td class="ln">${this.lineNo[r.id] || ''}</td><td class="py">${hlPy(r.py)}</td><td class="pc">${hlPc(r.pc || '')}</td></tr>`).join('');
+    // 追蹤表
+    const th = `<thead><tr><th>步</th><th>行</th>${this.cols.map(c => `<th>${esc(c)}</th>`).join('')}<th>輸出</th></tr></thead>`;
+    const body = this.steps.slice(1).map((s, i) => `<tr class="fut"><td>${i + 1}</td><td>${this.lineNo[s.line] || '–'}</td>${this.cols.map(c => {
+      const v = s.changed.includes(c) && c in s.vars ? s.vars[c] : ''; return `<td>${esc(v)}</td>`; }).join('')}<td class="${s.err ? 'er' : ''}">${esc(s.newOut.join(' ⏎ '))}</td></tr>`).join('');
+    this.$('.trace').innerHTML = th + '<tbody>' + body + '</tbody>';
+    this.renderPred();
+    if (this.hooks.breakpoints) { const valid = new Set(this.rows.map(r => r.id)); this.bps.forEach(b => { if (!valid.has(b)) this.bps.delete(b); }); this.paintBps(); }
+    this.go(0);
+  }
+  renderPred() {
+    const box = this.$('.st-pred');
+    if (!this.pred) { box.innerHTML = ''; return; }
+    box.innerHTML = `<div class="predict"><div class="q">${this.pred.q}</div><div class="opts">${this.pred.options.map((o, i) => `<button class="opt" data-i="${i}" aria-pressed="false">${esc(o.t)}</button>`).join('')}</div><div class="verdict" aria-live="polite"></div></div>`;
+    box.querySelector('.opts').addEventListener('click', e => {
+      const b = e.target.closest('.opt'); if (!b) return;
+      this.choice = +b.dataset.i;
+      $$('.opt', box).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const v = box.querySelector('.verdict'); v.className = 'verdict'; v.textContent = '已記下你的預測。現在逐行執行，看看結果。';
+      if (this.i === this.steps.length - 1) this.revealPred();
+    });
+  }
+  revealPred() {
+    if (!this.pred) return;
+    const v = this.$('.st-pred .verdict'); if (!v) return;
+    if (this.choice == null) { v.className = 'verdict'; v.textContent = '（你沒有作預測）' + (this.pred.options.find(o => o.ok) ? ` 正確答案：${this.pred.options.find(o => o.ok).t}` : ''); return; }
+    const o = this.pred.options[this.choice];
+    v.className = 'verdict ' + (o.ok ? 'ok' : 'no');
+    v.textContent = (o.ok ? '預測正確！' : '預測不正確。') + ' ' + (o.why || '');
+    o.ok ? Sound.ok() : Sound.bad();
+  }
+  step(d) {
+    if (d > 0 && this.i === 0 && this.pred && this.choice == null && !this.skipPred) {
+      this.skipPred = true;
+      const v = this.$('.st-pred .verdict'); if (v) { v.className = 'verdict'; v.textContent = '先作預測，再執行！（再按一次「下一步」可略過預測）'; }
+      return;
+    }
+    this.go(this.i + d);
+  }
+  go(i) {
+    i = Math.max(0, Math.min(this.steps.length - 1, i)); this.pauseLine = null; $$('.codetab tr.pause', this.root).forEach(tr => tr.classList.remove('pause'));
+    const moved = i !== this.i; this.i = i;
+    const s = this.steps[i];
+    // 程式碼高亮
+    $$('.codetab tbody tr', this.root).forEach(tr => {
+      const on = tr.dataset.id === s.line; tr.classList.toggle('cur', on && !s.err); tr.classList.toggle('err', on && !!s.err);
+      tr.querySelector('.gut').textContent = on ? (s.err ? '✘' : '▶') : '';
+    });
+    const cur = this.root.querySelector('.codetab tr.cur, .codetab tr.err');
+    if (cur && moved) { const box = this.root.querySelector('.codebox'); const top = cur.offsetTop - box.clientHeight / 2; if (box.scrollHeight > box.clientHeight) box.scrollTop = Math.max(0, top); }
+    // 變量
+    const vb = this.$('.vars'); const keys = Object.keys(s.vars);
+    const order = this.cols.filter(c => keys.includes(c)).concat(keys.filter(k => !this.cols.includes(k)));
+    vb.innerHTML = order.length ? order.map(k => {
+      const lab = this.prog.varLabel ? this.prog.varLabel(k) : ''; const chg = s.changed.includes(k);
+      return `<div class="crate${chg ? ' chg' : ''}${chg && !REDUCED ? ' anim' : ''}"><div class="lbl">${esc(k)}${lab ? ' · ' + lab : ''}</div><div class="val">${esc(s.vars[k])}</div></div>`;
+    }).join('') : '<span class="empty">（未有任何變量）</span>';
+    // 輸出
+    const con = this.$('.console'); const old = s.out.length - s.newOut.length;
+    con.innerHTML = s.out.length ? s.out.map((o, k) => {
+      const er = /^(Traceback|\s+File|\w*Error)/.test(o) || (s.err && k >= old);
+      return `<div class="${er ? 'er' : ''} ${k >= old ? 'new' : ''}"><span class="pr">${er ? '✘' : '&gt;'}</span> ${esc(o)}</div>`;
+    }).join('') : '<span class="hint" style="color:#999">（未有輸出）</span>';
+    // 解說
+    const nt = this.$('.note'); nt.classList.toggle('err', !!s.err); nt.textContent = s.note || '';
+    // 追蹤表
+    $$('.trace tbody tr', this.root).forEach((tr, k) => { tr.classList.toggle('fut', k + 1 > i); tr.classList.toggle('cur', k + 1 === i); });
+    const ct = this.root.querySelector('.trace tr.cur'); const tw = this.$('.trace-wrap');
+    if (ct && moved) tw.scrollTop = Math.max(0, ct.offsetTop - tw.clientHeight + ct.offsetHeight + 8);
+    // 計數
+    this.$('.cnt').textContent = `第 ${i} / ${this.steps.length - 1} 步`;
+    this.root.querySelector('[data-a=prev]').disabled = i === 0;
+    this.root.querySelector('[data-a=next]').disabled = i === this.steps.length - 1;
+    if (moved && i > 0) Sound.step();
+    if (i === this.steps.length - 1 && moved) { this.revealPred(); if (s.err) Sound.bad(); }
+    if (this.hooks.onStep) this.hooks.onStep(s, i, this.steps, this);
+  }
+  play() {
+    if (this.i === this.steps.length - 1) this.go(0);
+    if (this.i === 0 && this.pred && this.choice == null) this.skipPred = true;
+    const b = this.root.querySelector('[data-a=play]'); b.setAttribute('aria-pressed', 'true'); b.textContent = '⏸ 暫停';
+    const tick = () => {
+      if (this.i >= this.steps.length - 1) { this.stop(); return; }
+      this.go(this.i + 1);
+      const sp = +this.root.querySelector('[data-a=speed]').value;
+      this.timer = setTimeout(tick, [0, 2000, 1400, 900, 550, 300][sp]);
+    };
+    this.timer = setTimeout(tick, 150);
+  }
+  stop() {
+    if (this.timer) clearTimeout(this.timer); this.timer = null;
+    const b = this.root && this.root.querySelector('[data-a=play]'); if (b) { b.setAttribute('aria-pressed', 'false'); b.textContent = '⏵ 自動播放'; }
+  }
+}
+
+/* 拖放工具（滑鼠與觸控通用） */
+function makeDraggable(node, { onDrop, onTap, ghostClass = '' }) {
+  let sx, sy, ghost = null, active = false, pid = null;
+  node.addEventListener('pointerdown', e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (node.dataset.locked === '1') return;
+    sx = e.clientX; sy = e.clientY; active = true; pid = e.pointerId;
+    try { node.setPointerCapture(pid); } catch (er) {}
+  });
+  node.addEventListener('pointermove', e => {
+    if (!active) return;
+    if (!ghost && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) {
+      ghost = node.cloneNode(true); ghost.classList.add('ghost'); if (ghostClass) ghost.classList.add(ghostClass);
+      ghost.style.width = node.offsetWidth + 'px'; document.body.appendChild(ghost);
+    }
+    if (ghost) {
+      e.preventDefault();
+      ghost.style.left = (e.clientX - 20) + 'px'; ghost.style.top = (e.clientY - 20) + 'px';
+      const t = document.elementFromPoint(e.clientX, e.clientY); $$('.hov').forEach(x => x.classList.remove('hov'));
+      const slot = t && t.closest('[data-drop]'); if (slot) slot.classList.add('hov');
+    }
+  });
+  const end = e => {
+    if (!active) return; active = false;
+    try { node.releasePointerCapture(pid); } catch (er) {}
+    $$('.hov').forEach(x => x.classList.remove('hov'));
+    if (ghost) {
+      ghost.remove(); ghost = null;
+      const t = document.elementFromPoint(e.clientX, e.clientY); const slot = t && t.closest('[data-drop]');
+      if (slot && e.type === 'pointerup') onDrop(slot);
+    } else if (e.type === 'pointerup') onTap && onTap();
+  };
+  node.addEventListener('pointerup', end); node.addEventListener('pointercancel', end);
+  node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap && onTap(); } });
+}
+<\/script>
+<script>
+/* ================= 共用：海床格子與浮標 ================= */
+function cellsHTML(arr, st) {
+  st = st || {};
+  return arr.map((v, i) => {
+    const cls = ['cell', st.chk && st.chk.has(i) ? 'chk' : '', st.elim && st.elim.has(i) ? 'elim' : '', st.cur === i ? 'cur' : '', st.found === i ? 'found' : '', (st.cur === i || st.found === i) && !REDUCED ? 'ping' : ''].join(' ');
+    const names = []; if (st.L === i) names.push('left'); if (st.M === i) names.push('mid'); if (st.R === i) names.push('right');
+    const buoy = names.length ? `<span class="buoy b1${names.includes('mid') ? ' m' : ''}">${names.join('·')}</span>` : '';
+    return `<div class="${cls}">${buoy}<div class="v">${esc(v)}</div><div class="i">[${i}]</div></div>`;
+  }).join('');
+}
+const LEGEND5 = `<div class="legend5"><span><i style="background:var(--amber)"></i>正在探測</span><span><i style="background:#0b2a40;border-style:dashed"></i>✓ 已探測</span><span><i style="background:var(--sonar)"></i>◎ 找到</span><span><i style="background:repeating-linear-gradient(45deg,#0a2235 0 4px,#15364f 4px 8px)"></i>斜紋＝已排除</span></div>`;
+function renderSeaHook(s, i, steps, st) {
+  const box = st.root.querySelector('.hook'); if (!s.sea) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="ctl" style="margin:.6rem 0 .3rem"><span class="sonar-count">📡 探測次數：${s.sea.count || 0}</span>${s.sea.msg ? `<span class="hint">${esc(s.sea.msg)}</span>` : ''}</div><div class="seabed"><div class="cells">${cellsHTML(s.sea.arr, s.sea)}</div></div>${LEGEND5}`;
+}
+function linSearch(arr, t, early) { let c = 0; for (let i = 0; i < arr.length; i++) { c++; if (arr[i] === t) return { idx: i, count: c }; if (early && arr[i] > t) return { idx: -1, count: c }; } return { idx: -1, count: c }; }
+function binSearch(arr, t) { let L = 0, R = arr.length - 1, c = 0; const rounds = []; while (L <= R) { const M = Math.floor((L + R) / 2); c++; rounds.push([L, M, R]); if (arr[M] === t) return { idx: M, count: c, rounds }; if (t < arr[M]) R = M - 1; else L = M + 1; } return { idx: -1, count: c, rounds }; }
+
+/* ================= 5.1 ① 檢索的結果 ================= */
+const PROBE = [30, 80, 15, 60, 45, 90];
+function renderProbe() {
+  const t = clampInt($('#pTarget').value, -9999, 9999, 15), r = linSearch(PROBE, t, false);
+  const chk = new Set(); for (let i = 0; i < r.count; i++) chk.add(i); if (r.idx >= 0) chk.delete(r.idx);
+  $('#pCells').innerHTML = cellsHTML(PROBE, { chk, found: r.idx >= 0 ? r.idx : null });
+  $('#pResult').textContent = r.idx >= 0 ? `傳回 ${r.idx}（索引）` : '傳回 -1（找不到）';
+  $('#pCode').innerHTML = hlPy(`def linear_search(list, target):\n    for i in range(len(list)):\n        if list[i] == target:\n            return i\n    return -1\n\ndepths = [${PROBE.join(', ')}]\nresult = linear_search(depths, ${t})\nif result == -1:\n    print("找不到")\nelse:\n    print("在索引", result, "找到")`);
+  $('#pOut').innerHTML = `<span class="pr">&gt;</span> ${r.idx >= 0 ? '在索引 ' + r.idx + ' 找到' : '找不到'}`;
+}
+function initProbe() { ['input', 'change'].forEach(ev => $('#pTarget').addEventListener(ev, renderProbe)); renderProbe(); }
+
+/* ================= 5.1 ② 類似陣列的列表 ================= */
+let aArr = PROBE.slice();
+function aLog(lines, err) { $('#aOut').innerHTML = lines.map((l, k) => `<div class="${err && k === lines.length - 1 ? 'er' : ''}"><span class="pr">${err && k === lines.length - 1 ? '✘' : '&gt;'}</span> ${esc(l)}</div>`).join(''); }
+function renderA(st) { $('#aCells').innerHTML = cellsHTML(aArr, st || {}); }
+function initArrayOps() {
+  renderA();
+  $$('[data-aop]').forEach(b => b.addEventListener('click', () => {
+    const op = b.dataset.aop, n = aArr.length, i = clampInt($('#aIdx').value, -999, 999, 0), v = clampInt($('#aVal').value, -9999, 9999, 50);
+    const ok = i >= -n && i < n, real = i < 0 ? n + i : i;
+    const neg = i < 0 && ok ? `（Python 容許負數索引：${i} 即倒數第 ${-i} 個，也就是索引 ${real}。所以檢索失敗時傳回的 -1，不可以直接拿來作索引！）` : '';
+    if (op === 'reset') { aArr = PROBE.slice(); renderA(); aLog(['已還原 depths = ' + PY.list(aArr.map(String))]); return; }
+    if (op === 'get') {
+      if (!ok) { renderA(); aLog([`print(depths[${i}])`, 'IndexError: list index out of range  ← depths 只有索引 0 至 ' + (n - 1)], true); Sound.bad(); return; }
+      renderA({ found: real }); aLog([`print(depths[${i}])`, String(aArr[real]) + ' ' + neg]); Sound.step();
+    }
+    if (op === 'set') {
+      if (!ok) { renderA(); aLog([`depths[${i}] = ${v}`, 'IndexError: list assignment index out of range'], true); Sound.bad(); return; }
+      aArr[real] = v; renderA({ found: real }); aLog([`depths[${i}] = ${v}`, 'depths 變成 ' + PY.list(aArr.map(String)) + ' ' + neg]); Sound.step();
+    }
+    if (op === 'walk') { renderA({ chk: new Set(aArr.map((x, k) => k)) }); aLog(['for i in range(len(depths)):', '    print(i, depths[i])'].concat(aArr.map((x, k) => `${k} ${x}`))); Sound.step(); }
+  }));
+}
+
+/* ================= 5.2 線性檢索（含提早結束） ================= */
+function makeLinProg() {
+  return {
+    rows(p) {
+      const r = [
+        { id: 'D1', py: 'def linear_search(list, target):', pc: 'FUNCTION linear_search(list, target)' },
+        { id: 'D2', py: '    for i in range(len(list)):', pc: '  FOR i ← 0 TO LENGTH(list) - 1' },
+        { id: 'D3', py: '        if list[i] == target:', pc: '    IF list[i] = target THEN' },
+        { id: 'D4', py: '            return i', pc: '      RETURN i' }];
+      if (p.early) r.push({ id: 'D5', py: '        elif list[i] > target:', pc: '    ELSE IF list[i] > target THEN' }, { id: 'D6', py: '            return -1          # 提早結束', pc: '      RETURN -1' });
+      return r.concat([
+        { id: 'DE', py: '', pc: '    END IF\n  NEXT i' },
+        { id: 'D7', py: '    return -1', pc: '  RETURN -1' },
+        { id: 'DF', py: '', pc: 'END FUNCTION' },
+        { id: 'M1', py: `depths = [${p.list.join(', ')}]`, pc: `depths ← [${p.list.join(', ')}]` },
+        { id: 'M2', py: `print(linear_search(depths, ${p.target}))`, pc: `OUTPUT linear_search(depths, ${p.target})` }]);
+    },
+    cols(p) { return p.early ? ['i', 'list[i]', 'list[i] == target', 'list[i] > target'] : ['i', 'list[i]', 'list[i] == target']; },
+    run(p) {
+      const r = new Rec(), A = p.list, T = p.target, chk = new Set(); let count = 0;
+      const S = (o) => ({ sea: Object.assign({ arr: A, chk: new Set(chk), count }, o || {}) });
+      r.set('depths', PY.list(A.map(String))); r.push('M1', '建立列表 depths。', S());
+      r.push('M2', `呼叫 linear_search(depths, ${T})。`, S());
+      r.set('target', String(T)); r.push('D1', `參數 list 收到 depths，target 收到 ${T}。`, S());
+      let res = -1, line = 'D7';
+      for (let i = 0; i < A.length; i++) {
+        r.set('i', String(i)); r.set('list[i]', String(A[i])); count++;
+        r.push('D2', `探測索引 ${i}：list[${i}] = ${A[i]}。`, S({ cur: i }));
+        const eq = A[i] === T; r.set('list[i] == target', PY.bool(eq));
+        r.push('D3', `${A[i]} == ${T} → ${PY.bool(eq)}。`, S({ cur: i }));
+        if (eq) { res = i; line = 'D4'; r.push('D4', `找到了！傳回索引 ${i}，函數立即結束。`, S({ found: i })); break; }
+        if (p.early) {
+          const gt = A[i] > T; r.set('list[i] > target', PY.bool(gt));
+          r.push('D5', `${A[i]} > ${T} → ${PY.bool(gt)}。${gt ? '目前的數已比目標大。' : ''}`, S({ cur: i }));
+          if (gt) {
+            for (let k = i + 1; k < A.length; k++) chk.add(k);
+            const exists = A.indexOf(T);
+            r.push('D6', exists >= 0 ? `提早結束，傳回 -1。✘ 但 ${T} 其實在索引 ${exists}！列表未排序，不可以提早結束。` : `提早結束：列表已排序，後面的數只會更大，不用再探測（斜線格子都跳過了）。傳回 -1。`, S({ cur: i, elim: new Set(Array.from({ length: A.length - i - 1 }, (_, k) => i + 1 + k)), msg: exists >= 0 ? '錯誤：錯過了目標' : '後面的格子不用探測' }));
+            line = 'D6'; break;
+          }
+        }
+        chk.add(i);
+      }
+      if (line === 'D7') r.push('D7', A.length ? '已探測到列表末尾，沒有找到，傳回 -1。' : '列表是空的，傳回 -1。', S());
+      r.del('i', 'list[i]', 'target', 'list[i] == target', 'list[i] > target');
+      r.print(String(res)); r.push('M2', `輸出 ${res}。共探測 ${count} 次。`, S(res >= 0 ? { found: res } : {}));
+      return r.steps;
+    },
+    predict(p) {
+      const res = linSearch(p.list, p.target, p.early).idx;
+      const pos = p.list.indexOf(p.target);
+      const raw = [{ t: String(res), ok: true, why: res >= 0 ? `目標在索引 ${res}（索引由 0 開始）。` : (pos >= 0 ? '提早結束在未排序的列表上出錯，傳回 -1。' : '列表中沒有這個數，傳回 -1。') }];
+      if (res >= 0) raw.push({ t: String(res + 1), ok: false, why: '索引由 0 開始，不是由 1 開始。' }, { t: String(p.target), ok: false, why: '函數傳回的是位置（索引），不是數值本身。' }, { t: '-1', ok: false, why: '目標在列表中，可以找到。' });
+      else raw.push({ t: pos >= 0 ? String(pos) : '0', ok: false, why: pos >= 0 ? '目標確實在這個位置，但檢索在到達前已經停止了。' : '0 是第一個索引，表示「在第一格找到」，不是失敗。' }, { t: 'None', ok: false, why: '程式最後 return -1，不是 None。' });
+      const o = []; raw.forEach(x => { if (!o.some(y => y.t === x.t)) o.push(x); });
+      return { q: '程式會輸出甚麼？', options: o };
+    }
+  };
+}
+let lnStepper, erStepper;
+function renderErCompare() {
+  const A = parseIntList($('#erList').value, 12), T = clampInt($('#erTarget').value, -9999, 9999, 20);
+  const a = linSearch(A, T, true), b = linSearch(A, T, false);
+  $('#erCompare').innerHTML = `<span class="sonar-count">提早結束：探測 ${a.count} 次，傳回 ${a.idx}</span><span class="sonar-count">沒有提早結束：探測 ${b.count} 次，傳回 ${b.idx}</span>${a.idx !== b.idx ? '<span class="stamp no">✘ 兩者結果不同！</span>' : ''}`;
+}
+function initLinear() {
+  lnStepper = new Stepper($('#lnStepper'), makeLinProg(), () => ({ list: parseIntList($('#lnList').value, 12), target: clampInt($('#lnTarget').value, -9999, 9999, 8), early: false }), { onStep: renderSeaHook, traceOpen: true });
+  ['#lnList', '#lnTarget'].forEach(s => $(s).addEventListener('change', () => lnStepper.rebuild()));
+  erStepper = new Stepper($('#erStepper'), makeLinProg(), () => ({ list: parseIntList($('#erList').value, 12), target: clampInt($('#erTarget').value, -9999, 9999, 20), early: $('#erOn').checked }), { onStep: renderSeaHook });
+  const upd = () => { renderErCompare(); erStepper.rebuild(); };
+  ['#erList', '#erTarget', '#erOn'].forEach(s => $(s).addEventListener('change', upd));
+  $('#erBad').addEventListener('click', () => { $('#erList').value = '27, 5, 63, 12, 20, 41'; $('#erTarget').value = '20'; $('#erOn').checked = true; upd(); });
+  renderErCompare();
+}
+
+/* ================= 5.3 對分檢索 ================= */
+function makeBinProg() {
+  return {
+    rows(p) {
+      return [
+        { id: 'B1', py: 'def binary_search(list, target):', pc: 'FUNCTION binary_search(list, target)' },
+        { id: 'B2', py: '    left = 0', pc: '  left ← 0' },
+        { id: 'B3', py: '    right = len(list) - 1', pc: '  right ← LENGTH(list) - 1' },
+        { id: 'B4', py: '    while left <= right:', pc: '  WHILE left <= right DO' },
+        { id: 'B5', py: '        mid = (left + right) // 2', pc: '    mid ← (left + right) DIV 2' },
+        { id: 'B6', py: '        if list[mid] == target:', pc: '    IF list[mid] = target THEN' },
+        { id: 'B7', py: '            return mid', pc: '      RETURN mid' },
+        { id: 'B8', py: '        elif target < list[mid]:', pc: '    ELSE IF target < list[mid] THEN' },
+        { id: 'B9', py: '            right = mid - 1', pc: '      right ← mid - 1' },
+        { id: 'B10', py: '        else:', pc: '    ELSE' },
+        { id: 'B11', py: '            left = mid + 1', pc: '      left ← mid + 1' },
+        { id: 'BE', py: '', pc: '    END IF\n  END WHILE' },
+        { id: 'B12', py: '    return -1', pc: '  RETURN -1' },
+        { id: 'BF', py: '', pc: 'END FUNCTION' },
+        { id: 'M1', py: `depths = [${p.list.join(', ')}]`, pc: `depths ← [${p.list.join(', ')}]` },
+        { id: 'M2', py: `print(binary_search(depths, ${p.target}))`, pc: `OUTPUT binary_search(depths, ${p.target})` }];
+    },
+    cols() { return ['left', 'right', 'mid', 'list[mid]', '比較']; },
+    run(p) {
+      const r = new Rec(), A = p.list, T = p.target; let count = 0;
+      const elimOf = (L, R) => new Set(A.map((x, k) => k).filter(k => k < L || k > R));
+      const S = (o) => ({ sea: Object.assign({ arr: A, count }, o || {}) });
+      r.set('depths', PY.list(A.map(String))); r.push('M1', '建立列表 depths。', S());
+      r.push('M2', `呼叫 binary_search(depths, ${T})。`, S());
+      r.set('target', String(T)); r.push('B1', `target 收到 ${T}。`, S());
+      let L = 0, R = A.length - 1;
+      r.set('left', '0'); r.push('B2', 'left 浮標放在最左（索引 0）。', S({ L }));
+      r.set('right', String(R)); r.push('B3', `right 浮標放在最右（索引 ${R}）。`, S({ L, R }));
+      let res = -1, found = false;
+      while (true) {
+        const go = L <= R;
+        r.push('B4', `left <= right → ${L} <= ${R} → ${PY.bool(go)}。${go ? '檢索範圍仍有格子。' : '範圍已空，找不到。'}`, S({ L: go ? L : null, R: go ? R : null, elim: elimOf(L, R) }));
+        if (!go) break;
+        const M = Math.floor((L + R) / 2); count++;
+        r.set('mid', String(M)); r.set('list[mid]', String(A[M]));
+        r.push('B5', `mid = (${L} + ${R}) // 2 = ${M}；聲納探測中間格 list[${M}] = ${A[M]}。`, S({ L, M, R, cur: M, elim: elimOf(L, R) }));
+        if (A[M] === T) { r.set('比較', `${T} == ${A[M]}`); r.push('B6', `${A[M]} == ${T} → True。`, S({ L, M, R, found: M, elim: elimOf(L, R) })); r.push('B7', `找到了！傳回 mid = ${M}。`, S({ found: M, elim: elimOf(M, M) })); res = M; found = true; break; }
+        r.push('B6', `${A[M]} == ${T} → False。`, S({ L, M, R, cur: M, elim: elimOf(L, R) }));
+        if (T < A[M]) {
+          r.set('比較', `${T} < ${A[M]}`); r.push('B8', `${T} < ${A[M]} → True：目標在左半。`, S({ L, M, R, cur: M, elim: elimOf(L, R) }));
+          R = M - 1; r.set('right', String(R)); r.push('B9', `right = mid - 1 = ${R}，丟棄 mid 及右邊的一半。`, S({ L, R, elim: elimOf(L, R) }));
+        } else {
+          r.set('比較', `${T} > ${A[M]}`); r.push('B8', `${T} < ${A[M]} → False。`, S({ L, M, R, cur: M, elim: elimOf(L, R) }));
+          r.push('B10', `所以 ${T} > ${A[M]}：目標在右半。`, S({ L, M, R, cur: M, elim: elimOf(L, R) }));
+          L = M + 1; r.set('left', String(L)); r.push('B11', `left = mid + 1 = ${L}，丟棄 mid 及左邊的一半。`, S({ L, R, elim: elimOf(L, R) }));
+        }
+      }
+      if (!found) r.push('B12', '傳回 -1。', S({ elim: elimOf(1, 0) }));
+      r.del('left', 'right', 'mid', 'list[mid]', 'target', '比較');
+      const real = A.indexOf(T);
+      r.print(String(res));
+      r.push('M2', `輸出 ${res}。共探測 ${count} 次（列表有 ${A.length} 格）。` + (res === -1 && real >= 0 ? `✘ 但 ${T} 其實在索引 ${real}！數據未排序，對分檢索把它所在的一半丟棄了。` : ''), S(res >= 0 ? { found: res } : {}));
+      return r.steps;
+    },
+    predict(p) {
+      const res = binSearch(p.list, p.target).idx, real = p.list.indexOf(p.target);
+      const raw = [{ t: String(res), ok: true, why: res >= 0 ? `在索引 ${res} 找到。` : (real >= 0 ? `雖然 ${p.target} 在列表中，但數據未排序，對分檢索在錯誤的一半中找，結果傳回 -1。` : '列表中沒有這個數。') }];
+      if (real >= 0 && real !== res) raw.push({ t: String(real), ok: false, why: `${p.target} 確實在索引 ${real}，但對分檢索不一定會檢查到它。` });
+      if (res >= 0) raw.push({ t: String(res + 1), ok: false, why: '索引由 0 開始。' }, { t: '-1', ok: false, why: '數據已排序而目標在列表中，對分檢索一定找得到。' });
+      else raw.push({ t: '0', ok: false, why: '0 表示在第一格找到，不是失敗。' });
+      raw.push({ t: String(Math.floor((p.list.length - 1) / 2)), ok: false, why: '這只是第一輪的 mid，不一定是答案。' });
+      const o = []; raw.forEach(x => { if (!o.some(y => y.t === x.t)) o.push(x); });
+      return { q: '程式會輸出甚麼？', options: o };
+    }
+  };
+}
+let bnStepper, buStepper;
+function initBinary() {
+  bnStepper = new Stepper($('#bnStepper'), makeBinProg(), () => ({ list: parseIntList($('#bnList').value, 16), target: clampInt($('#bnTarget').value, -9999, 9999, 57) }), { onStep: renderSeaHook, traceOpen: true, wide: true });
+  ['#bnList', '#bnTarget'].forEach(s => $(s).addEventListener('change', () => bnStepper.rebuild()));
+  buStepper = new Stepper($('#buStepper'), makeBinProg(), () => ({ list: parseIntList($('#buList').value, 16), target: clampInt($('#buTarget').value, -9999, 9999, 15) }), { onStep: renderSeaHook, wide: true });
+  ['#buList', '#buTarget'].forEach(s => $(s).addEventListener('change', () => buStepper.rebuild()));
+}
+
+/* ================= 5.4 ① 聲納比賽 ================= */
+let RC = null, rcTimer = null;
+function rcSetup() {
+  clearTimeout(rcTimer); rcTimer = null;
+  const n = +$('#rcN').value, A = Array.from({ length: n }, (_, k) => (k + 1) * 3), mode = $('#rcT').value;
+  const T = mode === 'last' ? A[n - 1] : mode === 'first' ? A[0] : mode === 'none' ? A[n - 1] + 1 : A[Math.floor(Math.random() * n)];
+  RC = { n, A, T, li: 0, ldone: false, lfound: -1, bL: 0, bR: n - 1, bM: null, bc: 0, bdone: false, bfound: -1, lc: 0 };
+  rcRender();
+}
+function rcTick() {
+  const s = RC; if (!s) return;
+  if (!s.ldone) { s.lc++; if (s.A[s.li] === s.T) { s.ldone = true; s.lfound = s.li; } else { s.li++; if (s.li >= s.n) { s.ldone = true; s.li = s.n - 1; } } }
+  if (!s.bdone) {
+    if (s.bL > s.bR) s.bdone = true;
+    else { const M = Math.floor((s.bL + s.bR) / 2); s.bM = M; s.bc++; if (s.A[M] === s.T) { s.bdone = true; s.bfound = M; } else if (s.T < s.A[M]) s.bR = M - 1; else s.bL = M + 1; if (!s.bdone && s.bL > s.bR) s.bdone = true; }
+  }
+  rcRender(); Sound.step();
+  return s.ldone && s.bdone;
+}
+function rcRender() {
+  const s = RC;
+  const lin = s.A.map((x, k) => `<i class="${s.lfound === k ? 'found' : k < s.li || (s.ldone && k <= s.li && s.lfound !== k) ? 'chk' : k === s.li && s.lc ? 'cur' : ''}"></i>`).join('');
+  const bin = s.A.map((x, k) => `<i class="${s.bfound === k ? 'found' : (s.bc && (k < s.bL || k > s.bR)) ? 'elim' : k === s.bM ? 'cur' : ''}"></i>`).join('');
+  const lr = s.ldone ? (s.lfound >= 0 ? `找到（索引 ${s.lfound}）` : '找不到，傳回 -1') : '探測中…';
+  const br = s.bdone ? (s.bfound >= 0 ? `找到（索引 ${s.bfound}）` : '找不到，傳回 -1') : '探測中…';
+  $('#rcLanes').innerHTML = `<div class="lane"><h4><span>🚢 線性檢索 · 逐格掃描</span><span class="sonar-count">探測 ${s.lc} 次　${lr}</span></h4><div class="strip" aria-label="線性檢索進度">${lin}</div></div>
+    <div class="lane"><h4><span>🚢 對分檢索 · 每次減半</span><span class="sonar-count">探測 ${s.bc} 次　${br}</span></h4><div class="strip" aria-label="對分檢索進度">${bin}</div></div>
+    <div class="hint">列表：3, 6, 9, …, ${s.A[s.n - 1]}（共 ${s.n} 格，已排序）；目標：${s.T}。每格一條直線；斜紋＝對分檢索已排除的海域。</div>`;
+  $('#rcSpace').innerHTML = `<b>空間複雜度：</b>線性檢索只用一個變量 <code>i</code>；對分檢索只用 <code>left</code>、<code>right</code>、<code>mid</code>。n = ${s.n} 時如此，n = 1,000,000 時也一樣——額外記憶體不隨 n 增加，所以兩者都是 <b>O(1)</b>。`;
+}
+function initRace() {
+  rcSetup();
+  ['#rcN', '#rcT'].forEach(s => $(s).addEventListener('change', rcSetup));
+  $('#rcReset').addEventListener('click', rcSetup);
+  $('#rcStep').addEventListener('click', () => { clearTimeout(rcTimer); rcTimer = null; if (RC.ldone && RC.bdone) rcSetup(); rcTick(); });
+  $('#rcGo').addEventListener('click', () => {
+    clearTimeout(rcTimer); if (RC.ldone && RC.bdone) rcSetup();
+    if (REDUCED) { while (!rcTick()); return; }
+    const delay = Math.max(8, Math.min(250, 3000 / RC.n));
+    const loop = () => { if (!rcTick()) rcTimer = setTimeout(loop, delay); else rcTimer = null; };
+    loop();
+  });
+}
+
+/* ================= 5.4 ② 增長趨勢圖 ================= */
+const NS = [8, 16, 32, 64, 128, 256, 512, 1024];
+const binWorst = n => Math.floor(Math.log2(n)) + 1;
+function renderChart() {
+  const zoom = $("#chZoom").checked, W = 520, H = 340, l = 52, rgt = 96, t = 26, b = 40;
+  const ymax = zoom ? 12 : 1024, X = n => l + (n / 1024) * (W - l - rgt), Y = v => t + (1 - v / ymax) * (H - t - b);
+  const series = [
+    { name: '線性 O(n)', f: n => n, mark: (x, y) => `<circle cx="${x}" cy="${y}" r="5" fill="#0d3b5c"/>`, dash: '' },
+    { name: '對分 O(log n)', f: binWorst, mark: (x, y) => `<rect x="${x - 5}" y="${y - 5}" width="10" height="10" fill="#c2410c"/>`, dash: '' },
+    { name: 'O(1)', f: () => 1, mark: (x, y) => `<path d="M${x} ${y - 6} L${x + 6} ${y + 5} L${x - 6} ${y + 5} Z" fill="#0f6a3c"/>`, dash: '6 4' }];
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="最壞情況比較次數與 n 的關係"><defs><clipPath id="clipc"><rect x="${l}" y="${t - 6}" width="${W - l - rgt + 10}" height="${H - t - b + 12}"/></clipPath></defs>`;
+  const yt = zoom ? [0, 2, 4, 6, 8, 10, 12] : [0, 256, 512, 768, 1024];
+  yt.forEach(v => { g += `<line x1="${l}" x2="${W - rgt}" y1="${Y(v)}" y2="${Y(v)}" stroke="#d6e2e6"/><text x="${l - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="12" fill="#0a1e2e">${v}</text>`; });
+  [0, 256, 512, 768, 1024].forEach(v => { g += `<text x="${X(v)}" y="${H - b + 18}" text-anchor="middle" font-size="12" fill="#0a1e2e">${v}</text>`; });
+  g += `<line x1="${l}" x2="${l}" y1="${t}" y2="${H - b}" stroke="#0a1e2e" stroke-width="2"/><line x1="${l}" x2="${W - rgt}" y1="${H - b}" y2="${H - b}" stroke="#0a1e2e" stroke-width="2"/>`;
+  g += `<text x="${(l + W - rgt) / 2}" y="${H - 4}" text-anchor="middle" font-size="13" fill="#0a1e2e">輸入大小 n</text><text x="14" y="${(t + H - b) / 2}" transform="rotate(-90 14 ${(t + H - b) / 2})" text-anchor="middle" font-size="13" fill="#0a1e2e">最壞情況比較次數</text>`;
+  g += `<g clip-path="url(#clipc)">`;
+  series.forEach(s => {
+    const pts = NS.map(n => [X(n), Y(s.f(n))]);
+    g += `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="#0a1e2e" stroke-width="2.5" stroke-dasharray="${s.dash}"/>`;
+    g += pts.map(p => s.mark(p[0], p[1])).join('');
+  });
+  g += `</g>`;
+  const labs = series.map(s => { const v = s.f(1024); return v > ymax ? { s, x: X(16) + 10, y: t + 10, up: true } : { s, x: W - rgt + 8, y: Y(v) + 4, up: false }; });
+  const right = labs.filter(o => !o.up).sort((a, b) => a.y - b.y);
+  for (let k = 1; k < right.length; k++) if (right[k].y - right[k - 1].y < 16) right[k].y = right[k - 1].y + 16;
+  if (right.length && right[right.length - 1].y > H - b + 4) { const sh = right[right.length - 1].y - (H - b + 4); right.forEach(o => o.y -= sh); }
+  labs.forEach(o => { g += `<text x="${o.x}" y="${o.y}" font-size="13" font-weight="700" fill="#0a1e2e">${o.s.name}${o.up ? ' ↑（超出圖表）' : ''}</text>`; });
+  g += `</svg>`;
+  $('#chart').innerHTML = g + `<div class="hint">● 線性　■ 對分　▲ O(1)（虛線）${zoom ? '　（放大後，線性檢索的線很快便超出圖表頂部）' : '　（對分檢索的線貼近底部，放大才看得清）'}</div>`;
+  $('#nTable').innerHTML = `<thead><tr><th>n</th><th>線性最壞</th><th>對分最壞</th><th>對分比上一行多</th></tr></thead><tbody>${NS.map((n, k) => `<tr><td>${n}</td><td>${n}</td><td class="hi">${binWorst(n)}</td><td>${k ? '+' + (binWorst(n) - binWorst(NS[k - 1])) : '—'}</td></tr>`).join('')}</tbody>`;
+}
+function initChart() { $('#chZoom').addEventListener('change', renderChart); renderChart(); }
+
+/* ================= 5.4 ③ 揀選檢索方法 ================= */
+const SCN = [
+  { q: '30 個未排序的測驗分數，只需查找一次某個分數。', ans: 0, why: ['數據未排序而且很少，直接逐個檢查最簡單；先排序再對分反而更費時。', '對分檢索需要已排序的數據；為了查找一次而先排序並不划算。'] },
+  { q: '圖書館 100 萬本按書號排序的書，每日要查找數千次。', ans: 1, why: ['每次最多要看 100 萬本，查找數千次會非常慢。', '數據大型、已排序、要重複查找：每次最多約 20 次比較。'] },
+  { q: '剛輸入、未排序的 10 個貨品編號，要確認某編號是否存在。', ans: 0, why: ['未排序、只有 10 個：線性檢索最合適，簡單且易於除錯。', '數據未排序，不能直接用對分檢索。'] },
+  { q: '全校 1,200 名學生已按學號排序，校務處經常要按學號查找學生。', ans: 1, why: ['可以，但每次最多要看 1,200 個，經常查找便浪費時間。', '已排序、經常查找：對分檢索每次最多約 11 次比較。'] }
+];
+function initScn() {
+  $('#scnBox').innerHTML = SCN.map((s, i) => `<div class="cmt" data-i="${i}"><b>${esc(s.q)}</b><div class="copts" style="display:flex;gap:.4rem;flex-wrap:wrap"><button class="opt" data-j="0" aria-pressed="false">線性檢索</button><button class="opt" data-j="1" aria-pressed="false">對分檢索</button></div><div class="why" aria-live="polite"></div></div>`).join('');
+  $('#scnBox').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b) return; const card = b.closest('.cmt'), s = SCN[+card.dataset.i], j = +b.dataset.j, ok = j === s.ans;
+    $$('.opt', card).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    const w = card.querySelector('.why'); w.className = 'why ' + (ok ? 'ok' : 'no'); w.textContent = s.why[j]; ok ? Sound.ok() : Sound.bad();
+  });
+}
+<\/script>
+<script>
+/* ================= 練習引擎 ================= */
+const QSTATE = { results: store.get('results', {}), best: store.get('best', {}) };
+const norm = s => String(s == null ? '' : s).replace(/\s+/g, '').replace(/"/g, "'");
+const normB = s => { const n = norm(s); return /^(true|false)$/i.test(n) ? n[0].toUpperCase() + n.slice(1).toLowerCase() : n; };
+function shuffleNot(arr, seed) {
+  const a = arr.slice(); let s = seed;
+  const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  for (let k = 0; k < 20; k++) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } if (a.some((x, i) => x !== arr[i])) break; }
+  return a;
+}
+function record(q, ok) {
+  if (!(q.id in QSTATE.results)) { QSTATE.results[q.id] = ok; store.set('results', QSTATE.results); }
+  const sec = q.sec, score = secScore(sec);
+  if (score > (QSTATE.best[sec] || 0)) { QSTATE.best[sec] = score; store.set('best', QSTATE.best); }
+  ok ? Sound.ok() : Sound.bad();
+  updateScores();
+}
+const secQs = sec => QUESTIONS.filter(q => q.sec === sec);
+const secScore = sec => secQs(sec).filter(q => QSTATE.results[q.id] === true).length;
+function updateScores() {
+  SECTIONS.forEach(S => {
+    const n = secQs(S.id).length, done = secQs(S.id).filter(q => q.id in QSTATE.results).length;
+    const box = $(`#drill${S.id} .score`);
+    const bd = document.querySelector(`.badge[data-score="${S.id}"]`); if (bd) bd.textContent = `★ ${secScore(S.id)}/${n}`;
+    if (box) box.innerHTML = `<span>本節得分 ${secScore(S.id)} / ${n}</span><span>已作答 ${done} / ${n}</span><span>最佳紀錄 ${QSTATE.best[S.id] || 0} / ${n}</span>`;
+  });
+  renderReport();
+}
+function fbHTML(ok, html) { return `<div class="fb ${ok ? 'ok' : 'no'}"><div class="vd">${ok ? '正確！' : '未正確。'}</div>${html}</div>`; }
+function codeBlock(c) { return `<div class="codebox" style="margin:.3rem 0 .6rem"><pre class="pre">${hlPy(c)}</pre></div>`; }
+
+function renderQuestion(q, num) {
+  const card = el('div', 'q'); card.id = 'card-' + q.id;
+  const prev = q.id in QSTATE.results ? `（首次作答：${QSTATE.results[q.id] ? '✔ 答對' : '✘ 答錯'}）` : '';
+  card.innerHTML = `<div class="qh"><span class="qn">Q${num}</span><span class="qt">${q.tag}</span><span class="qstat">${prev}</span></div><div class="stem">${esc(q.stem)}</div>${q.code && q.type !== 'fill' ? codeBlock(q.code) : ''}<div class="body"></div><div class="acts"></div><div class="fbx" aria-live="polite"></div>`;
+  const body = card.querySelector('.body'), acts = card.querySelector('.acts'), fbx = card.querySelector('.fbx');
+  const submit = el('button', 'btn', '提交答案'); const retry = el('button', 'btn alt', '⟲ 再試一次'); retry.hidden = true;
+  acts.append(submit, retry);
+  const finish = (ok, html) => { fbx.innerHTML = fbHTML(ok, html); record(q, ok); submit.disabled = true; retry.hidden = false; card.querySelector('.qstat').textContent = `（首次作答：${QSTATE.results[q.id] ? '✔ 答對' : '✘ 答錯'}）`; };
+  retry.addEventListener('click', () => { const fresh = renderQuestion(q, num); card.replaceWith(fresh); });
+
+  if (q.type === 'mc') {
+    let pick = null;
+    body.innerHTML = `<div class="opts">${q.options.map((o, i) => `<button class="opt${o.mono ? ' mono' : ''}" data-i="${i}" aria-pressed="false">${String.fromCharCode(65 + i)}. ${esc(o.t)}</button>`).join('')}</div>`;
+    body.addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b || submit.disabled) return; pick = +b.dataset.i; $$('.opt', body).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
+    submit.addEventListener('click', () => {
+      if (pick == null) { fbx.innerHTML = '<div class="fb no"><div class="vd">請先揀選一個答案。</div></div>'; return; }
+      const o = q.options[pick], ci = q.options.findIndex(x => x.ok);
+      $$('.opt', body).forEach((b, i) => { if (i === ci) b.classList.add('right'); else if (i === pick) b.classList.add('wrong'); });
+      finish(!!o.ok, o.ok ? `<p>${esc(o.why)}</p>` : `<p><b>你選了 ${String.fromCharCode(65 + pick)}：</b>${esc(o.why)}</p><p><b>正確答案 ${String.fromCharCode(65 + ci)}：</b>${esc(q.options[ci].why)}</p>`);
+    });
+  }
+
+  if (q.type === 'trace') {
+    let h = `<div class="tt-wrap"><table class="tt"><thead><tr><th>#</th>${q.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+    q.rows.forEach((r, ri) => {
+      h += `<tr><td>${ri + 1}</td>${r.c.map((c, ci) => c.a ? `<td><input class="${q.wide ? 'wide' : ''}" data-r="${ri}" data-c="${ci}" aria-label="第 ${ri + 1} 行 ${esc(q.cols[ci])}" autocomplete="off" autocapitalize="off" spellcheck="false"></td>` : `<td class="given">${esc(c.g)}</td>`).join('')}</tr>`;
+    });
+    h += `</tbody></table></div><label class="typed" style="margin-top:.4rem"><b>輸出：</b><input data-out="1" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="輸出"></label>`;
+    body.innerHTML = h;
+    submit.addEventListener('click', () => {
+      let allOk = true; const notes = [];
+      q.rows.forEach((r, ri) => r.c.forEach((c, ci) => {
+        if (!c.a) return; const inp = body.querySelector(`input[data-r="${ri}"][data-c="${ci}"]`);
+        const ok = c.a.map(normB).includes(normB(inp.value)); inp.parentElement.classList.toggle('cok', ok); inp.parentElement.classList.toggle('cno', !ok);
+        if (!ok) { allOk = false; notes.push(`第 ${ri + 1} 行「${q.cols[ci]}」應為 <code>${esc(c.a[0])}</code>${inp.value.trim() ? `（你寫了 <code>${esc(inp.value.trim())}</code>）` : '（未填）'}：${esc(r.why)}`); }
+      }));
+      const oi = body.querySelector('[data-out]'); const ook = q.output.a.map(norm).includes(norm(oi.value));
+      oi.style.borderStyle = ook ? 'solid' : 'dashed'; oi.style.background = ook ? '#e1f0e3' : '#f8e0d6';
+      if (!ook) { allOk = false; notes.push(`輸出：${esc(q.output.why)}`); }
+      $$('input', body).forEach(i => i.readOnly = true);
+      finish(allOk, allOk ? `<p>追蹤表全部正確。${esc(q.output.why)}</p>` : `<ul>${notes.map(n => `<li>${n}</li>`).join('')}</ul>`);
+    });
+  }
+
+  if (q.type === 'fill') {
+    const parts = q.code.split(/\[\[(\d+)\]\]/);
+    let h = '';
+    parts.forEach((p, i) => { h += i % 2 ? `<input data-b="${p}" aria-label="空格 ${+p + 1}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="(${+p + 1})">` : hlPy(p); });
+    body.innerHTML = `<div class="fillcode">${h}</div>`;
+    submit.addEventListener('click', () => {
+      let allOk = true; const notes = [];
+      q.blanks.forEach((b, i) => {
+        const inp = body.querySelector(`[data-b="${i}"]`); const v = inp.value.trim();
+        let ok, why;
+        if (b.check) ({ ok, why } = b.check(v));
+        else { ok = b.a.includes(v); why = ok ? b.why : ((b.wrong && b.wrong[v]) || (v ? `這不是合適的答案。${b.why}` : '未填寫。')); }
+        inp.classList.toggle('cok', ok); inp.classList.toggle('cno', !ok); inp.readOnly = true;
+        if (!ok) allOk = false;
+        notes.push(`<li>空格 (${i + 1})：${ok ? '✔' : '✘'} ${esc(why)}${ok ? '' : `　參考答案：<code>${esc(b.model)}</code>`}</li>`);
+      });
+      finish(allOk, `<ul>${notes.join('')}</ul>`);
+    });
+  }
+
+  if (q.type === 'find') {
+    let pick = null;
+    body.innerHTML = `<ul class="linepick">${q.lines.map((l, i) => `<li><button data-i="${i}" aria-pressed="false"><span class="ln">${i + 1}</span><span class="flag"></span><code>${hlPy(l.c)}</code></button></li>`).join('')}</ul>`;
+    body.addEventListener('click', e => { const b = e.target.closest('button'); if (!b || submit.disabled) return; pick = +b.dataset.i; $$('li', body).forEach((li, i) => li.classList.toggle('sel', i === pick)); });
+    submit.addEventListener('click', () => {
+      if (pick == null) { fbx.innerHTML = '<div class="fb no"><div class="vd">請先點選一行。</div></div>'; return; }
+      const ci = q.lines.findIndex(l => l.ok), ok = pick === ci;
+      $$('li', body).forEach((li, i) => { li.classList.remove('sel'); if (i === ci) li.classList.add('r-ok'); else if (i === pick) li.classList.add('r-no'); });
+      finish(ok, ok ? `<p>第 ${ci + 1} 行：${esc(q.lines[ci].why)}</p>` : `<p><b>你選了第 ${pick + 1} 行：</b>${esc(q.lines[pick].why)}</p><p><b>出錯的是第 ${ci + 1} 行：</b>${esc(q.lines[ci].why)}</p>`);
+    });
+  }
+
+  if (q.type === 'parsons') {
+    const order = shuffleNot(q.lines.map((l, i) => i), q.id.length * 97 + num * 31);
+    const ul = el('ol', 'parsons'); ul.setAttribute('aria-label', '可排列的程式碼');
+    order.forEach(i => {
+      const li = el('li', '', `<span class="grip" aria-hidden="true">☰</span><code>${hlPy(q.lines[i].c)}</code><span class="mv"><button type="button" data-m="-1" aria-label="上移">▲</button><button type="button" data-m="1" aria-label="下移">▼</button></span>`);
+      li.dataset.i = i; ul.appendChild(li);
+    });
+    body.appendChild(ul);
+    const clearMarks = () => $$('li', ul).forEach(li => li.classList.remove('pok', 'pno'));
+    ul.addEventListener('click', e => {
+      const b = e.target.closest('button[data-m]'); if (!b || submit.disabled) return;
+      const li = b.closest('li'); clearMarks();
+      if (b.dataset.m === '-1' && li.previousElementSibling) ul.insertBefore(li, li.previousElementSibling);
+      if (b.dataset.m === '1' && li.nextElementSibling) ul.insertBefore(li.nextElementSibling, li);
+      b.focus();
+    });
+    let drag = null;
+    ul.addEventListener('pointerdown', e => {
+      const g = e.target.closest('.grip'); if (!g || submit.disabled) return;
+      drag = g.closest('li'); drag.classList.add('dragging'); clearMarks(); e.preventDefault();
+      try { ul.setPointerCapture(e.pointerId); } catch (er) {}
+    });
+    ul.addEventListener('pointermove', e => {
+      if (!drag) return; e.preventDefault();
+      const items = $$('li', ul).filter(li => li !== drag);
+      let target = null;
+      for (const li of items) { const r = li.getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { target = li; break; } }
+      if (target) { if (drag.nextElementSibling !== target) ul.insertBefore(drag, target); } else if (ul.lastElementChild !== drag) ul.appendChild(drag);
+    });
+    const endDrag = e => { if (!drag) return; drag.classList.remove('dragging'); drag = null; try { ul.releasePointerCapture(e.pointerId); } catch (er) {} };
+    ul.addEventListener('pointerup', endDrag); ul.addEventListener('pointercancel', endDrag);
+    submit.addEventListener('click', () => {
+      const cur = $$('li', ul).map(li => +li.dataset.i); let first = -1;
+      $$('li', ul).forEach((li, pos) => { const ok = cur[pos] === pos; li.classList.toggle('pok', ok); li.classList.toggle('pno', !ok); if (!ok && first < 0) first = pos; });
+      const ok = first < 0;
+      finish(ok, ok ? '<p>次序完全正確！</p>' : `<p>第一個放錯的位置是第 ${first + 1} 行：這裏應該是 <code>${esc(q.lines[first].c.trim())}</code>——${esc(q.lines[first].why)}</p><p>你放在這裏的 <code>${esc(q.lines[cur[first]].c.trim())}</code>：${esc(q.lines[cur[first]].why)}</p><div class="boxtitle">正確次序</div>${codeBlock(q.lines.map(l => l.c).join('\n'))}`);
+    });
+  }
+  return card;
+}
+function renderDrill(sec) {
+  const S = SECTIONS.find(s => s.id === sec), box = $('#drill' + sec);
+  box.innerHTML = `<div class="dh"><span class="tag" style="font-family:var(--stencil);background:var(--yellow);color:var(--ink);padding:0 .45em">PRACTICE</span><h3>${S.name} · 練習</h3><div class="score"></div><button class="btn alt" data-reset="${sec}">重做本節</button></div><div class="qs"></div>`;
+  const qs = box.querySelector('.qs');
+  let num = QUESTIONS.findIndex(q => q.sec === sec);
+  secQs(sec).forEach(q => qs.appendChild(renderQuestion(q, ++num)));
+  box.querySelector('[data-reset]').addEventListener('click', () => {
+    secQs(sec).forEach(q => delete QSTATE.results[q.id]); store.set('results', QSTATE.results); renderDrill(sec); updateScores();
+  });
+}
+function renderReport() {
+  const box = $('#reportCards'); if (!box) return;
+  let tot = 0, all = 0, weakest = null;
+  box.innerHTML = SECTIONS.map(S => {
+    const n = secQs(S.id).length, sc = secScore(S.id), done = secQs(S.id).filter(q => q.id in QSTATE.results).length, best = QSTATE.best[S.id] || 0;
+    tot += sc; all += n; const ratio = done ? sc / done : 1;
+    if (done && (!weakest || ratio < weakest.r)) weakest = { r: ratio, S };
+    return `<div class="manifest"><div class="hint">探測紀錄 · ${S.name}</div><div class="big">${sc}<span style="font-size:1.2rem"> / ${n}</span></div>
+      <div class="bar2" role="img" aria-label="得分比例"><i style="width:${n ? sc / n * 100 : 0}%"></i></div>
+      <div>已作答 ${done} / ${n} ｜ 最佳紀錄 ${best} / ${n}</div><a href="${S.anchor}">重溫本節 →</a></div>`;
+  }).join('');
+  const t = $('#reportTotal');
+  if (t) t.innerHTML = `全章得分：<b>${tot} / ${all}</b>。` + (weakest && weakest.r < .8 ? ` 建議重溫：<a href="${weakest.S.anchor}">${weakest.S.name}</a>。` : (tot === all ? ' 全部答對，探測成功！' : ''));
+}
+
+function renderMapping() {
+  $('#mapTable').innerHTML = `<thead><tr><th>課本重點</th><th>對應的互動</th><th>對應的練習</th></tr></thead><tbody>${MAPPING.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody>`;
+}
+
+/* ================= 啟動 ================= */
+function safe(fn, name) { try { fn(); } catch (e) { console.error('初始化失敗：' + name, e); } }
+document.addEventListener('DOMContentLoaded', () => {
+  const il = document.getElementById('indexLink'); if (il) il.href = CONFIG.INDEX_URL;
+  $('#sndBtn').addEventListener('click', e => { Sound.on = !Sound.on; e.currentTarget.setAttribute('aria-pressed', Sound.on); e.currentTarget.textContent = Sound.on ? '🔊 音效：開' : '🔇 音效：關'; if (Sound.on) Sound.ok(); });
+  const big = store.get('big', false); if (big) { document.body.classList.add('big'); $('#bigBtn').setAttribute('aria-pressed', 'true'); }
+  $('#bigBtn').addEventListener('click', e => { const on = document.body.classList.toggle('big'); e.currentTarget.setAttribute('aria-pressed', on); store.set('big', on); });
+  safe(initProbe, 'probe'); safe(initArrayOps, 'arrayops'); safe(initLinear, 'linear');
+  safe(initBinary, 'binary'); safe(initRace, 'race'); safe(initChart, 'chart'); safe(initScn, 'scn');
+  safe(() => SECTIONS.forEach(S => renderDrill(S.id)), 'drills');
+  safe(updateScores, 'scores'); safe(renderMapping, 'mapping');
+  $('#clearAll').addEventListener('click', () => { store.clear(); QSTATE.results = {}; QSTATE.best = {}; SECTIONS.forEach(S => renderDrill(S.id)); updateScores(); });
+  // 倉區切換（一次只顯示一節）
+  const show = (id, scroll) => {
+    if (!['s51', 's52', 's53', 's54'].includes(id)) id = 's51';
+    $$('.sec').forEach(x => x.classList.toggle('on', x.id === id));
+    $$('.zone').forEach(z => z.setAttribute('aria-current', z.dataset.go === id ? 'true' : 'false'));
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    if (scroll) window.scrollTo({ top: $('.zones').offsetTop, behavior: REDUCED ? 'auto' : 'smooth' });
+  };
+  $$('.zone').forEach(z => z.addEventListener('click', () => show(z.dataset.go, true)));
+  $$('.chips [data-jump]').forEach(c => c.addEventListener('click', () => { const t = document.getElementById(c.dataset.jump); if (t) t.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }));
+  document.addEventListener('click', e => { const a = e.target.closest('a[href^="#s5"]'); if (a) { e.preventDefault(); show(a.getAttribute('href').slice(1), true); } });
+  show((location.hash || '#s51').slice(1).split('-')[0], false);
+});
+<\/script>
+</body>
+</html>
+
+</script>
 
 <script>
 const CONFIG = {
@@ -6802,7 +8458,7 @@ const CHAPTERS = [
   { id: 'ch2', no: 2, name: '控制結構與算法基本組成部分', theme: '程式夜市', ready: true },
   { id: 'ch3', no: 3, name: '結構化編程與程式質素——測試及偵錯', theme: '程式鑑證科', ready: true },
   { id: 'ch4', no: 4, name: '檔案操作與數據處理', theme: '圖書館檔案室', ready: true },
-  { id: 'ch5', no: 5, name: '檢索算法', ready: false },
+  { id: 'ch5', no: 5, name: '檢索算法', theme: '深海聲納', ready: true },
   { id: 'ch6', no: 6, name: '數據結構', ready: false },
   { id: 'ch7', no: 7, name: '排序算法與數據合併技巧', ready: false },
   { id: 'ch8', no: 8, name: '分析及選擇算法', ready: false },
