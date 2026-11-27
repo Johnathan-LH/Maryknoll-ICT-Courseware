@@ -3176,6 +3176,1815 @@ practice($('#p1'),'s1',P1); practice($('#p2'),'s2',P2); practice($('#p3'),'s3',P
 </html>
 
 </script>
+<script type="text/x-chapter" id="src-ch3">
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>選修 C 第 3 章 · 結構化編程與程式質素——測試及偵錯</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --floor:#e3e8ec; --floor-dot:#cfd8df; --paper:#f7f6f1; --paper2:#eceee9;
+  --ink:#1b2430; --ink2:#46505c; --steel:#2b3a4a; --steel2:#56677a;
+  --yellow:#a9dcea; --yellow-soft:#d8eff5; --orange:#b3261e; --ok:#1d6a3a; --bad:#a8231b;
+  --card:#e7d3a1; --card-dark:#9c7b3d; --code:#18202a; --codefg:#e8edf2; --codedim:#8794a3;
+  --red:#b3261e; --manila:#ecd9a6;
+  --mono:"IBM Plex Mono",Consolas,Menlo,"Courier New",monospace;
+  --sans:"Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;
+  --serif:"Noto Serif TC","PMingLiU","Songti TC",serif;
+  --stencil:"Special Elite","Courier New",monospace;
+  --fs-scale:1;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{font-size:calc(clamp(16px, .6vw + 10.5px, 23px) * var(--fs-scale)); scroll-behavior:smooth; -webkit-text-size-adjust:100%}
+body{margin:0; color:var(--ink); font-family:var(--sans); line-height:1.6; overflow-x:hidden;
+  background-color:var(--floor);
+  background-image:linear-gradient(var(--floor-dot) 1px, transparent 1px), linear-gradient(90deg, var(--floor-dot) 1px, transparent 1px);
+  background-size:28px 28px;}
+code,pre,.mono,kbd,samp,textarea.mono,input.mono{font-family:var(--mono); font-variant-ligatures:none; font-feature-settings:"liga" 0,"calt" 0}
+h1,h2,h3,h4{line-height:1.25; margin:.2em 0 .5em}
+a{color:inherit}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:3px dashed var(--orange); outline-offset:3px}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.hazard{background:repeating-linear-gradient(-45deg,var(--yellow) 0 14px,var(--ink) 14px 28px)}
+
+/* ===== 系列橫額 ===== */
+.series{background:var(--ink); color:#f3f1ea; font-size:.82rem; display:flex; align-items:center; gap:1rem; padding:.35rem 1rem; flex-wrap:wrap}
+.series a{color:var(--yellow); text-decoration:none; font-weight:700}
+.series a:hover,.series a:focus-visible{text-decoration:underline}
+.series .tools{margin-left:auto; display:flex; gap:.5rem; flex-wrap:wrap}
+.tog{background:transparent; color:#f3f1ea; border:2px solid #77746a; padding:.1rem .6rem; cursor:pointer; font-size:.8rem; min-height:36px}
+.tog[aria-pressed="true"]{border-color:var(--yellow); color:var(--yellow)}
+
+/* ===== 封面 ===== */
+.hero{max-width:1100px; margin:0 auto; padding:1.6rem 1rem .8rem; text-align:center}
+.hero .kicker{font-family:var(--stencil); letter-spacing:.14em; color:var(--ink2); font-size:1rem}
+.hero h1{font-size:clamp(2rem,3.6vw,3.2rem); font-weight:900; margin:.1em 0 .2em; letter-spacing:.06em}
+.hero h1 .plate{display:inline-block; background:var(--yellow); border:3px solid var(--ink); padding:0 .3em; margin-right:.25em}
+.hero p{margin:.2rem auto; max-width:44em; color:var(--ink2)}
+
+/* ===== 分區按鈕 ===== */
+.zones{display:flex; justify-content:center; gap:.8rem; flex-wrap:wrap; padding:.8rem 1rem; position:sticky; top:0; z-index:40; background:var(--floor); border-bottom:3px solid var(--ink)}
+.zone{position:relative; background:var(--paper); border:3px solid var(--ink); padding:.35rem 1rem; cursor:pointer; text-align:left; min-height:52px}
+.zone b{display:block; font-size:1.02rem}
+.zone small{font-family:var(--stencil); letter-spacing:.12em; color:var(--ink2)}
+.zone[aria-current="true"]{background:var(--yellow); box-shadow:4px 4px 0 var(--ink)}
+.zone[aria-current="true"] b::before{content:"▶ "}
+.zone .badge{position:absolute; top:-.75rem; right:-.5rem; background:var(--ink); color:var(--yellow); font-size:.72rem; padding:0 .4rem; font-weight:700; font-family:var(--mono)}
+
+main{max-width:1180px; margin:0 auto; padding:0 1rem 3rem}
+.sec{display:none; scroll-margin-top:6rem}
+.sec.on{display:block}
+.sec-banner{text-align:center; margin:1.4rem 0 .6rem}
+.sec-banner h2{display:inline-block; font-size:clamp(1.5rem,2.6vw,2.2rem); font-weight:900; margin:0; border-bottom:6px solid var(--yellow); padding:0 .2em}
+.sec-banner p{margin:.4rem 0 0; color:var(--ink2)}
+.chips{display:flex; justify-content:center; flex-wrap:wrap; gap:.5rem; margin:.6rem 0 1.2rem}
+.chips button{background:transparent; border:2px dashed var(--ink2); padding:.25rem .8rem; cursor:pointer; min-height:42px}
+.chips button:hover{border-style:solid; background:var(--paper)}
+
+/* ===== 每個重點一張卡 ===== */
+.card{background:var(--paper); border:3px solid var(--ink); margin:2rem 0 1.6rem; position:relative; padding:1.5rem 1.2rem 1.1rem; scroll-margin-top:6.5rem; min-width:0}
+.card-tag{position:absolute; top:-1rem; left:1rem; background:var(--yellow); border:3px solid var(--ink); padding:0 .7rem; font-weight:900; font-size:1.02rem}
+.book{border-left:8px solid var(--ink); background:var(--paper2); padding:.45rem .9rem; margin:0 0 1rem}
+.book::before{content:"課本"; display:inline-block; font-size:.75rem; font-weight:900; background:var(--ink); color:#fff; padding:0 .35rem; margin-bottom:.2rem}
+.book ul{margin:.1rem 0 0; padding-left:1.2em}
+.book li{margin:.15rem 0}
+.book table{border-collapse:collapse; margin:.5rem 0 .2rem; font-size:.95rem}
+.book th,.book td{border:2px solid var(--ink); padding:.2rem .6rem; text-align:left; vertical-align:top}
+.book th{background:var(--ink); color:#fff}
+.try{font-weight:900; margin:.2rem 0 .5rem}
+.try::before{content:"試一試 ▸ "; color:var(--ink2)}
+.takeaway{border:2px solid var(--ink); background:#fffdf5; padding:.45rem .8rem; margin-top:1rem; font-weight:700}
+.takeaway::before{content:"重點："; background:var(--yellow); padding:0 .3rem; margin-right:.3rem}
+.hint{font-size:.9rem; color:var(--ink2)}
+.ctl{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin-bottom:.8rem}
+.grid2{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.callout{border:2px solid var(--ink); background:var(--yellow-soft); padding:.5rem .8rem; margin:.6rem 0}
+
+/* 按鈕 */
+.btn{background:var(--yellow); color:var(--ink); border:3px solid var(--ink); padding:.3rem .8rem; min-height:44px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:.35em; touch-action:manipulation}
+.btn:active{transform:translate(1px,1px)}
+.btn.alt{background:var(--paper)}
+.btn.dark{background:var(--steel); color:#fff}
+.btn:disabled{opacity:.4; cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--ink); color:var(--yellow)}
+.chk{display:inline-flex; align-items:center; gap:.4em; border:2px solid var(--ink); padding:.2rem .6rem; background:var(--paper); cursor:pointer; min-height:44px}
+.chk input{width:1.2em; height:1.2em; accent-color:var(--ink)}
+.chk.bug{border-style:dashed; background:#f5d2c3}
+.field{display:inline-flex; align-items:center; gap:.4em; flex-wrap:wrap}
+.field input,.field select{border:2px solid var(--ink); background:#fff; padding:.25rem .45rem; min-height:40px; max-width:100%}
+
+/* ===== 程式碼 ===== */
+.codebox{background:var(--code); color:var(--codefg); border:3px solid var(--ink); overflow-x:auto; font-family:var(--mono); font-variant-ligatures:none; font-size:.92rem}
+.codetab{border-collapse:collapse; width:100%; font-family:var(--mono); font-variant-ligatures:none}
+.codetab td{padding:.08rem .5rem; vertical-align:top; white-space:pre; border-bottom:1px solid #2a2d30}
+.codetab .gut{width:1.6em; text-align:center; color:var(--yellow); font-family:var(--sans); font-weight:900}
+.codetab .ln{width:2.2em; text-align:right; color:var(--codedim); user-select:none}
+.codetab .pc{border-left:2px dashed #555; color:#d9d6c8}
+.codetab tr.cur td{background:var(--yellow); color:var(--ink)}
+.codetab tr.cur td *{color:var(--ink)!important}
+.codetab tr.cur .ln{color:var(--ink); font-weight:700}
+.codetab tr.err td{background:#f3c7b4; color:var(--ink); text-decoration:underline wavy var(--bad)}
+.codetab tr.err td *{color:var(--ink)!important}
+.codetab tr.err .gut{text-decoration:none}
+.codetab th{font-family:var(--sans); font-size:.8rem; text-align:left; color:var(--yellow); padding:.2rem .5rem; border-bottom:2px solid #555; font-weight:700}
+.k{color:#ffcc66; font-weight:600}.b{color:#8fd3ff}.s{color:#b6e39a}.c{color:#a5a39a; font-style:italic}.n{color:#ffa98a}.cn{color:#ffd8f0; text-decoration:underline dotted}
+.pk{color:#ffcc66; font-weight:600}.arr{color:#fff; font-weight:700; font-family:var(--sans); font-size:1.1em}
+.pre{margin:0; padding:.6rem .8rem; white-space:pre; overflow-x:auto}
+
+/* ===== 逐步執行器 ===== */
+.stepper{min-width:0}
+.st-grid{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:1rem; align-items:start}
+.st-codehead{display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.3rem; flex-wrap:wrap}
+.st-codehead b{font-size:.95rem}
+.viewsw{display:none}
+.stepper.novars .st-grid{grid-template-columns:minmax(0,1fr)}
+.stepper.novars .console{min-height:2.4rem}
+.st-side{display:flex; flex-direction:column; gap:.8rem; min-width:0}
+.vars{display:flex; flex-wrap:wrap; gap:.55rem; min-height:4.2rem; align-content:flex-start}
+.vars .empty{color:var(--ink2); font-size:.9rem}
+.crate{border:3px solid var(--card-dark); background:var(--card); min-width:5.5rem; max-width:100%; position:relative; padding:0 .55rem .35rem; box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.crate .lbl{margin:-2px -.55rem .2rem; background:#fffdf5; border:2px solid var(--ink); font-family:var(--mono); font-variant-ligatures:none; font-size:.78rem; padding:0 .35rem; white-space:nowrap; font-weight:600; overflow-wrap:normal}
+.crate .val{font-family:var(--mono); font-variant-ligatures:none; font-size:1.05rem; font-weight:600; word-break:break-all; color:var(--ink)}
+.crate.chg{outline:3px solid var(--ink); outline-offset:2px}
+.crate.chg::after{content:"★ 剛更新"; position:absolute; right:-.3rem; bottom:-1.05rem; font-size:.7rem; background:var(--ink); color:var(--yellow); padding:0 .3rem; font-weight:700}
+.crate.anim{animation:drop .35s ease-out}
+@keyframes drop{from{transform:translateY(-10px)} to{transform:none}}
+.console{background:#0f1011; color:#e8e6df; border:3px solid var(--ink); font-family:var(--mono); font-variant-ligatures:none; padding:.4rem .6rem; min-height:3.2rem; font-size:.95rem; white-space:pre-wrap; word-break:break-all}
+.console .pr{color:var(--yellow)}
+.console .er{color:#ffb4a0; font-weight:600}
+.console .new{text-decoration:underline; text-decoration-color:var(--yellow); text-underline-offset:3px}
+.boxtitle{font-weight:900; font-size:.92rem; display:flex; align-items:center; gap:.4rem; margin-bottom:.25rem}
+.note{border:3px solid var(--ink); background:#fffdf5; padding:.5rem .8rem; margin:.8rem 0 .6rem; min-height:2.8rem; display:flex; gap:.6rem}
+.note::before{content:"解說"; font-weight:900; background:var(--ink); color:var(--yellow); padding:0 .4rem; height:fit-content; white-space:nowrap}
+.note.err{background:#f6d7ca; border-style:dashed}
+.note.err::before{content:"✘ 錯誤"}
+.ctrl{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center}
+.ctrl .cnt{font-family:var(--mono); font-variant-ligatures:none; font-weight:600; padding:0 .4rem; border:2px solid var(--ink); background:#fff; min-height:44px; display:flex; align-items:center}
+.ctrl label{display:inline-flex; align-items:center; gap:.3rem; font-size:.9rem}
+.ctrl input[type=range]{width:7rem; accent-color:var(--ink)}
+.trace-wrap{overflow-x:auto; margin-top:.5rem; border:2px solid var(--ink); background:#fff; max-height:20rem; overflow-y:auto}
+details.trace-box{margin-top:.8rem}
+details.trace-box > summary{cursor:pointer; font-weight:900; padding:.3rem 0; list-style:none}
+details.trace-box > summary::before{content:"▶ "} details.trace-box[open] > summary::before{content:"▼ "}
+.trace{border-collapse:collapse; width:100%; font-family:var(--mono); font-variant-ligatures:none; font-size:.9rem}
+.trace th{position:sticky; top:0; background:var(--ink); color:var(--yellow); font-family:var(--sans); padding:.3rem .5rem; text-align:center; font-size:.82rem; white-space:nowrap}
+.trace td{border:1px solid #9a968a; padding:.2rem .5rem; text-align:center; white-space:nowrap}
+.trace tr.cur td{background:var(--yellow-soft); font-weight:700; border-top:3px solid var(--ink); border-bottom:3px solid var(--ink)}
+.trace tr.cur td:first-child::before{content:"▶ "}
+.trace tr.fut{display:none}
+.trace td.er{color:var(--bad); font-weight:700}
+.predict{border:3px dashed var(--ink); background:var(--paper2); padding:.6rem .8rem; margin-bottom:.8rem}
+.predict .q{font-weight:900; margin-bottom:.4rem}
+.predict .q::before{content:"① 先預測 "; background:var(--ink); color:var(--yellow); padding:0 .35rem; margin-right:.3rem}
+.predict .opts{display:flex; flex-wrap:wrap; gap:.5rem}
+.opt{border:2px solid var(--ink); background:#fff; padding:.3rem .7rem; cursor:pointer; min-height:44px; text-align:left; font-family:var(--mono); font-variant-ligatures:none; white-space:pre-wrap}
+.opt[aria-pressed="true"]{background:var(--ink); color:var(--yellow)}
+.opt[aria-pressed="true"]::before{content:"☛ "}
+.verdict{margin-top:.5rem; font-weight:700}
+.verdict.ok::before{content:"✔ "; } .verdict.no::before{content:"✘ "}
+.verdict.ok{color:var(--ok)} .verdict.no{color:var(--bad)}
+.stamp{display:inline-block; border:3px solid currentColor; padding:.05rem .5rem; font-weight:900; transform:rotate(-2deg); letter-spacing:.05em}
+.stamp.ok{color:var(--ok)} .stamp.no{color:var(--bad); border-style:dashed}
+
+/* ===== 重構工作台 ===== */
+.refopts{display:flex; flex-wrap:wrap; gap:.5rem; margin:.4rem 0 .7rem}
+.shipcheck{display:grid; grid-template-columns:repeat(3,minmax(0,auto)); gap:.6rem; align-items:center; border:3px solid var(--ink); background:#fff; padding:.5rem .8rem; margin:.6rem 0}
+.shipcheck .out{font-family:var(--mono); font-variant-ligatures:none; font-size:1.25rem; font-weight:700; border:2px solid var(--ink); padding:.1rem .6rem; background:var(--paper)}
+.meter{display:flex; gap:3px; align-items:center}
+.meter i{width:1.1rem; height:1.1rem; border:2px solid var(--ink); display:inline-block}
+.meter i.on{background:var(--ink)}
+
+/* ===== 整理前後 ===== */
+.ba{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.ba h4{margin:0 0 .3rem; font-size:1rem}
+.steps-list{list-style:none; padding:0; margin:.6rem 0; display:flex; flex-wrap:wrap; gap:.4rem}
+.steps-list li{border:2px solid var(--ink2); padding:.1rem .6rem; font-size:.92rem; background:#fff}
+.steps-list li.done{border-color:var(--ink); background:var(--ink); color:var(--yellow)}
+.steps-list li.done::before{content:"✔ "}
+.steps-list li.now{outline:3px solid var(--yellow); outline-offset:1px}
+.result{display:flex; flex-wrap:wrap; gap:1rem; align-items:center; border:2px solid var(--ink); background:#fff; padding:.5rem .8rem; margin-top:.8rem}
+.result .out{font-family:var(--mono); font-variant-ligatures:none; font-size:1.2rem; font-weight:700; border:2px solid var(--ink); padding:0 .6rem; background:var(--paper)}
+.chg-line{background:rgba(242,194,20,.28); box-shadow:-6px 0 0 var(--yellow)}
+.cmt{border:2px solid var(--ink); background:#fff; padding:.6rem .8rem; margin:.6rem 0}
+.cmt .copts{display:grid; gap:.4rem; margin-top:.4rem}
+.cmt .why{margin-top:.4rem; font-weight:700}
+.cmt .why.ok{color:var(--ok)} .cmt .why.no{color:var(--bad)}
+.cmt .why.ok::before{content:"✔ "} .cmt .why.no::before{content:"✘ "}
+/* ===== 標籤機 ===== */
+.labeler{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.ship-label{background:#fffdf5; border:3px solid var(--ink); padding:.6rem .8rem; clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%)}
+.ship-label .bar{height:26px; background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 7px,transparent 7px 9px,var(--ink) 9px 10px,transparent 10px 13px); margin:.3rem 0}
+.ship-label input{width:100%; font-size:1.3rem; padding:.3rem .5rem; border:3px solid var(--ink)}
+.checks{list-style:none; padding:0; margin:.5rem 0}
+.checks li{padding:.25rem .3rem .25rem 2.1rem; position:relative; border-bottom:1px dashed #a8a395}
+.checks li::before{position:absolute; left:.2rem; top:.2rem; font-weight:900; width:1.5rem; text-align:center; border:2px solid var(--ink); line-height:1.25}
+.checks li.ok::before{content:"✔"; background:var(--ink); color:#fff}
+.checks li.no::before{content:"✘"; background:#fff; color:var(--bad); border-style:dashed}
+.checks li.na::before{content:"–"}
+.pyreact{border:2px solid var(--ink); background:var(--code); color:var(--codefg); padding:.4rem .6rem; font-family:var(--mono); font-variant-ligatures:none; white-space:pre-wrap; word-break:break-all}
+
+/* ===== 風格巡倉 / 找錯 ===== */
+.linepick{list-style:none; margin:0; padding:0; background:var(--code); border:3px solid var(--ink)}
+.linepick li{display:flex; align-items:stretch; border-bottom:1px solid #2e3134}
+.linepick button{flex:1; text-align:left; background:transparent; color:var(--codefg); border:0; padding:.25rem .5rem; cursor:pointer; white-space:pre; overflow-x:auto; font-family:var(--mono); font-variant-ligatures:none; min-height:40px; display:flex; gap:.6rem; align-items:center}
+.linepick .ln{color:var(--codedim); width:1.8em; text-align:right; flex:0 0 auto}
+.linepick .flag{flex:0 0 auto; width:4.6rem; font-family:var(--sans); font-size:.78rem; font-weight:900; text-align:center}
+.linepick li.sel button{background:#3a3016; box-shadow:inset 6px 0 0 var(--yellow)}
+.linepick li.sel .flag::before{content:"⚑ 已標記"; color:var(--yellow)}
+.linepick li.r-ok .flag::before{content:"✔ 正確"!important; color:#9fe0a8}
+.linepick li.r-no .flag::before{content:"✘ 判斷錯"!important; color:#ffb4a0}
+.linepick li.r-ok button,.linepick li.r-no button{box-shadow:none}
+.explist{list-style:none; padding:0; margin:.6rem 0 0}
+.explist li{border:2px solid var(--ink); background:#fff; padding:.35rem .6rem; margin:.35rem 0}
+.explist li b.badtag{background:var(--ink); color:var(--yellow); padding:0 .3rem; margin-right:.3rem}
+.explist li b.goodtag{border:2px solid var(--ink); padding:0 .3rem; margin-right:.3rem}
+
+/* ===== 貨格 ===== */
+.yard{border:3px dashed var(--ink); background:var(--paper2); padding:.6rem; display:flex; flex-wrap:wrap; gap:.6rem; min-height:4.5rem}
+.parcel{border:3px solid var(--card-dark); background:var(--card); padding:.35rem .6rem .4rem; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; max-width:20rem; position:relative; box-shadow:2px 2px 0 rgba(0,0,0,.3); font-weight:700; font-size:.95rem}
+.parcel small{display:block; font-weight:400; font-family:var(--mono); font-variant-ligatures:none; font-size:.8rem}
+.parcel.sel{outline:4px solid var(--ink); outline-offset:2px}
+.parcel.sel::after{content:"已選取"; position:absolute; top:-.9rem; right:.3rem; background:var(--ink); color:var(--yellow); font-size:.7rem; padding:0 .3rem}
+.parcel.done{cursor:default; background:#d9c49d; border-style:solid}
+.parcel.done::before{content:"✔ "; font-weight:900}
+.parcel.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.ghost{position:fixed; pointer-events:none; z-index:999; opacity:.92; transform:rotate(-3deg)}
+.racks{display:grid; grid-template-columns:minmax(0,3fr) minmax(0,5fr) minmax(0,1.3fr); gap:.8rem; margin-top:.8rem}
+.rack{border:4px solid var(--steel); border-top-width:10px; background:linear-gradient(#bdb8aa,#bdb8aa) bottom/100% 6px no-repeat, var(--paper2); padding:.4rem .4rem .8rem}
+.rack h4{margin:0 0 .4rem; font-size:.95rem; background:var(--steel); color:#fff; padding:.1rem .4rem; display:inline-block}
+.slots{display:grid; grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr)); gap:.45rem}
+.slot{border:3px dashed var(--ink2); min-height:5.2rem; background:#ece8dc; padding:.3rem; display:flex; flex-direction:column; gap:.3rem; cursor:pointer; position:relative}
+.slot .sname{font-weight:900; font-size:.95rem}
+.slot .sname i{font-style:normal; font-family:var(--mono); font-variant-ligatures:none; font-size:.75rem; font-weight:400; display:block}
+.slot.hov{border-style:solid; background:var(--yellow-soft)}
+.slot.ready{border-color:var(--ink)}
+.slot .parcel{font-size:.78rem; padding:.2rem .4rem; max-width:none}
+
+/* ===== 堆疊 / 隊列 ===== */
+.sq{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.stackviz{display:flex; flex-direction:column-reverse; align-items:center; gap:4px; min-height:13rem; border:3px solid var(--ink); border-top:0; background:var(--paper2); padding:.4rem; justify-content:flex-start}
+.pallet{width:70%; text-align:center; background:var(--card); border:3px solid var(--card-dark); font-weight:900; padding:.15rem; position:relative}
+.pallet.top::after{content:"◀ 頂 (top)"; position:absolute; left:100%; margin-left:.4rem; white-space:nowrap; font-size:.8rem; background:var(--ink); color:var(--yellow); padding:0 .3rem}
+.queueviz{display:flex; gap:6px; align-items:center; min-height:5.5rem; border:3px solid var(--ink); background:var(--paper2); padding:.4rem; overflow-x:auto}
+.truck{flex:0 0 auto; border:3px solid var(--ink); background:#fff; padding:.2rem .5rem; font-weight:700; position:relative; margin-top:1.2rem}
+.truck .pos{position:absolute; top:-1.3rem; left:0; font-size:.72rem; background:var(--ink); color:var(--yellow); padding:0 .3rem; white-space:nowrap}
+.oplog{max-height:9rem; overflow-y:auto; margin-top:.5rem}
+
+/* ===== 作用範圍倉 ===== */
+.scope{border:3px solid var(--ink); background:#fff; padding:.6rem; margin-top:.8rem}
+.board{border:4px double var(--ink); background:#f6eecf; padding:.4rem .6rem .6rem}
+.board h4,.bayx h4,.mainx h4{margin:0 0 .4rem; font-size:.98rem; display:flex; gap:.4rem; flex-wrap:wrap; align-items:center}
+.pin{font-size:.75rem; border:2px solid var(--ink); padding:0 .3rem; font-weight:700; background:#fff}
+.scope-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); gap:.7rem; margin-top:.7rem}
+.mainx{border:3px solid var(--ink); padding:.5rem; background:var(--paper2); position:relative}
+.bayx{border:4px solid var(--ink); background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(0,0,0,.04) 30px 31px), var(--paper2); padding:.5rem; position:relative; min-height:9rem}
+.bayx.closed{background:repeating-linear-gradient(90deg,#9ea3a8 0 6px,#b8bcc0 6px 12px)}
+.bayx.closed .shelf{visibility:hidden}
+.door{font-weight:900; font-size:.8rem; padding:0 .4rem; border:2px solid var(--ink); background:#fff}
+.here{background:var(--ink); color:var(--yellow); font-size:.78rem; padding:0 .4rem; font-weight:900}
+.shelf{display:flex; flex-wrap:wrap; gap:.5rem; align-items:flex-start; padding:.3rem 0 .5rem; border-bottom:6px solid var(--steel2); margin-bottom:.4rem; min-height:3.6rem}
+.shelf > .sl{flex:0 0 100%; font-size:.78rem; font-weight:700}
+.crate.g{border-style:double; border-width:5px}
+.crate.p{border-style:dashed}
+.crate.in{animation:boxin .7s ease-out}
+@keyframes boxin{from{transform:translateX(-160%) rotate(-6deg); opacity:.2} to{transform:none; opacity:1}}
+.waybill{border:2px dashed var(--ink); background:#fffdf5; padding:.2rem .5rem; font-family:var(--mono); font-variant-ligatures:none; font-size:.85rem; display:inline-block; margin:.2rem 0}
+.lookup{margin-top:.6rem; border:3px dashed var(--bad); background:#f8e0d6; padding:.4rem .6rem; font-weight:700}
+.legend{display:flex; flex-wrap:wrap; gap:.8rem; font-size:.85rem; margin-top:.5rem}
+.legend span{display:inline-flex; align-items:center; gap:.3rem}
+.legend i{display:inline-block; width:1.6rem; height:1rem; background:var(--card)}
+
+/* ===== 練習 ===== */
+.drill{border:4px solid var(--ink); background:var(--paper); margin:1.6rem 0}
+.drill > .dh{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; padding:.5rem .9rem; background:var(--steel); color:#fff}
+.drill > .dh h3{margin:0; font-size:1.2rem}
+.score{margin-left:auto; display:flex; gap:.6rem; flex-wrap:wrap; font-weight:700}
+.score span{background:var(--ink); padding:.05rem .5rem; border:2px solid var(--yellow)}
+.qs{padding:.8rem; display:grid; gap:1rem}
+.q{border:3px solid var(--ink); background:#fff; padding:.7rem .9rem; min-width:0}
+.q .qh{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:.4rem}
+.q .qn{font-family:var(--stencil); font-weight:900; font-size:1.3rem; background:var(--yellow); border:2px solid var(--ink); padding:0 .4rem; line-height:1.3}
+.q .qt{font-size:.8rem; font-weight:700; border:2px solid var(--ink); padding:0 .4rem}
+.q .qstat{margin-left:auto; font-size:.85rem; font-weight:700}
+.q .stem{margin:.2rem 0 .5rem; font-weight:700}
+.q .opts{display:grid; gap:.4rem}
+.q .opt{font-family:var(--sans); width:100%}
+.q .opt.mono{font-family:var(--mono)}
+.q .opt.right{border-width:4px; background:#e1f0e3}
+.q .opt.right::after{content:"  ✔ 正確答案"; font-weight:900; color:var(--ok); font-family:var(--sans)}
+.q .opt.wrong{border-style:dashed; background:#f8e0d6}
+.q .opt.wrong::after{content:"  ✘ 你的選擇"; font-weight:900; color:var(--bad); font-family:var(--sans)}
+.q .acts{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem}
+.fb{margin-top:.6rem; border-left:8px solid var(--ink); padding:.4rem .7rem; background:var(--paper2)}
+.fb.ok{border-left-style:solid} .fb.no{border-left-style:dashed; background:#f8e6de}
+.fb .vd{font-weight:900}
+.fb.ok .vd{color:var(--ok)} .fb.no .vd{color:var(--bad)}
+.fb.ok .vd::before{content:"✔ "} .fb.no .vd::before{content:"✘ "}
+.tt{border-collapse:collapse; font-family:var(--mono); font-variant-ligatures:none; margin:.4rem 0; max-width:100%}
+.tt-wrap{overflow-x:auto}
+.tt th{background:var(--ink); color:var(--yellow); font-family:var(--sans); padding:.25rem .5rem; font-size:.85rem; white-space:nowrap}
+.tt td{border:2px solid var(--ink); padding:.15rem .3rem; text-align:center}
+.tt td.given{background:var(--paper2)}
+.tt input{width:6.2rem; font-family:var(--mono); font-variant-ligatures:none; text-align:center; border:2px solid var(--ink2); padding:.2rem; min-height:38px; font-size:.95rem}
+.tt input.wide{width:9rem}
+.tt td.cok{background:#e1f0e3} .tt td.cok::after{content:" ✔"; color:var(--ok); font-weight:900}
+.tt td.cno{background:#f8e0d6} .tt td.cno::after{content:" ✘"; color:var(--bad); font-weight:900}
+.fillcode{background:var(--code); color:var(--codefg); border:3px solid var(--ink); padding:.5rem .7rem; font-family:var(--mono); font-variant-ligatures:none; white-space:pre; overflow-x:auto; line-height:2}
+.fillcode input{font-family:var(--mono); font-variant-ligatures:none; background:#fff; color:var(--ink); border:3px solid var(--yellow); width:7.5rem; padding:0 .3rem; font-size:.95rem; min-height:34px}
+.fillcode input.cok{border-color:#7fd08a; border-style:solid; background:#e1f0e3}
+.fillcode input.cno{border-color:#ff9b80; border-style:dashed; background:#f8e0d6}
+.parsons{list-style:none; margin:0; padding:0; border:3px solid var(--ink); background:var(--code)}
+.parsons li{display:flex; align-items:center; gap:.3rem; border-bottom:1px solid #2e3134; color:var(--codefg); background:var(--code); touch-action:none}
+.parsons li.dragging{opacity:.35}
+.parsons li.dropmark{box-shadow:inset 0 4px 0 var(--yellow)}
+.parsons .grip{cursor:grab; padding:.3rem .5rem; color:var(--yellow); font-weight:900; user-select:none; -webkit-user-select:none; min-height:44px; display:flex; align-items:center}
+.parsons code{flex:1; white-space:pre; overflow-x:auto; padding:.2rem 0}
+.parsons .mv{display:flex; gap:2px}
+.parsons .mv button{background:#33373b; color:#fff; border:2px solid #5a6066; width:40px; height:40px; cursor:pointer; font-size:.9rem}
+.parsons li.pok{box-shadow:inset 6px 0 0 #7fd08a} .parsons li.pok code::after{content:"   ✔"; color:#9fe0a8; font-family:var(--sans)}
+.parsons li.pno{box-shadow:inset 6px 0 0 #ff9b80} .parsons li.pno code::after{content:"   ✘ 位置不對"; color:#ffb4a0; font-family:var(--sans)}
+.typed{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center}
+.typed input{font-family:var(--mono); font-variant-ligatures:none; border:3px solid var(--ink); padding:.3rem .5rem; min-height:44px; width:14rem; max-width:100%}
+
+.report{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:1rem}
+.manifest{border:3px solid var(--ink); background:#fff; padding:.7rem .9rem; position:relative}
+.manifest .big{font-family:var(--stencil); font-weight:900; font-size:2.6rem; line-height:1}
+.bar2{height:14px; border:2px solid var(--ink); background:#fff; margin:.4rem 0}
+.bar2 i{display:block; height:100%; background:repeating-linear-gradient(-45deg,var(--ink) 0 5px,var(--steel2) 5px 10px)}
+.map{width:100%; border-collapse:collapse; font-size:.92rem}
+.map th,.map td{border:2px solid var(--ink); padding:.3rem .5rem; vertical-align:top; text-align:left}
+.map th{background:var(--ink); color:#fff}
+.map-wrap{overflow-x:auto}
+details.teacher > summary{cursor:pointer; font-weight:900; padding:.5rem .8rem; background:var(--ink); color:var(--yellow); list-style:none}
+details.teacher > summary::before{content:"▶ "} details.teacher[open] > summary::before{content:"▼ "}
+footer{max-width:1180px; margin:0 auto; padding:1rem; font-size:.85rem; color:var(--ink2)}
+
+/* ===== 響應式 ===== */
+@media (max-width: 1100px){
+  .st-grid{grid-template-columns:minmax(0,1fr)}
+  .racks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .racks .rack:nth-child(2){grid-column:1 / -1; grid-row:1}
+}
+@media (max-width: 820px){
+  .report,.ba{grid-template-columns:minmax(0,1fr)}
+  .grid2,.labeler,.sq,.scope-row{grid-template-columns:minmax(0,1fr)}
+  .racks{grid-template-columns:minmax(0,1fr)}
+  .racks .rack:nth-child(2){grid-column:auto; grid-row:auto}
+  .viewsw{display:inline-flex}
+  .codetab.only-py .pc,.codetab.only-py th.pch{display:none}
+  .codetab.only-pc .py,.codetab.only-pc th.pyh{display:none}
+  
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important; transition:none!important}
+}
+body.big{--fs-scale:1.15}
+
+/* ===== 第 3 章：程式鑑證科 ===== */
+.hero h1,.sec-banner h2,.card-tag{font-family:var(--serif)}
+.hero h1 .plate{background:var(--paper); border:3px solid var(--ink); position:relative}
+.hero .stampx{display:inline-block; font-family:var(--stencil); color:var(--red); border:3px solid var(--red); padding:0 .5em; transform:rotate(-6deg); font-size:1.1rem; margin-left:.4em; vertical-align:middle}
+.zone[aria-current="true"]{background:var(--manila)}
+.sec-banner h2{border-bottom:none; background:linear-gradient(transparent 62%, var(--yellow) 62%)}
+.card{border-radius:0; border-top-width:3px}
+.card-tag{background:var(--manila); border-bottom:none; top:-1.35rem; padding:.1rem .9rem .2rem; clip-path:polygon(0 0,calc(100% - 14px) 0,100% 100%,0 100%); padding-right:1.6rem}
+.book::before{content:"課本"; background:var(--red)}
+.takeaway::before{content:"結案："; background:var(--manila)}
+.try::before{content:"驗證 ▸ "}
+.btn{background:var(--yellow)}
+.codetab tr.cur td{background:#a9dcea}
+.codetab tr.pause td{background:#f3d7d3; color:var(--ink)} .codetab tr.pause td *{color:var(--ink)!important}
+.codetab tr.pause .gut{color:var(--red)}
+.codetab td.ln{cursor:default}
+.stepper .codetab tr.bp td.ln{color:#fff; background:var(--red); font-weight:700}
+.stepper .codetab tr.bp td.ln::before{content:"● "}
+.bp-on .codetab td.ln{cursor:pointer; text-decoration:underline dotted}
+.evid{display:inline-block; font-family:var(--stencil); background:#fff; border:2px solid var(--ink); padding:0 .45rem; font-size:.85rem; letter-spacing:.04em}
+.evid.red{border-color:var(--red); color:var(--red)}
+.cases{display:grid; grid-template-columns:repeat(auto-fit,minmax(16rem,1fr)); gap:.8rem}
+.case{border:2px solid var(--ink); background:#fff; padding:.6rem .8rem; position:relative}
+.case h4{margin:0 0 .3rem; font-size:1rem}
+.case .sym{font-family:var(--mono); font-variant-ligatures:none; background:var(--code); color:#ffb4a0; padding:.3rem .5rem; white-space:pre-wrap; word-break:break-all; font-size:.88rem}
+.case .sym.okout{color:var(--codefg)}
+.case .copts{display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem}
+.case .why{margin-top:.4rem; font-weight:700}
+.case .why.ok{color:var(--ok)} .case .why.no{color:var(--bad)}
+.case .why.ok::before{content:"✔ "} .case .why.no::before{content:"✘ "}
+.case.solved{border-width:3px}
+.case.solved::after{content:"已破案"; position:absolute; top:.4rem; right:.5rem; font-family:var(--stencil); color:var(--red); border:2px solid var(--red); padding:0 .3rem; transform:rotate(6deg)}
+.lab{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.9rem}
+.lab > div{border:2px solid var(--ink); background:#fff; padding:.6rem .7rem; min-width:0}
+.lab h4{margin:0 0 .4rem; font-size:1rem}
+.bits{display:flex; gap:3px; margin:.4rem 0; flex-wrap:wrap}
+.bits span{width:1.7rem; height:1.9rem; border:2px solid var(--ink); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; background:#fff}
+.bits span.one{background:var(--ink); color:#fff}
+.bits span.lost{border-style:dashed; color:var(--red); background:#f6e1dd}
+.suspects{display:grid; grid-template-columns:repeat(auto-fit,minmax(14rem,1fr)); gap:.8rem; margin-top:.6rem}
+.suspect{border:2px solid var(--ink); background:#fff; padding:.6rem .7rem}
+.suspect h4{margin:0 0 .3rem; font-family:var(--mono); font-size:.95rem}
+.sealed{font-family:var(--mono); background:var(--code); color:var(--codedim); padding:.3rem .5rem; font-size:.85rem; white-space:pre}
+.testres{font-family:var(--mono); font-variant-ligatures:none; margin-top:.4rem; font-size:.9rem; white-space:pre-wrap}
+.testres.ok{color:var(--ok)} .testres.no{color:var(--bad)}
+.bagtable{border-collapse:collapse; width:100%; font-size:.95rem; margin-top:.6rem}
+.bagtable th,.bagtable td{border:2px solid var(--ink); padding:.25rem .5rem; text-align:center}
+.bagtable th{background:var(--ink); color:#fff}
+.bagtable td.no{background:#f6e1dd; font-weight:700} .bagtable td.ok{background:#e1f0e3}
+.cover{display:flex; gap:.6rem; flex-wrap:wrap; margin:.5rem 0}
+.cover span{border:2px dashed var(--ink2); padding:.1rem .6rem}
+.cover span.hit{border-style:solid; border-color:var(--ink); background:var(--ink); color:#fff}
+.cover span.hit::before{content:"✔ "}
+@media (max-width: 900px){ .lab{grid-template-columns:minmax(0,1fr)} }
+</style>
+</head>
+<body>
+<div class="series" role="banner">
+  <span>第 3 章 · 程式鑑證科</span>
+  <span class="tools">
+    <button class="tog" id="sndBtn" aria-pressed="false">🔇 音效：關</button>
+    <button class="tog" id="bigBtn" aria-pressed="false">A+ 放大字體</button>
+  </span>
+</div>
+
+<header class="hero">
+  <div class="kicker">CASE FILE · CH-03</div>
+  <h1><span class="plate">程式鑑證科</span><span class="stampx">CONFIDENTIAL</span></h1>
+  <p>程式出錯就是一宗<b>案件</b>：錯誤訊息和錯誤輸出是<b>症狀</b>，出錯的程式碼是<b>原因</b>。用斷點、追蹤和測試數據蒐集證據，找出真兇。</p>
+</header>
+
+<nav class="zones" aria-label="鑑證室">
+  <button class="zone" data-go="s31"><b>3.1 結構化編程</b><small>CASE PLANNING</small><span class="badge" data-score="31"></span></button>
+  <button class="zone" data-go="s32"><b>3.2 解釋錯誤</b><small>EVIDENCE ROOM</small><span class="badge" data-score="32"></span></button>
+  <button class="zone" data-go="s33"><b>3.3 除錯方法與工具</b><small>FORENSIC TOOLS</small><span class="badge" data-score="33"></span></button>
+</nav>
+
+<main>
+<\!-- ================= 3.1 ================= -->
+<section class="sec" id="s31">
+  <div class="sec-banner"><h2>3.1 用於設計、實作和除錯的結構化編程</h2><p>標準控制結構 · 模組化方法 · 清晰的控制流程</p></div>
+  <div class="chips"><button data-jump="c31a">① 結構化編程</button><button data-jump="c31b">② 模組化 vs 單一區塊</button><button data-jump="c31c">③ 清晰的控制流程</button><button data-jump="drill31">🎯 練習</button></div>
+
+  <article class="card" id="c31a">
+    <div class="card-tag">① 結構化編程</div>
+    <div class="book"><ul><li><b>結構化編程</b>透過使用標準控制結構（<b>順序、選擇、迭代</b>），將問題分解為較小、有意義的<b>子程式（函數）</b>，來保持程式碼清晰和有條理。</li></ul></div>
+    <p class="try">下面的程式分解成兩個函數和主程式。辨認標記了甲、乙、丙的部分各屬哪一種控制結構。</p>
+    <div class="grid2">
+      <div class="codebox"><pre class="pre" id="structCode"></pre></div>
+      <div id="structPick"></div>
+    </div>
+    <div class="takeaway">任何程式都可以只用順序、選擇、迭代三種結構寫成；再把有意義的工作分成函數，程式便清晰、有條理。</div>
+  </article>
+
+  <article class="card" id="c31b">
+    <div class="card-tag">② 模組化方法 vs 單一區塊</div>
+    <div class="book">
+      <ul><li><b>模組化方法</b>涉及將較長的程式劃分為獨立的模組。這改善了設計過程，使編寫程式碼較不易出錯，並簡化了維護，因為<b>個別函數可以分開測試</b>。</li></ul>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>方面</th><th>模組化方法</th><th>單一區塊（非結構化）</th></tr></thead>
+        <tbody>
+          <tr><td>除錯</td><td>較容易在特定函數內定位錯誤。</td><td>較難在長序列中隔離錯誤。</td></tr>
+          <tr><td>維護</td><td>較安全；編輯一部分很少會破壞整個系統。</td><td>具風險；更改可能會導致意外的副作用。</td></tr>
+          <tr><td>測試</td><td>個別模組可以獨立測試。</td><td>整個程式必須一次過測試。</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="try">「成績報告」程式被植入了一個錯誤，程式碼已封存。用測試找出是哪個部分出錯。</p>
+    <div class="ctl"><button class="btn" id="susNew">🔀 重新植入錯誤</button><span class="hint" id="susInfo"></span></div>
+    <div class="grid2">
+      <div>
+        <div class="boxtitle">單一區塊版</div>
+        <div class="suspect"><div class="sealed">report(marks)   # 80 行，全部寫在一起</div>
+          <button class="btn alt" data-mtest="all" style="margin-top:.4rem">測試整個程式</button><div class="testres" id="monoRes"></div></div>
+      </div>
+      <div>
+        <div class="boxtitle">模組化版</div>
+        <div class="suspects" id="suspects" style="margin-top:0"></div>
+      </div>
+    </div>
+    <div id="susVerdict" aria-live="polite"></div>
+    <div class="takeaway">模組化：哪個函數的測試失敗，錯誤就在哪個函數；單一區塊：只知道「整個程式錯了」，要在長序列中逐行找。</div>
+  </article>
+
+  <article class="card" id="c31c">
+    <div class="card-tag">③ 清晰的控制流程</div>
+    <div class="book"><ul><li><b>清晰的控制流程</b>對可讀性至關重要。良好的風格會<b>先建立預設操作</b>，並<b>僅將選擇（if 語句）用作特殊情況的修飾符</b>，而不是創建混亂的嵌套邏輯。</li></ul></div>
+    <p class="try">運費規則：一般收 $30；購物滿 $500 <b>或</b>是會員便免運費。比較兩種寫法。</p>
+    <div class="ctl">
+      <label class="field">total <input type="number" id="cfTotal" value="200" min="0" max="2000" style="width:6rem"></label>
+      <label class="field">is_member <select id="cfMember"><option value="False">False</option><option value="True">True</option></select></label>
+      <button class="btn alt" data-cf="messy" aria-pressed="true">混亂的嵌套</button>
+      <button class="btn alt" data-cf="clear" aria-pressed="false">先建立預設操作</button>
+    </div>
+    <div id="cfStepper"></div>
+    <div style="overflow-x:auto;margin-top:.8rem"><table class="map" id="cfTable"></table></div>
+    <div class="takeaway">先寫「一般情況」（fee = 30），再用一個 if 處理特殊情況；結果一樣，但較短、較少嵌套、較易讀。</div>
+  </article>
+
+  <div class="drill" id="drill31"></div>
+</section>
+
+<\!-- ================= 3.2 ================= -->
+<section class="sec" id="s32">
+  <div class="sec-banner"><h2>3.2 解釋錯誤</h2><p>數值錯誤 · 程式錯誤 · 症狀與原因</p></div>
+  <div class="chips"><button data-jump="c32a">① 數值錯誤</button><button data-jump="c32b">② 三類程式錯誤</button><button data-jump="c32c">③ 症狀 → 原因</button><button data-jump="drill32">🎯 練習</button></div>
+
+  <article class="card" id="c32a">
+    <div class="card-tag">① 數值錯誤</div>
+    <div class="book"><ul><li><b>數值錯誤</b>源於電腦儲存數字的方式。常見類型包括<b>捨入誤差</b>（浮點數的精確度損失）、<b>截尾誤差</b>（截斷小數）以及<b>上溢 / 下溢誤差</b>（數值太大或太小而無法表示）。</li></ul></div>
+    <div class="lab">
+      <div>
+        <h4>捨入誤差 <span class="evid">EXHIBIT A</span></h4>
+        <label class="field">把 0.1 加 <input type="number" id="nrN" value="10" min="1" max="100" style="width:4.5rem"> 次</label>
+        <div class="codebox" style="margin-top:.4rem"><pre class="pre" id="nrCode"></pre></div>
+        <div class="console" id="nrOut"></div>
+        <p class="hint" id="nrNote"></p>
+      </div>
+      <div>
+        <h4>截尾誤差 <span class="evid">EXHIBIT B</span></h4>
+        <label class="field">總分 <input type="number" id="ntTotal" value="236" min="0" max="999" style="width:5rem"></label>
+        <label class="field">人數 <input type="number" id="ntCount" value="3" min="1" max="50" style="width:4.5rem"></label>
+        <div class="codebox" style="margin-top:.4rem"><pre class="pre" id="ntCode"></pre></div>
+        <div class="console" id="ntOut"></div>
+        <p class="hint" id="ntNote"></p>
+      </div>
+      <div>
+        <h4>上溢 / 下溢 <span class="evid">EXHIBIT C</span></h4>
+        <p class="hint" style="margin:.1rem 0">模擬：8 位元計數器只能存 0–255。<span class="ext">模擬（Python 整數沒有上限）</span></p>
+        <label class="field">計數器 <input type="number" id="noA" value="250" min="0" max="255" style="width:5rem"></label>
+        <label class="field">＋ <input type="number" id="noB" value="10" min="0" max="255" style="width:5rem"></label>
+        <div class="bits" id="noBits" aria-label="8 位元"></div>
+        <div class="console" id="noOut"></div>
+        <div class="hint" style="margin-top:.4rem">Python 浮點數：</div>
+        <div class="console" id="nfOut"></div>
+      </div>
+    </div>
+    <div class="takeaway">捨入誤差：0.1 在二進制存不準；截尾誤差：int() 直接丟掉小數；上溢／下溢：數值超出可表示的範圍。</div>
+  </article>
+
+  <article class="card" id="c32b">
+    <div class="card-tag">② 三類程式錯誤</div>
+    <div class="book">
+      <ul><li><b>程式錯誤</b>根據其發生的時間和影響執行的方式進行分類：<b>語法錯誤</b>會阻止運行，<b>運行錯誤</b>會導致程式崩潰，而<b>邏輯錯誤</b>會產生錯誤結果但不會崩潰。</li></ul>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>錯誤類型</th><th>定義</th><th>典型症狀</th></tr></thead>
+        <tbody>
+          <tr><td>語法錯誤</td><td>違反編程語言語法。</td><td>程式拒絕運行；「Invalid syntax」訊息。</td></tr>
+          <tr><td>運行錯誤</td><td>執行期間發生非法操作。</td><td>程式可以運行，但在執行其間崩潰（例如 <code>ZeroDivisionError</code>）。</td></tr>
+          <tr><td>邏輯錯誤</td><td>程式碼有效，但算法錯誤。</td><td>程式可以運行，但產生不正確的輸出。</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="try">同一個計平均分的程式，揀一種錯誤，先預測，再逐行執行——留意錯誤在<b>甚麼時候</b>出現。</p>
+    <div class="ctl">
+      <button class="btn alt" data-em="ok" aria-pressed="true">✔ 正確版本</button>
+      <button class="btn alt" data-em="syntax" aria-pressed="false">語法錯誤</button>
+      <button class="btn alt" data-em="runtime" aria-pressed="false">運行錯誤</button>
+      <button class="btn alt" data-em="logic" aria-pressed="false">邏輯錯誤</button>
+    </div>
+    <div id="emStepper"></div>
+    <div class="takeaway">語法錯誤：一行也不執行；運行錯誤：執行到一半崩潰；邏輯錯誤：執行完畢，但答案錯。</div>
+  </article>
+
+  <article class="card" id="c32c">
+    <div class="card-tag">③ 由症狀找原因</div>
+    <div class="book"><ul><li><b>錯誤解釋</b>需要將你所看到的<b>「症狀」</b>與<b>「原因」</b>（程式碼故障）聯繫起來。例如，<code>IndexError</code> 通常是指在循環中正在存取一個不存在的列表項目。</li></ul></div>
+    <p class="try">每宗案件：先判斷錯誤類型，再點選造成錯誤的那一行。</p>
+    <div class="cases" id="caseFiles"></div>
+    <div class="takeaway">錯誤訊息指出的那一行是「症狀」出現的地方，原因可能在別的行（例如循環範圍寫錯）。</div>
+  </article>
+
+  <div class="drill" id="drill32"></div>
+</section>
+
+<\!-- ================= 3.3 ================= -->
+<section class="sec" id="s33">
+  <div class="sec-banner"><h2>3.3 應用除錯方法與工具</h2><p>存根 · 標記 · 斷點 · 追蹤 · 系統化測試</p></div>
+  <div class="chips"><button data-jump="c33a">① 存根與標記</button><button data-jump="c33b">② 斷點與追蹤</button><button data-jump="c33c">③ 系統化測試</button><button data-jump="drill33">🎯 練習</button></div>
+
+  <article class="card" id="c33a">
+    <div class="card-tag">① 手動除錯：存根與標記</div>
+    <div class="book">
+      <ul><li><b>手動除錯方法</b>包括使用<b>存根</b>（替換未完成部分的暫時程式碼）和<b>標記</b>（用來記錄特定條件（例如失敗）是否發生的變量）。</li></ul>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>方法 / 工具</th><th>主要目的</th></tr></thead>
+        <tbody>
+          <tr><td>存根</td><td>即使某些子程式尚未編寫，也允許測試主程式。</td></tr>
+          <tr><td>標記</td><td>記錄是否發生了某個事件（例如 <code>has_error = True</code>）。</td></tr>
+          <tr><td>斷點</td><td>暫停程式以實時檢查變量的當前狀態。</td></tr>
+          <tr><td>追蹤</td><td>在每一步印出數值日誌，以顯示數據如何隨時間改變。</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="try">檢查分數是否有效（0–100）的函數還未寫好，先用存根代替，主程式照樣可以測試。之後換上真正的函數，看看標記 <code>has_error</code> 怎樣改變。</p>
+    <div class="ctl">
+      <label class="field">分數列表 <input class="mono" id="sbList" value="65, -5, 88" size="14"></label>
+      <button class="btn alt" data-sb="stub" aria-pressed="true">用存根</button>
+      <button class="btn alt" data-sb="real" aria-pressed="false">換上真正的函數</button>
+    </div>
+    <div id="sbStepper"></div>
+    <div class="takeaway">存根讓主程式先跑起來；標記由 False 開始，條件一旦發生便設為 True，之後一直記住。</div>
+  </article>
+
+  <article class="card" id="c33b">
+    <div class="card-tag">② 軟件除錯工具：斷點與追蹤</div>
+    <div class="book"><ul><li><b>軟件除錯工具</b>例如<b>斷點</b>允許程式員在特定行暫停執行以檢查變量數值，而<b>程式追蹤</b>會追蹤逐步的改變以準確識別邏輯錯誤的地方。</li></ul></div>
+    <p class="try">這個程式要找最高溫度，但輸出錯了。<b>點選行號</b>設定斷點（●），按「⏩ 執行到斷點」逐次暫停檢查；或開啟追蹤，看每一步印出的日誌。</p>
+    <div class="ctl">
+      <label class="field">溫度列表 <input class="mono" id="bpList" value="-3, -8, -1, -5" size="14"></label>
+      <label class="chk"><input type="checkbox" id="bpTrace"> 加入追蹤輸出（print 日誌）</label>
+      <label class="chk"><input type="checkbox" id="bpFix"> 修正：highest = temps[0]</label>
+    </div>
+    <div id="bpStepper"></div>
+    <div class="takeaway">斷點：在指定行暫停，看當下的變量；追蹤：每一步印出數值，看數據怎樣隨時間改變。兩者都能指出 highest 由一開始便錯了。</div>
+  </article>
+
+  <article class="card" id="c33c">
+    <div class="card-tag">③ 系統化測試</div>
+    <div class="book"><ul><li><b>系統化測試</b>是隔離故障所必需的。這涉及設計涵蓋以下內容的測試數據：<b>正常情況</b>（典型數值）、<b>邊界情況</b>（如 0 或 100 的邊緣數值），以及<b>特殊情況</b>以確保穩健性。</li></ul></div>
+    <p class="try">函數 <code>grade(score)</code> 的規格：0–100 分有效，50 分或以上「合格」，否則「不合格」；無效分數傳回「無效」。程式碼已封存，它藏着一個錯誤——設計測試數據把它揪出來。</p>
+    <div class="ctl">
+      <label class="field">測試數據 score <input type="number" id="tdVal" value="75" style="width:6rem"></label>
+      <label class="field">類別 <select id="tdCat"><option value="normal">正常情況</option><option value="edge">邊界情況</option><option value="special">特殊情況</option></select></label>
+      <button class="btn" id="tdAdd">放入證物袋並測試</button>
+      <button class="btn alt" id="tdReset">⟲ 清空</button>
+    </div>
+    <div class="cover" id="tdCover"></div>
+    <div style="overflow-x:auto"><table class="bagtable" id="tdTable"></table></div>
+    <div id="tdVerdict" aria-live="polite"></div>
+    <div class="takeaway">只用正常數據（例如 75、30）測試，這個錯誤永遠不會現形；要刻意測試邊界（0、50、100）和特殊情況。</div>
+  </article>
+
+  <div class="drill" id="drill33"></div>
+</section>
+
+<section class="card" id="report" style="margin-top:3rem">
+  <div class="card-tag">✔ 結案報告</div>
+  <div class="report" id="reportCards"></div>
+  <div class="ctl" style="margin-top:.8rem"><span class="hint" id="reportTotal"></span><button class="btn alt" id="clearAll" style="margin-left:auto">清除本裝置上的紀錄</button></div>
+  <details class="teacher" style="margin-top:1rem">
+    <summary>教師用：課本重點 → 對應的互動或練習</summary>
+    <div class="map-wrap" style="padding-top:.5rem"><table class="map" id="mapTable"></table></div>
+  </details>
+</section>
+</main>
+<footer>程式鑑證科 · DSE ICT 選修單元 C 第 3 章 · 呂Sir 的 ICT 互動課件</footer>
+<script>
+const CONFIG = { INDEX_URL: "./", STORAGE_KEY: "electiveC-ch3-progress-v1" };
+const SECTIONS = [
+  { id: '31', name: '3.1 結構化編程', anchor: '#s31' },
+  { id: '32', name: '3.2 解釋錯誤', anchor: '#s32' },
+  { id: '33', name: '3.3 除錯方法與工具', anchor: '#s33' }
+];
+const QUESTIONS = [
+  /* ---------- 3.1 ---------- */
+  { id: 'q1', sec: '31', type: 'mc', tag: '概念', stem: '結構化編程使用哪三種標準控制結構？',
+    options: [
+      { t: '順序、函數、變量', why: '函數和變量不是控制結構。' },
+      { t: '輸入、處理、輸出', why: '這是程式的基本運作模式，不是控制結構。' },
+      { t: '順序、選擇、迭代', ok: 1, why: '結構化編程只用順序、選擇（if）、迭代（循環）三種標準控制結構。' },
+      { t: '語法、運行、邏輯', why: '這是三類程式錯誤。' }] },
+  { id: 'q2', sec: '31', type: 'mc', tag: '情境選擇', stem: '一個 800 行、全部寫在一起的程式，修改了稅率計算後，列印收據的部分也出錯了。這反映單一區塊在哪方面的問題？',
+    options: [
+      { t: '維護：更改可能會導致意外的副作用', ok: 1, why: '單一區塊中各部分互相牽連，改一處便影響其他部分。' },
+      { t: '測試：個別模組可以獨立測試', why: '這是模組化方法的優點，不是單一區塊的問題。' },
+      { t: '語法：程式拒絕運行', why: '題目說程式可以運行，只是部分輸出出錯。' },
+      { t: '速度：程式執行得較慢', why: '比較表討論的是除錯、維護、測試，不是速度。' }] },
+  { id: 'q3', sec: '31', type: 'mc', tag: '概念', stem: '在「測試」方面，模組化方法比單一區塊好在哪裏？',
+    options: [
+      { t: '整個程式必須一次過測試', why: '這是單一區塊的情況。' },
+      { t: '個別模組可以獨立測試', ok: 1, why: '每個函數可以分開測試，哪個測試失敗，錯誤便在哪個函數。' },
+      { t: '模組化的程式不需要測試', why: '任何程式都需要測試。' },
+      { t: '模組化令語法錯誤不會出現', why: '模組化不能防止語法錯誤。' }] },
+  { id: 'q4', sec: '31', type: 'trace', tag: '填寫追蹤表', stem: '完成追蹤表（每次循環結束時的值），並寫出最後一行的輸出。',
+    code: 'orders = [600, 200, 500]\ncount = 0\nfor total in orders:\n    fee = 30\n    if total >= 500:\n        fee = 0\n        count = count + 1\n    print(total, fee)\nprint(count)',
+    cols: ['total', 'fee', 'count', 'print(total, fee) 的輸出'], wide: 1,
+    rows: [
+      { c: [{ g: '600' }, { a: ['0'] }, { a: ['1'] }, { a: ['600 0'] }], why: '600 >= 500，免運費，fee 變 0，count 加 1。' },
+      { c: [{ g: '200' }, { a: ['30'] }, { a: ['1'] }, { a: ['200 30'] }], why: '200 < 500，保留預設 fee = 30，count 不變。' },
+      { c: [{ g: '500' }, { a: ['0'] }, { a: ['2'] }, { a: ['500 0'] }], why: '500 >= 500 成立（剛好在邊界），fee 變 0，count 變 2。' }],
+    output: { a: ['2'], why: '最後 print(count) 輸出 2。' } },
+  { id: 'q5', sec: '31', type: 'parsons', tag: '排列程式碼', stem: '用「先建立預設操作」的風格，把運費函數排列成正確次序。',
+    lines: [
+      { c: 'def shipping_fee(total, is_member):', why: '函數定義在最前。' },
+      { c: '    fee = 30', why: '先建立預設操作（一般情況）。' },
+      { c: '    if total >= 500 or is_member:', why: '再用 if 處理特殊情況。' },
+      { c: '        fee = 0', why: '特殊情況才把 fee 改為 0。' },
+      { c: '    return fee', why: '最後傳回結果。' }] },
+  { id: 'q6', sec: '31', type: 'find', tag: '找錯', stem: '單獨測試 get_average([80, 60])，期望 70.0，實際得到 30.0。點選出錯的一行。',
+    lines: [
+      { c: 'def get_average(scores):', why: '函數定義正確。' },
+      { c: '    total = 0', why: 'total 由 0 開始，正確。' },
+      { c: '    for s in scores:', why: '逐個分數循環，正確。' },
+      { c: '        total = s', ok: 1, why: '每次都把 total 換成目前的分數，最後只剩 60；應為 total = total + s。60 ÷ 2 = 30.0 正好解釋了錯誤輸出。' },
+      { c: '    return total / len(scores)', why: '除以人數求平均，正確。' }] },
+  { id: 'q7', sec: '31', type: 'mc', tag: '情境選擇', stem: '以下哪一種寫法最符合「清晰的控制流程」？（規則：一般收 $30，會員免運費）',
+    options: [
+      { t: 'fee = 30，然後 if is_member: fee = 0', ok: 1, why: '先建立預設操作，只用一個 if 處理特殊情況。' },
+      { t: '用三層嵌套的 if…else 列出每一種組合', why: '混亂的嵌套邏輯，難讀、易錯。' },
+      { t: '不用 if，每次都把 fee 設為 0', why: '這樣非會員也免運費，結果錯誤。' },
+      { t: '在 if 和 else 兩邊都各自寫一次 fee = 30', why: '重複的程式碼令流程不清晰，改價時要改多處。' }] },
+
+  /* ---------- 3.2 ---------- */
+  { id: 'q8', sec: '32', type: 'mc', tag: '預測輸出', stem: '以下程式的輸出是甚麼？', code: 'print(0.1 + 0.2 == 0.3)',
+    options: [
+      { t: 'True', mono: 1, why: '數學上相等，但浮點數 0.1 和 0.2 在二進制存不準，相加得 0.30000000000000004。' },
+      { t: 'False', mono: 1, ok: 1, why: '捨入誤差：0.1 + 0.2 得 0.30000000000000004，不等於 0.3。' },
+      { t: '0.3', mono: 1, why: '== 比較的結果是布爾值，不是數值。' },
+      { t: 'SyntaxError', mono: 1, why: '語法完全正確。' }] },
+  { id: 'q9', sec: '32', type: 'mc', tag: '預測輸出', stem: '以下程式的輸出是甚麼？', code: 'print(int(7.9), int(-7.9))',
+    options: [
+      { t: '8 -8', mono: 1, why: 'int() 不會四捨五入。' },
+      { t: '7 -8', mono: 1, why: 'int() 是向零截斷，-7.9 截斷後是 -7，不是向下取整。' },
+      { t: '7 -7', mono: 1, ok: 1, why: 'int() 直接截去小數部分（向零截斷）：7.9 → 7，-7.9 → -7。這就是截尾誤差的來源。' },
+      { t: '8 -7', mono: 1, why: '7.9 不會變成 8；int() 不會進位。' }] },
+  { id: 'q10', sec: '32', type: 'mc', tag: '概念', stem: '一個 8 位元的計數器只能儲存 0 至 255。計數器現時是 250，再加 10 後顯示 4。這是哪一種數值錯誤？',
+    options: [
+      { t: '上溢誤差', ok: 1, why: '260 太大，8 個位元無法表示，最高的位元被丟棄。' },
+      { t: '下溢誤差', why: '下溢是數值太小（太接近 0）而無法表示；這裏是太大。' },
+      { t: '捨入誤差', why: '捨入誤差是浮點數精確度損失，這裏是整數超出範圍。' },
+      { t: '截尾誤差', why: '截尾誤差是截斷小數，這裏沒有小數。' }] },
+  { id: 'q11', sec: '32', type: 'mc', tag: '情境選擇', stem: '一個計平均分的程式可以運行，沒有任何錯誤訊息，但三個分數 80、70、90 的平均分顯示為 120.0。這是：',
+    options: [
+      { t: '語法錯誤', why: '語法錯誤會令程式拒絕運行；這個程式運行了。' },
+      { t: '運行錯誤', why: '運行錯誤會令程式崩潰；這個程式沒有崩潰。' },
+      { t: '邏輯錯誤', ok: 1, why: '程式碼有效、可以運行，但算法錯了（例如除以 2 而不是 3），輸出不正確。' },
+      { t: '上溢誤差', why: '120.0 不是太大而無法表示的數值。' }] },
+  { id: 'q12', sec: '32', type: 'mc', tag: '概念', stem: 'ZeroDivisionError 屬於哪一類錯誤？',
+    options: [
+      { t: '語法錯誤', why: 'x / 0 的寫法完全符合語法，問題在執行時才出現。' },
+      { t: '運行錯誤', ok: 1, why: '執行期間發生非法操作（除以 0），程式崩潰。' },
+      { t: '邏輯錯誤', why: '邏輯錯誤不會崩潰；ZeroDivisionError 會令程式崩潰。' },
+      { t: '捨入誤差', why: '捨入誤差不會產生錯誤訊息。' }] },
+  { id: 'q13', sec: '32', type: 'find', tag: '找錯', stem: '程式顯示 IndexError: list index out of range（指向第 4 行）。點選造成錯誤的「原因」那一行。',
+    lines: [
+      { c: 'scores = [70, 85, 90]', why: '列表本身沒有問題，有 3 個項目（索引 0–2）。' },
+      { c: 'total = 0', why: '沒有問題。' },
+      { c: 'for i in range(len(scores) + 1):', ok: 1, why: 'range(4) 產生 0–3，而 scores[3] 不存在——循環範圍多了一次，這是原因。' },
+      { c: '    total = total + scores[i]', why: '錯誤訊息指向這行，但這只是症狀出現的地方；問題在 i 的範圍。' },
+      { c: 'print(total)', why: '程式崩潰前未執行到這行。' }] },
+  { id: 'q14', sec: '32', type: 'trace', tag: '填寫追蹤表', stem: '完成追蹤表，並寫出令程式崩潰的錯誤名稱。',
+    code: 'values = [4, 2, 0, 5]\nfor v in values:\n    print(20 // v)',
+    cols: ['v', '輸出'],
+    rows: [
+      { c: [{ g: '4' }, { a: ['5'] }], why: '20 // 4 = 5。' },
+      { c: [{ g: '2' }, { a: ['10'] }], why: '20 // 2 = 10。' },
+      { c: [{ g: '0' }, { g: '（崩潰）' }], why: '' }],
+    output: { a: ['ZeroDivisionError'], why: '20 // 0 是除以 0，出現 ZeroDivisionError，程式崩潰；v = 5 那一次不會執行。' } },
+  { id: 'q15', sec: '32', type: 'fill', tag: '程式碼填空', stem: '修正這個邏輯錯誤，使程式對任何長度的列表都計算正確的平均分。',
+    code: 'scores = [80, 70, 90]\ntotal = 0\nfor s in scores:\n    total = total + s\naverage = total / [[0]]\nprint(average)',
+    blanks: [
+      { a: ['len(scores)'], wrong: { '3': '這組數據剛好正確，但寫死 3，列表長度一改便會產生邏輯錯誤。', '2': '除以 2 正是原本的邏輯錯誤。', 'len(total)': 'total 是整數，不能用 len()，會出現運行錯誤（TypeError）。', 'scores': '不能除以一個列表，會出現 TypeError。' }, model: 'len(scores)', why: 'len(scores) 會隨列表長度改變，永遠除以正確的人數。' }] },
+
+  /* ---------- 3.3 ---------- */
+  { id: 'q16', sec: '33', type: 'mc', tag: '情境選擇', stem: '主程式已寫好，但它會呼叫的函數 calc_bonus() 還未寫。想現在就測試主程式，應該：',
+    options: [
+      { t: '寫一個存根，例如 def calc_bonus(x): return 0', ok: 1, why: '存根是替換未完成部分的暫時程式碼，令主程式可以先測試。' },
+      { t: '在 calc_bonus 設斷點', why: '函數根本未存在，斷點幫不上忙。' },
+      { t: '加一個標記變量', why: '標記用來記錄某事件是否發生，不能代替未寫好的函數。' },
+      { t: '等所有函數都寫好才測試', why: '這樣會延遲發現主程式的錯誤；存根讓你可以提早測試。' }] },
+  { id: 'q17', sec: '33', type: 'trace', tag: '填寫追蹤表', stem: '標記 has_error 記錄是否出現無效分數。完成追蹤表，並寫出輸出。',
+    code: 'scores = [65, -5, 88, 120]\nhas_error = False\nbad = 0\nfor s in scores:\n    if s < 0 or s > 100:\n        has_error = True\n        bad = bad + 1\nprint(has_error, bad)',
+    cols: ['s', 'has_error', 'bad'],
+    rows: [
+      { c: [{ g: '—' }, { g: 'False' }, { g: '0' }], why: '' },
+      { c: [{ g: '65' }, { a: ['False'] }, { a: ['0'] }], why: '65 在 0–100 之內，不改變。' },
+      { c: [{ g: '-5' }, { a: ['True'] }, { a: ['1'] }], why: '-5 < 0，標記設為 True，bad 變 1。' },
+      { c: [{ g: '88' }, { a: ['True'] }, { a: ['1'] }], why: '88 有效，但標記不會變回 False——它記錄的是「曾經發生」。' },
+      { c: [{ g: '120' }, { a: ['True'] }, { a: ['2'] }], why: '120 > 100，標記仍是 True，bad 變 2。' }],
+    output: { a: ['True2'], why: 'print(has_error, bad) 輸出 True 2。' } },
+  { id: 'q18', sec: '33', type: 'mc', tag: '情境選擇', stem: '想在循環第 3 次執行到 if 那一行時，停下來看看 highest 的值。應使用：',
+    options: [
+      { t: '斷點', ok: 1, why: '斷點在特定行暫停執行，讓你檢查變量的當前狀態。' },
+      { t: '追蹤', why: '追蹤在每一步印出日誌，但不會暫停程式。' },
+      { t: '存根', why: '存根用來代替未完成的子程式。' },
+      { t: '標記', why: '標記記錄某事件是否發生，不能暫停程式。' }] },
+  { id: 'q19', sec: '33', type: 'mc', tag: '情境選擇', stem: '函數接受 0 至 100 的分數。以下哪一個測試數據屬於「邊界情況」？',
+    options: [
+      { t: '75', why: '75 是典型數值，屬於正常情況。' },
+      { t: '100', ok: 1, why: '100 是有效範圍的邊緣數值，最容易因 < 與 <= 寫錯而出錯。' },
+      { t: '-10', why: '-10 不在有效範圍內，屬於特殊情況。' },
+      { t: '"abc"', why: '不是數值，屬於特殊情況。' }] },
+  { id: 'q20', sec: '33', type: 'fill', tag: '程式碼填空', stem: '填寫空格：(1) 存根暫時一律傳回 True；(2) 標記的初始值。',
+    code: 'def is_valid(score):\n    [[0]] True          # 存根\n\nhas_error = [[1]]     # 標記：未發生錯誤',
+    blanks: [
+      { a: ['return'], wrong: { 'print': 'print 只會顯示 True，函數本身會傳回 None，主程式拿不到 True。', 'pass': 'pass 不會傳回任何值（傳回 None）。' }, model: 'return', why: '存根用 return 傳回一個固定的暫時值。' },
+      { a: ['False'], wrong: { 'True': '標記一開始應表示「未發生」，所以是 False。', 'false': 'Python 的布爾值首字母要大寫：False。', '0': '應用布爾值 False 表示「未發生」。', '"False"': '加了引號便是字串，不是布爾值。' }, model: 'False', why: '標記由 False 開始，條件發生時才設為 True。' }] },
+  { id: 'q21', sec: '33', type: 'parsons', tag: '排列程式碼', stem: '排列程式碼：用標記記錄列表中是否有負數。',
+    lines: [
+      { c: 'has_error = False', why: '標記要在循環之前設為 False。' },
+      { c: 'for s in scores:', why: '然後逐個檢查。' },
+      { c: '    if s < 0:', why: '在循環內檢查條件。' },
+      { c: '        has_error = True', why: '條件成立才把標記設為 True。' },
+      { c: 'print(has_error)', why: '循環完成後才輸出標記。' }] },
+  { id: 'q22', sec: '33', type: 'find', tag: '找錯', stem: '規格：50 分或以上「合格」。用測試數據 50 測試，得到「不合格」。點選出錯的一行。',
+    lines: [
+      { c: 'def grade(score):', why: '函數定義正確。' },
+      { c: '    if score < 0 or score > 100:', why: '處理無效分數（特殊情況），正確。' },
+      { c: '        return "無效"', why: '正確。' },
+      { c: '    if score > 50:', ok: 1, why: '用了 >，剛好 50 分被判為不合格；應為 score >= 50。只有邊界值 50 才能揭露這個錯誤。' },
+      { c: '        return "合格"', why: '正確。' },
+      { c: '    return "不合格"', why: '正確。' }] }
+];
+const MAPPING = [
+  ['3.1 (1) 結構化編程：順序、選擇、迭代；分解為子程式（函數）', '3.1 ① 辨認甲乙丙的控制結構及函數數目', 'Q1、Q5'],
+  ['3.1 (2) 模組化方法：分開測試、較不易出錯、易維護', '3.1 ② 封存的函數逐個測試，指認出錯的函數', 'Q3、Q6'],
+  ['3.1 表：除錯（定位 vs 隔離）', '3.1 ② 模組化版單獨測試即可定位；單一區塊版只知道整個程式錯', 'Q6'],
+  ['3.1 表：維護（較安全 vs 副作用）', '3.1 ② 比較表', 'Q2'],
+  ['3.1 表：測試（獨立測試 vs 一次過測試）', '3.1 ② 單獨測試與測試整個程式的對比', 'Q3'],
+  ['3.1 (3) 清晰的控制流程：先建立預設操作，if 只處理特殊情況', '3.1 ③ 混亂嵌套 vs 預設操作（逐步執行、四種情況對照表）', 'Q4、Q5、Q7'],
+  ['3.2 (1) 數值錯誤：捨入、截尾、上溢／下溢', '3.2 ① 三個實驗：0.1 累加、int() 截尾、8 位元計數器及浮點數 inf／0.0', 'Q8、Q9、Q10'],
+  ['3.2 (2) 程式錯誤分類及表（語法／運行／邏輯）', '3.2 ② 同一程式四個版本逐步執行，比較錯誤出現的時間', 'Q11、Q12、Q14、Q15'],
+  ['3.2 (3) 症狀與原因（IndexError）', '3.2 ③ 三宗案件：先判斷類型，再點選原因行', 'Q13'],
+  ['3.3 (1) 存根、標記（及方法／工具表）', '3.3 ① 存根 vs 真正函數，標記 has_error 的變化', 'Q16、Q17、Q20、Q21'],
+  ['3.3 (2) 斷點、程式追蹤', '3.3 ② 點行號設斷點、執行到斷點；加入追蹤日誌；修正 highest = temps[0]', 'Q18'],
+  ['3.3 (3) 系統化測試：正常、邊界、特殊情況', '3.3 ③ 證物袋：自選測試數據及類別，只有邊界值 50 揭露錯誤', 'Q19、Q22'],
+  ['DSE 要求：偽代碼與 Python 並列、追蹤表、錯誤示範', '逐步執行器（3.1 ③、3.2 ②、3.3 ①②）；每節的錯誤示範', 'Q4、Q14、Q17（填寫追蹤表）']
+];
+<\/script>
+<script>
+
+/* ================= 共用工具 ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function parseIntList(s, max = 12) {
+  const out = [];
+  String(s).split(/[,，\s]+/).forEach(t => { if (t === '') return; const n = Number(t); if (Number.isInteger(n) && Math.abs(n) <= 9999) out.push(n); });
+  return out.slice(0, max);
+}
+function clampInt(v, lo, hi, d) { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; }
+
+const store = {
+  read() { try { return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '{}') || {}; } catch (e) { return {}; } },
+  get(k, d) { const o = this.read(); return (o && k in o) ? o[k] : d; },
+  set(k, v) { try { const o = this.read(); o[k] = v; localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(o)); } catch (e) { /* 寫入失敗也照常運作 */ } },
+  clear() { try { localStorage.removeItem(CONFIG.STORAGE_KEY); } catch (e) {} }
+};
+
+const Sound = {
+  on: false, ctx: null,
+  beep(f = 600, d = .06, type = 'square', vol = .06) {
+    if (!this.on) return;
+    try {
+      this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g); g.connect(this.ctx.destination); o.start(t); o.stop(t + d + .02);
+    } catch (e) {}
+  },
+  step() { this.beep(520, .04); }, ok() { this.beep(880, .14, 'triangle', .09); }, bad() { this.beep(170, .2, 'sawtooth', .05); }
+};
+
+/* ================= Python 值的表示（與 Python 3 repr 一致） ================= */
+const PY = {
+  int: n => String(n),
+  float(x) {
+    if (Number.isNaN(x)) return 'nan';
+    if (!Number.isFinite(x)) return x > 0 ? 'inf' : '-inf';
+    if (x === 0) return Object.is(x, -0) ? '-0.0' : '0.0';
+    const a = Math.abs(x);
+    if (a >= 1e16 || a < 1e-4) {
+      let [m, e] = x.toExponential().split('e');
+      const sign = e[0] === '-' ? '-' : '+'; let d = e.replace(/^[+-]/, ''); if (d.length < 2) d = '0' + d;
+      return m + 'e' + sign + d;
+    }
+    if (Number.isInteger(x)) return x.toFixed(0) + '.0';
+    return String(x);
+  },
+  str: s => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'",
+  bool: b => b ? 'True' : 'False',
+  list: arr => '[' + arr.join(', ') + ']'
+};
+function noisyFloat(s) { const m = /\.(\d+)/.exec(s); return !!(m && m[1].length >= 10); }
+
+/* ================= 語法顯示 ================= */
+const PY_KW = new Set(['def', 'return', 'for', 'in', 'if', 'elif', 'else', 'while', 'class', 'True', 'False', 'None', 'and', 'or', 'not', 'import', 'with', 'as', 'pass', 'global']);
+const PY_BI = new Set(['print', 'len', 'int', 'float', 'str', 'range', 'input', 'self', 'append', 'pop', 'sum']);
+function hlPy(src) {
+  const re = /("""[\s\S]*?"""|"[^"]*"|'[^']*'|#[^\n]*|\b\d+(?:\.\d+)?\b|\b[A-Za-z_]\w*\b)/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index)); const t = m[0];
+    if (t[0] === '#') out += `<span class="c">${esc(t)}</span>`;
+    else if (t[0] === '"' || t[0] === "'") out += `<span class="s">${esc(t)}</span>`;
+    else if (/^\d/.test(t)) out += `<span class="n">${esc(t)}</span>`;
+    else if (PY_KW.has(t)) out += `<span class="k">${t}</span>`;
+    else if (PY_BI.has(t)) out += `<span class="b">${t}</span>`;
+    else if (/^[A-Z][A-Z0-9_]+$/.test(t)) out += `<span class="cn">${t}</span>`;
+    else out += esc(t);
+    last = m.index + t.length;
+  }
+  return out + esc(src.slice(last));
+}
+const PC_KW = /\b(FUNCTION|END|RETURN|FOR|EACH|IN|NEXT|IF|THEN|ELSE|OUTPUT|WHILE|DO|TYPE|ENDTYPE|NEW|AND|OR|NOT|TRUE|FALSE)\b/g;
+function hlPc(src) {
+  const ci = src.indexOf('//');
+  const code = ci >= 0 ? src.slice(0, ci) : src, com = ci >= 0 ? src.slice(ci) : '';
+  let h = esc(code).replace(PC_KW, '<span class="pk">$1</span>').replace(/←/g, '<span class="arr">←</span>');
+  return h + (com ? `<span class="c">${esc(com)}</span>` : '');
+}
+
+/* ================= 執行記錄器 ================= */
+class Rec {
+  constructor(startNote) { this.steps = []; this.v = {}; this.out = []; this.touched = new Set(); this.push(null, startNote || '按「▶ 下一步」開始逐行執行。'); }
+  set(k, val) { this.v[k] = val; this.touched.add(k); }
+  del(...ks) { ks.forEach(k => delete this.v[k]); }
+  print(s) { this.out.push(String(s)); }
+  push(line, note, extra = {}) {
+    const prev = this.steps[this.steps.length - 1];
+    const vars = Object.assign({}, this.v), changed = [];
+    for (const k in vars) if (this.touched.has(k) || !prev || prev.vars[k] !== vars[k]) changed.push(k);
+    const newOut = prev ? this.out.slice(prev.out.length) : [];
+    this.steps.push(Object.assign({ line, vars, out: this.out.slice(), newOut, note, changed: prev ? changed : [] }, extra));
+    this.touched = new Set();
+  }
+}
+
+/* ================= 逐步執行器 ================= */
+class Stepper {
+  /* prog: { rows(p), cols(p), run(p), predict?(p), explain?(p), varLabel?(k) }  getP: () => params  hooks: { onStep(step, i, steps) } */
+  constructor(root, prog, getP, hooks = {}) {
+    this.root = root; this.prog = prog; this.getP = getP; this.hooks = hooks; this.timer = null; this.view = 'py';
+    root.classList.add('stepper'); if (hooks.breakpoints) root.classList.add('bp-on'); if (hooks.noVars) root.classList.add('novars');
+    root.innerHTML = `
+      <div class="st-pred"></div>
+      <div class="st-grid">
+        <div>
+          <div class="st-codehead"><b>程式碼（Python ｜ 偽代碼）</b>
+            <span class="viewsw" role="group" aria-label="切換顯示"><button class="btn alt" data-v="py" aria-pressed="true">Python</button><button class="btn alt" data-v="pc" aria-pressed="false">偽代碼</button></span></div>
+          <div class="codebox"><table class="codetab only-py"><thead><tr><th></th><th></th><th class="pyh">Python</th><th class="pch">偽代碼</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="st-side">
+          <div${hooks.noVars ? ' hidden' : ''}><div class="boxtitle">📦 變量（貨箱）</div><div class="vars"></div></div>
+          <div><div class="boxtitle">🖨 輸出</div><div class="console" aria-live="polite"></div></div>
+        </div>
+      </div>
+      <div class="note" aria-live="polite"></div>
+      <div class="ctrl">
+        <button class="btn alt" data-a="reset" title="重設">⟲ 重設</button>
+        <button class="btn alt" data-a="prev" title="上一步">◀ 上一步</button>
+        <button class="btn" data-a="next" title="下一步">▶ 下一步</button>
+        <button class="btn dark" data-a="play" aria-pressed="false">⏵ 自動播放</button>
+        ${hooks.breakpoints ? '<button class="btn alt" data-a="bp">⏩ 執行到斷點</button>' : ''}
+        <label>速度 <input type="range" min="1" max="5" value="3" data-a="speed" aria-label="自動播放速度"></label>
+        <span class="cnt" aria-live="off"></span>
+      </div>
+      <div class="hook"></div>
+      <details class="trace-box"${hooks.traceOpen ? ' open' : ''}><summary>📋 追蹤表 <span class="hint">（只記下該步改變了的值；▶ 為目前一步）</span></summary>
+      <div class="trace-wrap"><table class="trace"></table></div></details>`;
+    this.$ = s => root.querySelector(s);
+    root.querySelector('.ctrl').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const a = b.dataset.a;
+      if (a === 'next') { this.stop(); this.step(1); } else if (a === 'prev') { this.stop(); this.step(-1); }
+      else if (a === 'reset') { this.stop(); this.go(0); } else if (a === 'bp') { this.stop(); this.runToBp(); } else if (a === 'play') { this.timer ? this.stop() : this.play(); }
+    });
+    root.querySelector('.viewsw').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return; this.view = b.dataset.v;
+      $$('.viewsw button', root).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const t = this.$('.codetab'); t.classList.toggle('only-py', this.view === 'py'); t.classList.toggle('only-pc', this.view === 'pc');
+    });
+    this.bps = new Set();
+    if (hooks.breakpoints) root.querySelector('.codetab tbody').addEventListener('click', e => {
+      const td = e.target.closest('td.ln'); if (!td || !td.textContent) return;
+      const id = td.parentElement.dataset.id; this.bps.has(id) ? this.bps.delete(id) : this.bps.add(id); this.paintBps();
+    });
+    this.rebuild();
+  }
+  paintBps() {
+    $$('.codetab tbody tr', this.root).forEach(tr => { const on = this.bps.has(tr.dataset.id); tr.classList.toggle('bp', on); tr.querySelector('.ln').setAttribute('aria-pressed', on); });
+    if (this.hooks.onBp) this.hooks.onBp(this);
+  }
+  runToBp() {
+    if (this.i === 0 && this.pred && this.choice == null) this.skipPred = true;
+    // 斷點：在該行「執行之前」暫停 → 顯示上一步的狀態，並標示即將執行的行
+    let k = this.i + 1;
+    if (this.pauseLine != null) k = this.i + 2;
+    while (k < this.steps.length && !this.bps.has(this.steps[k].line)) k++;
+    if (this.bps.size === 0 || k >= this.steps.length) {
+      this.go(this.steps.length - 1);
+      this.$('.note').textContent = (this.bps.size === 0 ? '未設定斷點：先點選左邊的行號（出現 ●）。' : '之後再沒有經過斷點的步驟，') + '程式已執行到最後。';
+      return;
+    }
+    this.go(k - 1);
+    this.pauseLine = this.steps[k].line;
+    $$('.codetab tbody tr', this.root).forEach(tr => { const on = tr.dataset.id === this.pauseLine; tr.classList.toggle('pause', on); if (on) tr.querySelector('.gut').textContent = '⏸'; });
+    this.$('.note').textContent = `⏸ 在斷點暫停：第 ${this.lineNo[this.pauseLine]} 行「即將執行」，還未執行。右邊是此刻的變量，檢查後再按「⏩ 執行到斷點」繼續。`;
+  }
+  rebuild() {
+    this.stop();
+    this.p = this.getP();
+    this.rows = this.prog.rows(this.p).filter(Boolean);
+    this.cols = this.prog.cols(this.p);
+    this.steps = this.prog.run(this.p);
+    this.pred = this.prog.predict ? this.prog.predict(this.p) : null;
+    this.choice = null; this.skipPred = false;
+    // Python 行號
+    let n = 0; this.lineNo = {};
+    this.rows.forEach(r => { if (r.py !== '' || r.blank) { n++; this.lineNo[r.id] = n; } });
+    const tb = this.$('.codetab tbody');
+    tb.innerHTML = this.rows.map(r => `<tr data-id="${r.id}"><td class="gut"></td><td class="ln">${this.lineNo[r.id] || ''}</td><td class="py">${hlPy(r.py)}</td><td class="pc">${hlPc(r.pc || '')}</td></tr>`).join('');
+    // 追蹤表
+    const th = `<thead><tr><th>步</th><th>行</th>${this.cols.map(c => `<th>${esc(c)}</th>`).join('')}<th>輸出</th></tr></thead>`;
+    const body = this.steps.slice(1).map((s, i) => `<tr class="fut"><td>${i + 1}</td><td>${this.lineNo[s.line] || '–'}</td>${this.cols.map(c => {
+      const v = s.changed.includes(c) && c in s.vars ? s.vars[c] : ''; return `<td>${esc(v)}</td>`; }).join('')}<td class="${s.err ? 'er' : ''}">${esc(s.newOut.join(' ⏎ '))}</td></tr>`).join('');
+    this.$('.trace').innerHTML = th + '<tbody>' + body + '</tbody>';
+    this.renderPred();
+    if (this.hooks.breakpoints) { const valid = new Set(this.rows.map(r => r.id)); this.bps.forEach(b => { if (!valid.has(b)) this.bps.delete(b); }); this.paintBps(); }
+    this.go(0);
+  }
+  renderPred() {
+    const box = this.$('.st-pred');
+    if (!this.pred) { box.innerHTML = ''; return; }
+    box.innerHTML = `<div class="predict"><div class="q">${this.pred.q}</div><div class="opts">${this.pred.options.map((o, i) => `<button class="opt" data-i="${i}" aria-pressed="false">${esc(o.t)}</button>`).join('')}</div><div class="verdict" aria-live="polite"></div></div>`;
+    box.querySelector('.opts').addEventListener('click', e => {
+      const b = e.target.closest('.opt'); if (!b) return;
+      this.choice = +b.dataset.i;
+      $$('.opt', box).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const v = box.querySelector('.verdict'); v.className = 'verdict'; v.textContent = '已記下你的預測。現在逐行執行，看看結果。';
+      if (this.i === this.steps.length - 1) this.revealPred();
+    });
+  }
+  revealPred() {
+    if (!this.pred) return;
+    const v = this.$('.st-pred .verdict'); if (!v) return;
+    if (this.choice == null) { v.className = 'verdict'; v.textContent = '（你沒有作預測）' + (this.pred.options.find(o => o.ok) ? ` 正確答案：${this.pred.options.find(o => o.ok).t}` : ''); return; }
+    const o = this.pred.options[this.choice];
+    v.className = 'verdict ' + (o.ok ? 'ok' : 'no');
+    v.textContent = (o.ok ? '預測正確！' : '預測不正確。') + ' ' + (o.why || '');
+    o.ok ? Sound.ok() : Sound.bad();
+  }
+  step(d) {
+    if (d > 0 && this.i === 0 && this.pred && this.choice == null && !this.skipPred) {
+      this.skipPred = true;
+      const v = this.$('.st-pred .verdict'); if (v) { v.className = 'verdict'; v.textContent = '先作預測，再執行！（再按一次「下一步」可略過預測）'; }
+      return;
+    }
+    this.go(this.i + d);
+  }
+  go(i) {
+    i = Math.max(0, Math.min(this.steps.length - 1, i)); this.pauseLine = null; $$('.codetab tr.pause', this.root).forEach(tr => tr.classList.remove('pause'));
+    const moved = i !== this.i; this.i = i;
+    const s = this.steps[i];
+    // 程式碼高亮
+    $$('.codetab tbody tr', this.root).forEach(tr => {
+      const on = tr.dataset.id === s.line; tr.classList.toggle('cur', on && !s.err); tr.classList.toggle('err', on && !!s.err);
+      tr.querySelector('.gut').textContent = on ? (s.err ? '✘' : '▶') : '';
+    });
+    const cur = this.root.querySelector('.codetab tr.cur, .codetab tr.err');
+    if (cur && moved) { const box = this.root.querySelector('.codebox'); const top = cur.offsetTop - box.clientHeight / 2; if (box.scrollHeight > box.clientHeight) box.scrollTop = Math.max(0, top); }
+    // 變量
+    const vb = this.$('.vars'); const keys = Object.keys(s.vars);
+    const order = this.cols.filter(c => keys.includes(c)).concat(keys.filter(k => !this.cols.includes(k)));
+    vb.innerHTML = order.length ? order.map(k => {
+      const lab = this.prog.varLabel ? this.prog.varLabel(k) : ''; const chg = s.changed.includes(k);
+      return `<div class="crate${chg ? ' chg' : ''}${chg && !REDUCED ? ' anim' : ''}"><div class="lbl">${esc(k)}${lab ? ' · ' + lab : ''}</div><div class="val">${esc(s.vars[k])}</div></div>`;
+    }).join('') : '<span class="empty">（未有任何變量）</span>';
+    // 輸出
+    const con = this.$('.console'); const old = s.out.length - s.newOut.length;
+    con.innerHTML = s.out.length ? s.out.map((o, k) => {
+      const er = /^(Traceback|\s+File|\w*Error)/.test(o) || (s.err && k >= old);
+      return `<div class="${er ? 'er' : ''} ${k >= old ? 'new' : ''}"><span class="pr">${er ? '✘' : '&gt;'}</span> ${esc(o)}</div>`;
+    }).join('') : '<span class="hint" style="color:#999">（未有輸出）</span>';
+    // 解說
+    const nt = this.$('.note'); nt.classList.toggle('err', !!s.err); nt.textContent = s.note || '';
+    // 追蹤表
+    $$('.trace tbody tr', this.root).forEach((tr, k) => { tr.classList.toggle('fut', k + 1 > i); tr.classList.toggle('cur', k + 1 === i); });
+    const ct = this.root.querySelector('.trace tr.cur'); const tw = this.$('.trace-wrap');
+    if (ct && moved) tw.scrollTop = Math.max(0, ct.offsetTop - tw.clientHeight + ct.offsetHeight + 8);
+    // 計數
+    this.$('.cnt').textContent = `第 ${i} / ${this.steps.length - 1} 步`;
+    this.root.querySelector('[data-a=prev]').disabled = i === 0;
+    this.root.querySelector('[data-a=next]').disabled = i === this.steps.length - 1;
+    if (moved && i > 0) Sound.step();
+    if (i === this.steps.length - 1 && moved) { this.revealPred(); if (s.err) Sound.bad(); }
+    if (this.hooks.onStep) this.hooks.onStep(s, i, this.steps, this);
+  }
+  play() {
+    if (this.i === this.steps.length - 1) this.go(0);
+    if (this.i === 0 && this.pred && this.choice == null) this.skipPred = true;
+    const b = this.root.querySelector('[data-a=play]'); b.setAttribute('aria-pressed', 'true'); b.textContent = '⏸ 暫停';
+    const tick = () => {
+      if (this.i >= this.steps.length - 1) { this.stop(); return; }
+      this.go(this.i + 1);
+      const sp = +this.root.querySelector('[data-a=speed]').value;
+      this.timer = setTimeout(tick, [0, 2000, 1400, 900, 550, 300][sp]);
+    };
+    this.timer = setTimeout(tick, 150);
+  }
+  stop() {
+    if (this.timer) clearTimeout(this.timer); this.timer = null;
+    const b = this.root && this.root.querySelector('[data-a=play]'); if (b) { b.setAttribute('aria-pressed', 'false'); b.textContent = '⏵ 自動播放'; }
+  }
+}
+
+/* 拖放工具（滑鼠與觸控通用） */
+function makeDraggable(node, { onDrop, onTap, ghostClass = '' }) {
+  let sx, sy, ghost = null, active = false, pid = null;
+  node.addEventListener('pointerdown', e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (node.dataset.locked === '1') return;
+    sx = e.clientX; sy = e.clientY; active = true; pid = e.pointerId;
+    try { node.setPointerCapture(pid); } catch (er) {}
+  });
+  node.addEventListener('pointermove', e => {
+    if (!active) return;
+    if (!ghost && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) {
+      ghost = node.cloneNode(true); ghost.classList.add('ghost'); if (ghostClass) ghost.classList.add(ghostClass);
+      ghost.style.width = node.offsetWidth + 'px'; document.body.appendChild(ghost);
+    }
+    if (ghost) {
+      e.preventDefault();
+      ghost.style.left = (e.clientX - 20) + 'px'; ghost.style.top = (e.clientY - 20) + 'px';
+      const t = document.elementFromPoint(e.clientX, e.clientY); $$('.hov').forEach(x => x.classList.remove('hov'));
+      const slot = t && t.closest('[data-drop]'); if (slot) slot.classList.add('hov');
+    }
+  });
+  const end = e => {
+    if (!active) return; active = false;
+    try { node.releasePointerCapture(pid); } catch (er) {}
+    $$('.hov').forEach(x => x.classList.remove('hov'));
+    if (ghost) {
+      ghost.remove(); ghost = null;
+      const t = document.elementFromPoint(e.clientX, e.clientY); const slot = t && t.closest('[data-drop]');
+      if (slot && e.type === 'pointerup') onDrop(slot);
+    } else if (e.type === 'pointerup') onTap && onTap();
+  };
+  node.addEventListener('pointerup', end); node.addEventListener('pointercancel', end);
+  node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap && onTap(); } });
+}
+<\/script>
+<script>
+/* ================= 3.1 ① 結構化編程 ================= */
+const STRUCT_CODE = `def get_average(scores):
+    total = 0
+    for s in scores:              # 甲
+        total = total + s
+    return total / len(scores)
+
+def get_grade(average):
+    if average >= 50:             # 乙
+        return "合格"
+    return "不合格"
+
+marks = [72, 45, 60]              # 丙（主程式）
+avg = get_average(marks)
+print(avg, get_grade(avg))`;
+const STRUCT_Q = [
+  { q: '甲：for s in scores 及其下一行', opts: [
+    { t: '順序', why: '這兩行會重複執行多次，不只是由上而下執行一次。' },
+    { t: '選擇', why: '這裏沒有按條件揀選執行哪一部分。' },
+    { t: '迭代', ok: 1, why: 'for 循環對每個分數重複執行累加——這是迭代。' }] },
+  { q: '乙：if average >= 50', opts: [
+    { t: '順序', why: 'if 會按條件決定執行哪一行，不是每行都執行。' },
+    { t: '選擇', ok: 1, why: '按條件 average >= 50 揀選傳回「合格」或「不合格」——這是選擇。' },
+    { t: '迭代', why: '這裏沒有重複執行。' }] },
+  { q: '丙：主程式的三行', opts: [
+    { t: '順序', ok: 1, why: '三行由上而下逐行執行一次：建立列表 → 計平均 → 輸出。' },
+    { t: '選擇', why: '主程式沒有 if。' },
+    { t: '迭代', why: '主程式沒有循環（循環在 get_average 內）。' }] },
+  { q: '這個問題被分解成多少個子程式（函數）？', opts: [
+    { t: '1 個', why: '數一數 def：有 get_average 和 get_grade。' },
+    { t: '2 個', ok: 1, why: 'get_average 計平均分，get_grade 判斷等級，各自負責一件有意義的工作。' },
+    { t: '3 個', why: '主程式不是函數；用 def 定義的只有兩個。' }] }
+];
+function initStruct() {
+  $('#structCode').innerHTML = hlPy(STRUCT_CODE);
+  const box = $('#structPick');
+  box.innerHTML = STRUCT_Q.map((c, i) => `<div class="cmt" data-i="${i}" style="margin-top:${i ? '.6rem' : 0}"><b>${esc(c.q)}</b>
+    <div class="copts" style="display:flex;flex-wrap:wrap;gap:.4rem">${c.opts.map((o, j) => `<button class="opt" data-j="${j}" aria-pressed="false">${esc(o.t)}</button>`).join('')}</div><div class="why" aria-live="polite"></div></div>`).join('') +
+    `<div class="console" style="margin-top:.6rem"><span class="pr">&gt;</span> 59.0 合格</div><div class="hint">（程式的輸出：(72 + 45 + 60) ÷ 3 = 59.0）</div>`;
+  box.addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b) return;
+    const card = b.closest('.cmt'), o = STRUCT_Q[+card.dataset.i].opts[+b.dataset.j];
+    $$('.opt', card).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    const w = card.querySelector('.why'); w.className = 'why ' + (o.ok ? 'ok' : 'no'); w.textContent = o.why; o.ok ? Sound.ok() : Sound.bad();
+  });
+}
+
+/* ================= 3.1 ② 模組化 vs 單一區塊：找出出錯的函數 ================= */
+const SUSPECTS = [
+  { fn: 'get_average(scores)', test: 'get_average([80, 60])', expect: '70.0', bugOut: '30.0',
+    code: 'def get_average(scores):\n    total = 0\n    for s in scores:\n        total = s              # ✘ 應為 total = total + s\n    return total / len(scores)' },
+  { fn: 'get_grade(average)', test: 'get_grade(70.0)', expect: "'合格'", bugOut: "'不合格'",
+    code: 'def get_grade(average):\n    if average >= 75:          # ✘ 合格分數應為 50\n        return "合格"\n    return "不合格"' },
+  { fn: 'format_report(avg, grade)', test: "format_report(70.0, '合格')", expect: "'平均分：70.0 合格'", bugOut: "'平均分：合格 70.0'",
+    code: 'def format_report(avg, grade):\n    return "平均分：" + grade + " " + str(avg)   # ✘ 次序倒轉' }
+];
+const MONO_OUT = ['平均分：30.0 不合格', '平均分：70.0 不合格', '平均分：合格 70.0'];
+let susBug = 0, susTests = 0, susDone = false;
+function newSuspect() {
+  let n; do { n = Math.floor(Math.random() * 3); } while (n === susBug && Math.random() < .7);
+  susBug = n; susTests = 0; susDone = false;
+  $('#monoRes').textContent = ''; $('#monoRes').className = 'testres'; $('#susVerdict').innerHTML = '';
+  renderSuspects();
+}
+function renderSuspects() {
+  $('#suspects').innerHTML = SUSPECTS.map((s, i) => `<div class="suspect"><h4>${esc(s.fn)}</h4>
+    <div class="sealed">${susDone ? '' : '（程式碼已封存）'}</div>${susDone && i === susBug ? `<div class="codebox"><pre class="pre">${hlPy(s.code)}</pre></div>` : ''}
+    <div class="ctl" style="margin:.4rem 0 0"><button class="btn alt" data-stest="${i}">單獨測試</button><button class="btn" data-accuse="${i}" ${susDone ? 'disabled' : ''}>指認疑犯</button></div>
+    <div class="testres" id="sres${i}"></div></div>`).join('');
+  $('#susInfo').textContent = `已做測試：${susTests} 次`;
+}
+function initSuspects() {
+  renderSuspects();
+  $('#susNew').addEventListener('click', newSuspect);
+  $('[data-mtest]').addEventListener('click', () => {
+    susTests++; $('#susInfo').textContent = `已做測試：${susTests} 次`;
+    const r = $('#monoRes'); r.className = 'testres no';
+    r.textContent = `report([80, 60])\n期望：平均分：70.0 合格\n實際：${MONO_OUT[susBug]}   ✘ 錯誤\n→ 只知道整個程式有錯，不知道錯在 80 行中的哪一行。`;
+    Sound.bad();
+  });
+  $('#suspects').addEventListener('click', e => {
+    const t = e.target.closest('[data-stest]'), a = e.target.closest('[data-accuse]');
+    if (t) {
+      const i = +t.dataset.stest, s = SUSPECTS[i], bad = i === susBug; susTests++;
+      const r = $('#sres' + i); r.className = 'testres ' + (bad ? 'no' : 'ok');
+      r.textContent = `${s.test}\n期望：${s.expect}\n實際：${bad ? s.bugOut : s.expect}   ${bad ? '✘ 失敗' : '✔ 通過'}`;
+      $('#susInfo').textContent = `已做測試：${susTests} 次`; bad ? Sound.bad() : Sound.ok();
+    }
+    if (a && !susDone) {
+      const i = +a.dataset.accuse, ok = i === susBug; susDone = true;
+      const keep = $$('#suspects .testres').map(x => [x.className, x.textContent]);
+      renderSuspects(); $$('#suspects .testres').forEach((x, k) => { x.className = keep[k][0]; x.textContent = keep[k][1]; });
+      $('#susVerdict').innerHTML = `<div class="callout"><span class="stamp ${ok ? 'ok' : 'no'}">${ok ? '✔ 指認正確' : '✘ 指認錯誤'}</span> 錯誤藏在 <code>${esc(SUSPECTS[susBug].fn)}</code>（程式碼已解封）。${ok ? `你用了 ${susTests} 次測試便鎖定錯誤所在的函數——這就是「個別模組可以獨立測試」的好處。` : '先逐個函數單獨測試，失敗的那個便是疑犯。'}　按「🔀 重新植入錯誤」再查一宗。</div>`;
+      ok ? Sound.ok() : Sound.bad();
+    }
+  });
+  newSuspect();
+}
+
+/* ================= 3.1 ③ 清晰的控制流程 ================= */
+let cfMode = 'messy';
+function cfP() { return { total: clampInt($('#cfTotal').value, 0, 99999, 200), member: $('#cfMember').value === 'True', mode: cfMode }; }
+function feeOf(total, member) { return (total >= 500 || member) ? 0 : 30; }
+const PROG_CF = {
+  rows(p) {
+    const head = [
+      { id: 'A1', py: `total = ${p.total}`, pc: `total ← ${p.total}` },
+      { id: 'A2', py: `is_member = ${PY.bool(p.member)}`, pc: `is_member ← ${p.member ? 'TRUE' : 'FALSE'}` }];
+    if (p.mode === 'clear') return head.concat([
+      { id: 'C1', py: 'fee = 30                        # 預設操作', pc: 'fee ← 30' },
+      { id: 'C2', py: 'if total >= 500 or is_member:   # 特殊情況', pc: 'IF total >= 500 OR is_member THEN' },
+      { id: 'C3', py: '    fee = 0', pc: '  fee ← 0' },
+      { id: 'CE', py: '', pc: 'END IF' },
+      { id: 'C4', py: 'print(fee)', pc: 'OUTPUT fee' }]);
+    return head.concat([
+      { id: 'M1', py: 'if total >= 500:', pc: 'IF total >= 500 THEN' },
+      { id: 'M2', py: '    if is_member:', pc: '  IF is_member THEN' },
+      { id: 'M3', py: '        fee = 0', pc: '    fee ← 0' },
+      { id: 'M4', py: '    else:', pc: '  ELSE' },
+      { id: 'M5', py: '        fee = 0', pc: '    fee ← 0' },
+      { id: 'ME1', py: '', pc: '  END IF' },
+      { id: 'M6', py: 'else:', pc: 'ELSE' },
+      { id: 'M7', py: '    if is_member:', pc: '  IF is_member THEN' },
+      { id: 'M8', py: '        fee = 0', pc: '    fee ← 0' },
+      { id: 'M9', py: '    else:', pc: '  ELSE' },
+      { id: 'M10', py: '        fee = 30', pc: '    fee ← 30' },
+      { id: 'ME2', py: '', pc: '  END IF' },
+      { id: 'ME3', py: '', pc: 'END IF' },
+      { id: 'M11', py: 'print(fee)', pc: 'OUTPUT fee' }]);
+  },
+  cols() { return ['total', 'is_member', 'fee']; },
+  run(p) {
+    const r = new Rec(), T = p.total, M = p.member, big = T >= 500;
+    r.set('total', String(T)); r.push('A1', `total = ${T}。`);
+    r.set('is_member', PY.bool(M)); r.push('A2', `is_member = ${PY.bool(M)}。`);
+    if (p.mode === 'clear') {
+      r.set('fee', '30'); r.push('C1', '先建立預設操作：一般情況收 $30。');
+      const c = big || M;
+      r.push('C2', `${T} >= 500 是 ${PY.bool(big)}，is_member 是 ${PY.bool(M)}；用 or 連接 → ${PY.bool(c)}。${c ? '屬特殊情況。' : '不是特殊情況，保留預設值。'}`);
+      if (c) { r.set('fee', '0'); r.push('C3', '特殊情況：免運費。'); }
+    } else {
+      r.push('M1', `${T} >= 500 → ${PY.bool(big)}，${big ? '進入第一層 if。' : '跳到外層 else。'}`);
+      if (big) {
+        r.push('M2', `is_member → ${PY.bool(M)}。`);
+        if (M) { r.set('fee', '0'); r.push('M3', 'fee = 0。'); } else { r.push('M4', '進入 else。'); r.set('fee', '0'); r.push('M5', 'fee = 0（與上面重複！）'); }
+      } else {
+        r.push('M6', '進入外層 else。');
+        r.push('M7', `is_member → ${PY.bool(M)}。`);
+        if (M) { r.set('fee', '0'); r.push('M8', 'fee = 0。'); } else { r.push('M9', '進入 else。'); r.set('fee', '30'); r.push('M10', 'fee = 30。'); }
+      }
+    }
+    const f = feeOf(T, M); r.print(String(f));
+    r.push(p.mode === 'clear' ? 'C4' : 'M11', `輸出 ${f}。${p.mode === 'clear' ? '只需 4 行、1 層 if。' : '要穿過兩層嵌套才得到答案，fee = 0 寫了三次。'}`);
+    return r.steps;
+  },
+  predict(p) {
+    const f = feeOf(p.total, p.member);
+    return { q: `total = ${p.total}、is_member = ${PY.bool(p.member)}，輸出是甚麼？`, options: [
+      { t: '0', ok: f === 0, why: f === 0 ? '滿 $500 或是會員，免運費。' : '未滿 $500，也不是會員，不能免運費。' },
+      { t: '30', ok: f === 30, why: f === 30 ? '未滿 $500，也不是會員，收預設的 $30。' : (p.total >= 500 ? '已滿 $500' : '是會員') + '，所以免運費。' }] };
+  }
+};
+let cfStepper;
+function renderCfTable() {
+  const cases = [[200, false], [200, true], [600, false], [600, true]];
+  $('#cfTable').innerHTML = `<thead><tr><th>total</th><th>is_member</th><th>混亂嵌套版輸出</th><th>預設操作版輸出</th><th>是否相同</th></tr></thead><tbody>${cases.map(([t, m]) => `<tr><td>${t}</td><td>${PY.bool(m)}</td><td>${feeOf(t, m)}</td><td>${feeOf(t, m)}</td><td>✔ 相同</td></tr>`).join('')}
+    <tr><td colspan="2"><b>程式行數 ／ 最深嵌套</b></td><td>11 行 ／ 2 層</td><td>4 行 ／ 1 層</td><td></td></tr></tbody>`;
+}
+function initCf() {
+  cfStepper = new Stepper($('#cfStepper'), PROG_CF, cfP);
+  $$('[data-cf]').forEach(b => b.addEventListener('click', () => { cfMode = b.dataset.cf; $$('[data-cf]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); cfStepper.rebuild(); }));
+  ['#cfTotal', '#cfMember'].forEach(s => $(s).addEventListener('change', () => cfStepper.rebuild()));
+  renderCfTable();
+}
+<\/script>
+<script>
+/* ================= 3.2 ① 數值錯誤 ================= */
+function renderNumLab() {
+  // 捨入誤差
+  const n = clampInt($('#nrN').value, 1, 100, 10);
+  let t = 0; for (let i = 0; i < n; i++) t = t + 0.1;
+  const eq = t === n / 10;
+  $('#nrCode').innerHTML = hlPy(`total = 0.0\nfor i in range(${n}):\n    total = total + 0.1\nprint(total)\nprint(total == ${n} / 10)`);
+  $('#nrOut').innerHTML = `<div><span class="pr">&gt;</span> ${esc(PY.float(t))}</div><div><span class="pr">&gt;</span> ${PY.bool(eq)}</div>`;
+  $('#nrNote').textContent = eq ? `這次剛好相等（${PY.float(t)}），試試其他次數，例如 3 或 10。` : `應該是 ${PY.float(n / 10)}，但得到 ${PY.float(t)}：0.1 不能用二進制準確表示，每次相加都帶有微小誤差，累積起來便顯現出來。`;
+  // 截尾誤差
+  const tot = clampInt($('#ntTotal').value, 0, 99999, 236), cnt = clampInt($('#ntCount').value, 1, 999, 3);
+  const exact = tot / cnt, cut = Math.trunc(exact);
+  $('#ntCode').innerHTML = hlPy(`total = ${tot}\ncount = ${cnt}\naverage = int(total / count)\nprint(average)\nprint(total / count)`);
+  $('#ntOut').innerHTML = `<div><span class="pr">&gt;</span> ${cut}</div><div><span class="pr">&gt;</span> ${esc(PY.float(exact))}</div>`;
+  const lost = exact - cut;
+  $('#ntNote').textContent = lost === 0 ? '這次剛好整除，沒有小數被截去。試試總分 236、人數 3。' : `int() 直接截去小數部分（不是四捨五入），少了約 ${(Math.round(lost * 1000) / 1000)}——這就是截尾誤差。`;
+  // 上溢：8 位元
+  const a = clampInt($('#noA').value, 0, 255, 250), b = clampInt($('#noB').value, 0, 255, 10);
+  const sum = a + b, res = sum % 256, over = sum > 255;
+  const bits = sum.toString(2).padStart(9, '0').slice(-9);
+  $('#noBits').innerHTML = bits.split('').map((c, i) => `<span class="${i === 0 ? (c === '1' ? 'lost' : 'lost') : (c === '1' ? 'one' : '')}" title="${i === 0 ? '第 9 個位元（存不下）' : ''}">${i === 0 ? (c === '1' ? '1' : '·') : c}</span>`).join('');
+  $('#noOut').innerHTML = `<div><span class="pr">&gt;</span> ${a} + ${b} → 計數器顯示 ${res}</div>` + (over ? `<div class="er"><span class="pr">✘</span> 上溢：正確答案 ${sum} 超過 255，需要第 9 個位元（虛線格），它被丟棄，只剩 ${res}。</div>` : `<div><span class="pr">✔</span> ${sum} 在 0–255 之內，沒有上溢。</div>`);
+  $('#nfOut').innerHTML = `<div><span class="pr">&gt;</span> print(1e308 * 10)   →  inf   <span class="pr">#</span> 上溢：太大</div><div><span class="pr">&gt;</span> print(5e-324 / 2)   →  0.0   <span class="pr">#</span> 下溢：太小</div>`;
+}
+function initNumLab() {
+  ['#nrN', '#ntTotal', '#ntCount', '#noA', '#noB'].forEach(s => { $(s).addEventListener('input', renderNumLab); $(s).addEventListener('change', renderNumLab); });
+  renderNumLab();
+}
+
+/* ================= 3.2 ② 三類程式錯誤 ================= */
+let emMode = 'ok';
+const PROG_EM = {
+  rows(p) {
+    const m = p.mode;
+    return [
+      { id: 'E1', py: m === 'runtime' ? 'scores = []' : 'scores = [80, 70, 90]', pc: m === 'runtime' ? 'scores ← []' : 'scores ← [80, 70, 90]' },
+      { id: 'E2', py: 'total = 0', pc: 'total ← 0' },
+      { id: 'E3', py: m === 'syntax' ? 'for s in scores' : 'for s in scores:', pc: 'FOR EACH s IN scores' },
+      { id: 'E4', py: '    total = total + s', pc: '  total ← total + s' },
+      { id: 'EN', py: '', pc: 'NEXT s' },
+      { id: 'E5', py: m === 'logic' ? 'average = total / 2' : 'average = total / len(scores)', pc: m === 'logic' ? 'average ← total / 2' : 'average ← total / LENGTH(scores)' },
+      { id: 'E6', py: 'print("平均分：", average)', pc: 'OUTPUT "平均分：", average' }
+    ];
+  },
+  cols() { return ['scores', 's', 'total', 'average']; },
+  run(p) {
+    const r = new Rec(), m = p.mode;
+    if (m === 'syntax') {
+      r.print('  File "main.py", line 3'); r.print('    for s in scores'); r.print('                   ^');
+      r.print("SyntaxError: expected ':'");
+      r.push('E3', '語法錯誤：for 語句尾漏了冒號。Python 在執行前先檢查整個程式的語法，發現錯誤便拒絕運行——第 1、2 行也沒有執行，所以沒有任何變量。（較舊版本的 Python 會顯示「invalid syntax」。）', { err: true });
+      return r.steps;
+    }
+    const sc = m === 'runtime' ? [] : [80, 70, 90];
+    r.set('scores', PY.list(sc.map(String))); r.push('E1', m === 'runtime' ? '這次的列表是空的。' : '建立分數列表。');
+    let t = 0; r.set('total', '0'); r.push('E2', 'total 由 0 開始。');
+    for (const s of sc) { r.set('s', String(s)); r.push('E3', `取出 s = ${s}。`); const o = t; t += s; r.set('total', String(t)); r.push('E4', `total = ${o} + ${s} = ${t}`); }
+    r.push('E3', sc.length ? '列表已沒有項目，循環結束。' : '列表是空的，循環一次也不執行。');
+    if (m === 'runtime') {
+      r.print('Traceback (most recent call last):'); r.print('  File "main.py", line 5, in <module>'); r.print('ZeroDivisionError: division by zero');
+      r.push('E5', '運行錯誤：len(scores) 是 0，total / 0 是非法操作，程式在第 5 行崩潰。前面幾行其實已經執行了。', { err: true });
+      return r.steps;
+    }
+    const avg = m === 'logic' ? t / 2 : t / sc.length;
+    r.set('average', PY.float(avg)); r.push('E5', m === 'logic' ? `average = ${t} / 2 = ${PY.float(avg)}。程式碼有效，但算法錯了：應除以人數 3，不是 2。` : `average = ${t} / 3 = ${PY.float(avg)}。`);
+    r.print('平均分： ' + PY.float(avg)); r.push('E6', m === 'logic' ? '邏輯錯誤：程式順利執行完畢，沒有任何錯誤訊息，但輸出的 120.0 是錯的。' : '程式正確執行完畢，輸出 80.0。');
+    return r.steps;
+  },
+  predict(p) {
+    const m = p.mode;
+    return { q: '這個版本執行後會怎樣？', options: [
+      { t: '平均分： 80.0', ok: m === 'ok', why: m === 'ok' ? '(80 + 70 + 90) ÷ 3 = 80.0。' : '這個版本有錯，不會得到正確的 80.0。' },
+      { t: '平均分： 120.0', ok: m === 'logic', why: m === 'logic' ? '除以 2 而不是 3：240 ÷ 2 = 120.0，程式不會報錯。' : '只有除以 2 的版本才會得到 120.0。' },
+      { t: '執行到第 5 行時崩潰（ZeroDivisionError）', ok: m === 'runtime', why: m === 'runtime' ? '列表是空的，len(scores) 為 0，除以 0 令程式崩潰。' : '這個版本的列表不是空的，不會除以 0。' },
+      { t: '一行也不執行（SyntaxError）', ok: m === 'syntax', why: m === 'syntax' ? 'for 行尾漏了冒號，程式拒絕運行。' : '這個版本沒有語法錯誤，程式可以運行。' }] };
+  }
+};
+let emStepper;
+function initEm() {
+  emStepper = new Stepper($('#emStepper'), PROG_EM, () => ({ mode: emMode }));
+  $$('[data-em]').forEach(b => b.addEventListener('click', () => { emMode = b.dataset.em; $$('[data-em]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); emStepper.rebuild(); }));
+}
+
+/* ================= 3.2 ③ 由症狀找原因 ================= */
+const CASES = [
+  { title: '案件 #301', sym: 'Traceback (most recent call last):\n  File "main.py", line 4, in <module>\nIndexError: list index out of range', err: true,
+    lines: ['scores = [70, 85, 90]', 'total = 0', 'for i in range(len(scores) + 1):', '    total = total + scores[i]', 'print(total)'],
+    type: 1, cause: 2,
+    typeWhy: ['程式可以開始運行（崩潰前已執行了幾行），所以不是語法錯誤。', '程式執行期間存取了不存在的項目而崩潰——運行錯誤。', '邏輯錯誤不會崩潰；這裏有錯誤訊息，程式崩潰了。'],
+    lineWhy: ['列表有 3 個項目（索引 0–2），沒有問題。', 'total 由 0 開始，沒有問題。', 'range(len(scores) + 1) 產生 0、1、2、3，多了一個 3，而 scores[3] 不存在——這是原因。', '錯誤訊息指着這行，但這只是「症狀」出現的地方；它存取 scores[i] 本身沒錯，錯在 i 的範圍。', '程式崩潰前根本未執行到這行。'] },
+  { title: '案件 #302', sym: '合格人數： 1\n（但 45、50、80 之中，50 分或以上算合格，應有 2 人）', err: false,
+    lines: ['marks = [45, 50, 80]', 'passed = 0', 'for m in marks:', '    if m > 50:', '        passed = passed + 1', 'print("合格人數：", passed)'],
+    type: 2, cause: 3,
+    typeWhy: ['程式順利執行，沒有語法錯誤。', '程式沒有崩潰，也沒有錯誤訊息。', '程式執行完畢但輸出錯誤——邏輯錯誤。'],
+    lineWhy: ['數據沒有問題。', '計數器由 0 開始，沒有問題。', '逐個分數檢查，沒有問題。', 'm > 50 把剛好 50 分的同學排除了，應為 m >= 50——這是原因。', '累加計數本身沒有問題。', '輸出的格式沒有問題，只是數值錯了。'] },
+  { title: '案件 #303', sym: '  File "main.py", line 3\n    print("總數：" total)\n          ^^^^^^^^^^^^^\nSyntaxError: invalid syntax. Perhaps you forgot a comma?', err: true,
+    lines: ['items = ["筆", "簿"]', 'total = len(items)', 'print("總數：" total)'],
+    type: 0, cause: 2,
+    typeWhy: ['程式拒絕運行，訊息是 invalid syntax——語法錯誤。', '運行錯誤要在程式執行期間才發生；這個程式一行也沒有執行。', '邏輯錯誤的程式能運行；這個程式根本不能運行。'],
+    lineWhy: ['列表的寫法正確。', 'len(items) 的寫法正確。', '"總數：" 和 total 之間漏了逗號，違反 Python 語法——這是原因。'] }
+];
+function renderCases() {
+  $('#caseFiles').innerHTML = CASES.map((c, i) => `<div class="case" data-i="${i}">
+    <h4>${c.title} <span class="evid red">症狀</span></h4>
+    <div class="sym${c.err ? '' : ' okout'}">${esc(c.sym)}</div>
+    <div style="margin-top:.5rem"><b>第一步：這是哪類錯誤？</b></div>
+    <div class="copts">${['語法錯誤', '運行錯誤', '邏輯錯誤'].map((t, j) => `<button class="opt" data-t="${j}" aria-pressed="false">${t}</button>`).join('')}</div>
+    <div class="why tw" aria-live="polite"></div>
+    <div class="step2" hidden><div style="margin-top:.5rem"><b>第二步：點選造成錯誤的那一行</b></div>
+      <ul class="linepick" style="margin-top:.3rem">${c.lines.map((l, k) => `<li><button data-l="${k}"><span class="ln">${k + 1}</span><code>${hlPy(l)}</code></button></li>`).join('')}</ul>
+      <div class="why lw" aria-live="polite"></div></div></div>`).join('');
+}
+function initCases() {
+  renderCases();
+  $('#caseFiles').addEventListener('click', e => {
+    const card = e.target.closest('.case'); if (!card) return; const c = CASES[+card.dataset.i];
+    const t = e.target.closest('[data-t]'), l = e.target.closest('[data-l]');
+    if (t) {
+      const j = +t.dataset.t, ok = j === c.type;
+      $$('[data-t]', card).forEach(x => x.setAttribute('aria-pressed', x === t ? 'true' : 'false'));
+      const w = card.querySelector('.tw'); w.className = 'why tw ' + (ok ? 'ok' : 'no'); w.textContent = c.typeWhy[j];
+      if (ok) card.querySelector('.step2').hidden = false;
+      ok ? Sound.ok() : Sound.bad();
+    }
+    if (l) {
+      const k = +l.dataset.l, ok = k === c.cause;
+      $$('.linepick li', card).forEach((li, x) => { li.classList.toggle('sel', x === k && !ok); li.classList.toggle('r-ok', x === k && ok); li.classList.toggle('r-no', x === k && !ok); });
+      const w = card.querySelector('.lw'); w.className = 'why lw ' + (ok ? 'ok' : 'no'); w.textContent = c.lineWhy[k];
+      card.classList.toggle('solved', ok);
+      ok ? Sound.ok() : Sound.bad();
+    }
+  });
+}
+<\/script>
+<script>
+/* ================= 3.3 ① 存根與標記 ================= */
+let sbMode = 'stub';
+function sbP() { return { mode: sbMode, list: parseIntList($('#sbList').value, 8) }; }
+const PROG_SB = {
+  rows(p) {
+    return [
+      { id: 'B1', py: 'def check_score(score):', pc: 'FUNCTION check_score(score)' },
+      p.mode === 'stub'
+        ? { id: 'B2', py: '    return True             # 存根：暫時一律當作有效', pc: '  RETURN TRUE   // 存根' }
+        : { id: 'B2', py: '    return 0 <= score <= 100', pc: '  RETURN score >= 0 AND score <= 100' },
+      { id: 'BE', py: '', pc: 'END FUNCTION' },
+      { id: 'B3', py: `scores = [${p.list.join(', ')}]`, pc: `scores ← [${p.list.join(', ')}]` },
+      { id: 'B4', py: 'has_error = False           # 標記', pc: 'has_error ← FALSE   // 標記' },
+      { id: 'B5', py: 'for s in scores:', pc: 'FOR EACH s IN scores' },
+      { id: 'B6', py: '    if not check_score(s):', pc: '  IF NOT check_score(s) THEN' },
+      { id: 'B7', py: '        has_error = True', pc: '    has_error ← TRUE' },
+      { id: 'BN', py: '', pc: '  END IF\nNEXT s' },
+      { id: 'B8', py: 'print("有錯誤：", has_error)', pc: 'OUTPUT "有錯誤：", has_error' }
+    ];
+  },
+  cols() { return ['s', 'check_score(s)', 'has_error']; },
+  run(p) {
+    const r = new Rec(), stub = p.mode === 'stub';
+    r.push('B1', stub ? '定義函數 check_score。它還未寫好，現在只是一個存根。' : '定義真正的 check_score 函數。');
+    r.set('scores', PY.list(p.list.map(String))); r.push('B3', '建立分數列表。');
+    let flag = false; r.set('has_error', 'False'); r.push('B4', '標記 has_error 由 False 開始：「到目前為止未發生錯誤」。');
+    for (const s of p.list) {
+      r.set('s', String(s)); r.push('B5', `取出 s = ${s}。`);
+      const ok = stub ? true : (s >= 0 && s <= 100);
+      r.set('check_score(s)', PY.bool(ok));
+      r.push('B2', stub ? `存根不理會分數，一律傳回 True。（${s} 其實${s >= 0 && s <= 100 ? '有效' : '無效'}）` : `0 <= ${s} <= 100 → ${PY.bool(ok)}。`);
+      r.push('B6', `not ${PY.bool(ok)} → ${PY.bool(!ok)}，${ok ? '分數有效，不改標記。' : '分數無效！'}`);
+      if (!ok) { flag = true; r.set('has_error', 'True'); r.push('B7', '把標記設為 True：記錄「錯誤曾經發生」。之後即使遇到有效分數，標記也不會變回 False。'); }
+    }
+    r.push('B5', p.list.length ? '列表已沒有項目，循環結束。' : '列表是空的，循環一次也不執行。');
+    r.print('有錯誤： ' + PY.bool(flag));
+    r.push('B8', stub ? `輸出 ${PY.bool(flag)}。主程式的循環和標記都運作正常——存根令主程式可以先測試；但要得到正確結果，仍要換上真正的函數。` : `輸出 ${PY.bool(flag)}。`);
+    return r.steps;
+  },
+  predict(p) {
+    const bad = p.list.some(s => s < 0 || s > 100), real = p.mode === 'real' && bad;
+    return { q: '程式會輸出甚麼？', options: [
+      { t: '有錯誤： True', ok: real, why: real ? '列表中有無效分數，真正的函數傳回 False，標記被設為 True。' : (p.mode === 'stub' ? '存根一律傳回 True，所以 if 永遠不成立，標記不會改變。' : '所有分數都在 0–100 之內，標記不會改變。') },
+      { t: '有錯誤： False', ok: !real, why: !real ? (p.mode === 'stub' ? '存根一律傳回 True（當作有效），標記保持 False。' : '所有分數都有效，標記保持 False。') : '列表有無效分數，真正的函數會發現它，標記會變成 True。' }] };
+  }
+};
+let sbStepper;
+function initSb() {
+  sbStepper = new Stepper($('#sbStepper'), PROG_SB, sbP);
+  $$('[data-sb]').forEach(b => b.addEventListener('click', () => { sbMode = b.dataset.sb; $$('[data-sb]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); sbStepper.rebuild(); }));
+  $('#sbList').addEventListener('change', () => sbStepper.rebuild());
+}
+
+/* ================= 3.3 ② 斷點與追蹤 ================= */
+function bpP() { return { list: parseIntList($('#bpList').value, 8), trace: $('#bpTrace').checked, fix: $('#bpFix').checked }; }
+const PROG_BP = {
+  rows(p) {
+    const rows = [
+      { id: 'P1', py: `temps = [${p.list.join(', ')}]`, pc: `temps ← [${p.list.join(', ')}]` },
+      { id: 'P2', py: p.fix ? 'highest = temps[0]' : 'highest = 0', pc: p.fix ? 'highest ← temps[0]' : 'highest ← 0' },
+      { id: 'P3', py: 'for t in temps:', pc: 'FOR EACH t IN temps' }];
+    if (p.trace) rows.push({ id: 'PT', py: '    print("t =", t, "highest =", highest)   # 追蹤', pc: '  OUTPUT "t =", t, "highest =", highest' });
+    return rows.concat([
+      { id: 'P4', py: '    if t > highest:', pc: '  IF t > highest THEN' },
+      { id: 'P5', py: '        highest = t', pc: '    highest ← t' },
+      { id: 'PN', py: '', pc: '  END IF\nNEXT t' },
+      { id: 'P6', py: 'print("最高溫度：", highest)', pc: 'OUTPUT "最高溫度：", highest' }]);
+  },
+  cols() { return ['t', 't > highest', 'highest']; },
+  run(p) {
+    const r = new Rec(), L = p.list;
+    r.set('temps', PY.list(L.map(String))); r.push('P1', '建立溫度列表。');
+    if (p.fix && !L.length) {
+      r.print('Traceback (most recent call last):'); r.print('  File "main.py", line 2, in <module>'); r.print('IndexError: list index out of range');
+      r.push('P2', '列表是空的，temps[0] 不存在——要另外處理空列表（特殊情況）。', { err: true }); return r.steps;
+    }
+    let h = p.fix ? L[0] : 0;
+    r.set('highest', String(h)); r.push('P2', p.fix ? `highest 由第一個溫度 ${h} 開始。` : 'highest 由 0 開始——但如果全部溫度都低於 0，0 便永遠是「最高」！');
+    for (const t of L) {
+      r.set('t', String(t)); r.push('P3', `取出 t = ${t}。`);
+      if (p.trace) { r.print(`t = ${t} highest = ${h}`); r.push('PT', `追蹤日誌：印出 t = ${t}、highest = ${h}。`); }
+      const c = t > h; r.set('t > highest', PY.bool(c)); r.push('P4', `${t} > ${h} → ${PY.bool(c)}。${c ? '' : '不更新。'}`);
+      if (c) { h = t; r.set('highest', String(h)); r.push('P5', `highest 更新為 ${h}。`); }
+    }
+    r.push('P3', L.length ? '列表已沒有項目，循環結束。' : '列表是空的，循環一次也不執行。');
+    r.print('最高溫度： ' + h);
+    const real = L.length ? Math.max(...L) : null;
+    r.push('P6', `輸出 ${h}。` + (real !== null && h !== real ? `錯了！列表中最高的是 ${real}。用斷點或追蹤可見：highest 由 0 開始後一直沒有被更新。` : ''));
+    return r.steps;
+  },
+  predict(p) {
+    const L = p.list; if (!L.length) return null;
+    let h = p.fix ? L[0] : 0; L.forEach(t => { if (t > h) h = t; });
+    const real = Math.max(...L);
+    const raw = [
+      { t: '最高溫度： ' + h, ok: true, why: p.fix ? 'highest 由第一個溫度開始，正確找出最大值。' : (h === real ? '這組數據中有溫度高於 0，所以剛好正確。' : 'highest 由 0 開始，而所有溫度都低於 0，所以 highest 從未被更新。') },
+      { t: '最高溫度： ' + real, ok: false, why: '這是「應該」得到的答案，但程式由 0 開始比較，沒有溫度大於 0。' },
+      { t: '最高溫度： ' + Math.min(...L), ok: false, why: '這是最低溫度；程式用 t > highest，找的是較大的值。' }];
+    const o = []; raw.forEach(x => { if (!o.some(y => y.t === x.t)) o.push(x); });
+    return { q: '程式會輸出甚麼？', options: o };
+  }
+};
+let bpStepper;
+function initBp() {
+  bpStepper = new Stepper($('#bpStepper'), PROG_BP, bpP, { breakpoints: true, traceOpen: true });
+  $('#bpStepper').classList.add('bp-on');
+  ['#bpList', '#bpTrace', '#bpFix'].forEach(s => $(s).addEventListener('change', () => bpStepper.rebuild()));
+}
+
+/* ================= 3.3 ③ 系統化測試：證物袋 ================= */
+const TD_CAT = { normal: '正常情況', edge: '邊界情況', special: '特殊情況' };
+function tdTrueCat(v) { if (v < 0 || v > 100) return 'special'; if (v === 0 || v === 50 || v === 100) return 'edge'; return 'normal'; }
+function tdSpec(v) { if (v < 0 || v > 100) return '無效'; return v >= 50 ? '合格' : '不合格'; }
+function tdBug(v) { if (v < 0 || v > 100) return '無效'; return v > 50 ? '合格' : '不合格'; }
+const TD_CODE = 'def grade(score):\n    if score < 0 or score > 100:\n        return "無效"\n    if score > 50:              # ✘ 應為 score >= 50\n        return "合格"\n    return "不合格"';
+let tdBag = [];
+function renderTd() {
+  const hit = new Set(tdBag.map(b => tdTrueCat(b.v)));
+  $('#tdCover').innerHTML = '覆蓋：' + ['normal', 'edge', 'special'].map(k => `<span class="${hit.has(k) ? 'hit' : ''}">${TD_CAT[k]}</span>`).join('');
+  $('#tdTable').innerHTML = `<thead><tr><th>#</th><th>score</th><th>你標示的類別</th><th>規格要求</th><th>實際輸出</th><th>結果</th></tr></thead><tbody>${tdBag.length ? tdBag.map((b, i) => {
+    const tc = tdTrueCat(b.v), catOk = tc === b.cat, exp = tdSpec(b.v), act = tdBug(b.v), pass = exp === act;
+    return `<tr><td>${i + 1}</td><td class="mono">${b.v}</td><td class="${catOk ? 'ok' : 'no'}">${TD_CAT[b.cat]} ${catOk ? '✔' : `✘（應為${TD_CAT[tc]}）`}</td><td>${exp}</td><td>${act}</td><td class="${pass ? 'ok' : 'no'}">${pass ? '✔ 通過' : '✘ 不符規格'}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="hint">證物袋是空的：輸入一個分數，揀類別，按「放入證物袋並測試」。</td></tr>'}</tbody>`;
+  const caught = tdBag.some(b => tdSpec(b.v) !== tdBug(b.v));
+  $('#tdVerdict').innerHTML = caught
+    ? `<div class="callout"><span class="stamp no">✘ 揪出錯誤</span> 用邊界值 50 測試時，輸出「不合格」，但規格說 50 分或以上合格。程式碼已解封：</div><div class="codebox"><pre class="pre">${hlPy(TD_CODE)}</pre></div>`
+    : (tdBag.length ? `<p class="hint">暫時全部通過${hit.size < 3 ? `，但還未覆蓋${['normal', 'edge', 'special'].filter(k => !hit.has(k)).map(k => TD_CAT[k]).join('、')}` : ''}。測試全部通過不代表沒有錯誤——想想規格中哪些數值最容易寫錯。</p>` : '');
+}
+function initTd() {
+  renderTd();
+  $('#tdAdd').addEventListener('click', () => {
+    const raw = $('#tdVal').value.trim(); const v = Number(raw);
+    if (raw === '' || !Number.isFinite(v) || Math.abs(v) > 100000) { $('#tdVerdict').innerHTML = '<p class="hint">請輸入一個數值。</p>'; return; }
+    if (tdBag.length >= 12) tdBag.shift();
+    tdBag.push({ v, cat: $('#tdCat').value });
+    const last = tdBag[tdBag.length - 1]; (tdSpec(last.v) !== tdBug(last.v)) ? Sound.bad() : Sound.step();
+    renderTd();
+  });
+  $('#tdReset').addEventListener('click', () => { tdBag = []; renderTd(); });
+}
+<\/script>
+<script>
+/* ================= 練習引擎 ================= */
+const QSTATE = { results: store.get('results', {}), best: store.get('best', {}) };
+const norm = s => String(s == null ? '' : s).replace(/\s+/g, '').replace(/"/g, "'");
+const normB = s => { const n = norm(s); return /^(true|false)$/i.test(n) ? n[0].toUpperCase() + n.slice(1).toLowerCase() : n; };
+function shuffleNot(arr, seed) {
+  const a = arr.slice(); let s = seed;
+  const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  for (let k = 0; k < 20; k++) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } if (a.some((x, i) => x !== arr[i])) break; }
+  return a;
+}
+function record(q, ok) {
+  if (!(q.id in QSTATE.results)) { QSTATE.results[q.id] = ok; store.set('results', QSTATE.results); }
+  const sec = q.sec, score = secScore(sec);
+  if (score > (QSTATE.best[sec] || 0)) { QSTATE.best[sec] = score; store.set('best', QSTATE.best); }
+  ok ? Sound.ok() : Sound.bad();
+  updateScores();
+}
+const secQs = sec => QUESTIONS.filter(q => q.sec === sec);
+const secScore = sec => secQs(sec).filter(q => QSTATE.results[q.id] === true).length;
+function updateScores() {
+  SECTIONS.forEach(S => {
+    const n = secQs(S.id).length, done = secQs(S.id).filter(q => q.id in QSTATE.results).length;
+    const box = $(`#drill${S.id} .score`);
+    const bd = document.querySelector(`.badge[data-score="${S.id}"]`); if (bd) bd.textContent = `★ ${secScore(S.id)}/${n}`;
+    if (box) box.innerHTML = `<span>本節得分 ${secScore(S.id)} / ${n}</span><span>已作答 ${done} / ${n}</span><span>最佳紀錄 ${QSTATE.best[S.id] || 0} / ${n}</span>`;
+  });
+  renderReport();
+}
+function fbHTML(ok, html) { return `<div class="fb ${ok ? 'ok' : 'no'}"><div class="vd">${ok ? '正確！' : '未正確。'}</div>${html}</div>`; }
+function codeBlock(c) { return `<div class="codebox" style="margin:.3rem 0 .6rem"><pre class="pre">${hlPy(c)}</pre></div>`; }
+
+function renderQuestion(q, num) {
+  const card = el('div', 'q'); card.id = 'card-' + q.id;
+  const prev = q.id in QSTATE.results ? `（首次作答：${QSTATE.results[q.id] ? '✔ 答對' : '✘ 答錯'}）` : '';
+  card.innerHTML = `<div class="qh"><span class="qn">Q${num}</span><span class="qt">${q.tag}</span><span class="qstat">${prev}</span></div><div class="stem">${esc(q.stem)}</div>${q.code && q.type !== 'fill' ? codeBlock(q.code) : ''}<div class="body"></div><div class="acts"></div><div class="fbx" aria-live="polite"></div>`;
+  const body = card.querySelector('.body'), acts = card.querySelector('.acts'), fbx = card.querySelector('.fbx');
+  const submit = el('button', 'btn', '提交答案'); const retry = el('button', 'btn alt', '⟲ 再試一次'); retry.hidden = true;
+  acts.append(submit, retry);
+  const finish = (ok, html) => { fbx.innerHTML = fbHTML(ok, html); record(q, ok); submit.disabled = true; retry.hidden = false; card.querySelector('.qstat').textContent = `（首次作答：${QSTATE.results[q.id] ? '✔ 答對' : '✘ 答錯'}）`; };
+  retry.addEventListener('click', () => { const fresh = renderQuestion(q, num); card.replaceWith(fresh); });
+
+  if (q.type === 'mc') {
+    let pick = null;
+    body.innerHTML = `<div class="opts">${q.options.map((o, i) => `<button class="opt${o.mono ? ' mono' : ''}" data-i="${i}" aria-pressed="false">${String.fromCharCode(65 + i)}. ${esc(o.t)}</button>`).join('')}</div>`;
+    body.addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b || submit.disabled) return; pick = +b.dataset.i; $$('.opt', body).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
+    submit.addEventListener('click', () => {
+      if (pick == null) { fbx.innerHTML = '<div class="fb no"><div class="vd">請先揀選一個答案。</div></div>'; return; }
+      const o = q.options[pick], ci = q.options.findIndex(x => x.ok);
+      $$('.opt', body).forEach((b, i) => { if (i === ci) b.classList.add('right'); else if (i === pick) b.classList.add('wrong'); });
+      finish(!!o.ok, o.ok ? `<p>${esc(o.why)}</p>` : `<p><b>你選了 ${String.fromCharCode(65 + pick)}：</b>${esc(o.why)}</p><p><b>正確答案 ${String.fromCharCode(65 + ci)}：</b>${esc(q.options[ci].why)}</p>`);
+    });
+  }
+
+  if (q.type === 'trace') {
+    let h = `<div class="tt-wrap"><table class="tt"><thead><tr><th>#</th>${q.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+    q.rows.forEach((r, ri) => {
+      h += `<tr><td>${ri + 1}</td>${r.c.map((c, ci) => c.a ? `<td><input class="${q.wide ? 'wide' : ''}" data-r="${ri}" data-c="${ci}" aria-label="第 ${ri + 1} 行 ${esc(q.cols[ci])}" autocomplete="off" autocapitalize="off" spellcheck="false"></td>` : `<td class="given">${esc(c.g)}</td>`).join('')}</tr>`;
+    });
+    h += `</tbody></table></div><label class="typed" style="margin-top:.4rem"><b>輸出：</b><input data-out="1" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="輸出"></label>`;
+    body.innerHTML = h;
+    submit.addEventListener('click', () => {
+      let allOk = true; const notes = [];
+      q.rows.forEach((r, ri) => r.c.forEach((c, ci) => {
+        if (!c.a) return; const inp = body.querySelector(`input[data-r="${ri}"][data-c="${ci}"]`);
+        const ok = c.a.map(normB).includes(normB(inp.value)); inp.parentElement.classList.toggle('cok', ok); inp.parentElement.classList.toggle('cno', !ok);
+        if (!ok) { allOk = false; notes.push(`第 ${ri + 1} 行「${q.cols[ci]}」應為 <code>${esc(c.a[0])}</code>${inp.value.trim() ? `（你寫了 <code>${esc(inp.value.trim())}</code>）` : '（未填）'}：${esc(r.why)}`); }
+      }));
+      const oi = body.querySelector('[data-out]'); const ook = q.output.a.map(norm).includes(norm(oi.value));
+      oi.style.borderStyle = ook ? 'solid' : 'dashed'; oi.style.background = ook ? '#e1f0e3' : '#f8e0d6';
+      if (!ook) { allOk = false; notes.push(`輸出：${esc(q.output.why)}`); }
+      $$('input', body).forEach(i => i.readOnly = true);
+      finish(allOk, allOk ? `<p>追蹤表全部正確。${esc(q.output.why)}</p>` : `<ul>${notes.map(n => `<li>${n}</li>`).join('')}</ul>`);
+    });
+  }
+
+  if (q.type === 'fill') {
+    const parts = q.code.split(/\[\[(\d+)\]\]/);
+    let h = '';
+    parts.forEach((p, i) => { h += i % 2 ? `<input data-b="${p}" aria-label="空格 ${+p + 1}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="(${+p + 1})">` : hlPy(p); });
+    body.innerHTML = `<div class="fillcode">${h}</div>`;
+    submit.addEventListener('click', () => {
+      let allOk = true; const notes = [];
+      q.blanks.forEach((b, i) => {
+        const inp = body.querySelector(`[data-b="${i}"]`); const v = inp.value.trim();
+        let ok, why;
+        if (b.check) ({ ok, why } = b.check(v));
+        else { ok = b.a.includes(v); why = ok ? b.why : ((b.wrong && b.wrong[v]) || (v ? `這不是合適的答案。${b.why}` : '未填寫。')); }
+        inp.classList.toggle('cok', ok); inp.classList.toggle('cno', !ok); inp.readOnly = true;
+        if (!ok) allOk = false;
+        notes.push(`<li>空格 (${i + 1})：${ok ? '✔' : '✘'} ${esc(why)}${ok ? '' : `　參考答案：<code>${esc(b.model)}</code>`}</li>`);
+      });
+      finish(allOk, `<ul>${notes.join('')}</ul>`);
+    });
+  }
+
+  if (q.type === 'find') {
+    let pick = null;
+    body.innerHTML = `<ul class="linepick">${q.lines.map((l, i) => `<li><button data-i="${i}" aria-pressed="false"><span class="ln">${i + 1}</span><span class="flag"></span><code>${hlPy(l.c)}</code></button></li>`).join('')}</ul>`;
+    body.addEventListener('click', e => { const b = e.target.closest('button'); if (!b || submit.disabled) return; pick = +b.dataset.i; $$('li', body).forEach((li, i) => li.classList.toggle('sel', i === pick)); });
+    submit.addEventListener('click', () => {
+      if (pick == null) { fbx.innerHTML = '<div class="fb no"><div class="vd">請先點選一行。</div></div>'; return; }
+      const ci = q.lines.findIndex(l => l.ok), ok = pick === ci;
+      $$('li', body).forEach((li, i) => { li.classList.remove('sel'); if (i === ci) li.classList.add('r-ok'); else if (i === pick) li.classList.add('r-no'); });
+      finish(ok, ok ? `<p>第 ${ci + 1} 行：${esc(q.lines[ci].why)}</p>` : `<p><b>你選了第 ${pick + 1} 行：</b>${esc(q.lines[pick].why)}</p><p><b>出錯的是第 ${ci + 1} 行：</b>${esc(q.lines[ci].why)}</p>`);
+    });
+  }
+
+  if (q.type === 'parsons') {
+    const order = shuffleNot(q.lines.map((l, i) => i), q.id.length * 97 + num * 31);
+    const ul = el('ol', 'parsons'); ul.setAttribute('aria-label', '可排列的程式碼');
+    order.forEach(i => {
+      const li = el('li', '', `<span class="grip" aria-hidden="true">☰</span><code>${hlPy(q.lines[i].c)}</code><span class="mv"><button type="button" data-m="-1" aria-label="上移">▲</button><button type="button" data-m="1" aria-label="下移">▼</button></span>`);
+      li.dataset.i = i; ul.appendChild(li);
+    });
+    body.appendChild(ul);
+    const clearMarks = () => $$('li', ul).forEach(li => li.classList.remove('pok', 'pno'));
+    ul.addEventListener('click', e => {
+      const b = e.target.closest('button[data-m]'); if (!b || submit.disabled) return;
+      const li = b.closest('li'); clearMarks();
+      if (b.dataset.m === '-1' && li.previousElementSibling) ul.insertBefore(li, li.previousElementSibling);
+      if (b.dataset.m === '1' && li.nextElementSibling) ul.insertBefore(li.nextElementSibling, li);
+      b.focus();
+    });
+    let drag = null;
+    ul.addEventListener('pointerdown', e => {
+      const g = e.target.closest('.grip'); if (!g || submit.disabled) return;
+      drag = g.closest('li'); drag.classList.add('dragging'); clearMarks(); e.preventDefault();
+      try { ul.setPointerCapture(e.pointerId); } catch (er) {}
+    });
+    ul.addEventListener('pointermove', e => {
+      if (!drag) return; e.preventDefault();
+      const items = $$('li', ul).filter(li => li !== drag);
+      let target = null;
+      for (const li of items) { const r = li.getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { target = li; break; } }
+      if (target) { if (drag.nextElementSibling !== target) ul.insertBefore(drag, target); } else if (ul.lastElementChild !== drag) ul.appendChild(drag);
+    });
+    const endDrag = e => { if (!drag) return; drag.classList.remove('dragging'); drag = null; try { ul.releasePointerCapture(e.pointerId); } catch (er) {} };
+    ul.addEventListener('pointerup', endDrag); ul.addEventListener('pointercancel', endDrag);
+    submit.addEventListener('click', () => {
+      const cur = $$('li', ul).map(li => +li.dataset.i); let first = -1;
+      $$('li', ul).forEach((li, pos) => { const ok = cur[pos] === pos; li.classList.toggle('pok', ok); li.classList.toggle('pno', !ok); if (!ok && first < 0) first = pos; });
+      const ok = first < 0;
+      finish(ok, ok ? '<p>次序完全正確！</p>' : `<p>第一個放錯的位置是第 ${first + 1} 行：這裏應該是 <code>${esc(q.lines[first].c.trim())}</code>——${esc(q.lines[first].why)}</p><p>你放在這裏的 <code>${esc(q.lines[cur[first]].c.trim())}</code>：${esc(q.lines[cur[first]].why)}</p><div class="boxtitle">正確次序</div>${codeBlock(q.lines.map(l => l.c).join('\n'))}`);
+    });
+  }
+  return card;
+}
+function renderDrill(sec) {
+  const S = SECTIONS.find(s => s.id === sec), box = $('#drill' + sec);
+  box.innerHTML = `<div class="dh"><span class="tag" style="font-family:var(--stencil);background:var(--yellow);color:var(--ink);padding:0 .45em">PRACTICE</span><h3>${S.name} · 練習</h3><div class="score"></div><button class="btn alt" data-reset="${sec}">重做本節</button></div><div class="qs"></div>`;
+  const qs = box.querySelector('.qs');
+  let num = QUESTIONS.findIndex(q => q.sec === sec);
+  secQs(sec).forEach(q => qs.appendChild(renderQuestion(q, ++num)));
+  box.querySelector('[data-reset]').addEventListener('click', () => {
+    secQs(sec).forEach(q => delete QSTATE.results[q.id]); store.set('results', QSTATE.results); renderDrill(sec); updateScores();
+  });
+}
+function renderReport() {
+  const box = $('#reportCards'); if (!box) return;
+  let tot = 0, all = 0, weakest = null;
+  box.innerHTML = SECTIONS.map(S => {
+    const n = secQs(S.id).length, sc = secScore(S.id), done = secQs(S.id).filter(q => q.id in QSTATE.results).length, best = QSTATE.best[S.id] || 0;
+    tot += sc; all += n; const ratio = done ? sc / done : 1;
+    if (done && (!weakest || ratio < weakest.r)) weakest = { r: ratio, S };
+    return `<div class="manifest"><div class="hint">案件 · ${S.name}</div><div class="big">${sc}<span style="font-size:1.2rem"> / ${n}</span></div>
+      <div class="bar2" role="img" aria-label="得分比例"><i style="width:${n ? sc / n * 100 : 0}%"></i></div>
+      <div>已作答 ${done} / ${n} ｜ 最佳紀錄 ${best} / ${n}</div><a href="${S.anchor}">重溫本節 →</a></div>`;
+  }).join('');
+  const t = $('#reportTotal');
+  if (t) t.innerHTML = `全章得分：<b>${tot} / ${all}</b>。` + (weakest && weakest.r < .8 ? ` 建議重溫：<a href="${weakest.S.anchor}">${weakest.S.name}</a>。` : (tot === all ? ' 全部答對，結案！' : ''));
+}
+
+function renderMapping() {
+  $('#mapTable').innerHTML = `<thead><tr><th>課本重點</th><th>對應的互動</th><th>對應的練習</th></tr></thead><tbody>${MAPPING.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody>`;
+}
+
+/* ================= 啟動 ================= */
+function safe(fn, name) { try { fn(); } catch (e) { console.error('初始化失敗：' + name, e); } }
+document.addEventListener('DOMContentLoaded', () => {
+  const il = document.getElementById('indexLink'); if (il) il.href = CONFIG.INDEX_URL;
+  $('#sndBtn').addEventListener('click', e => { Sound.on = !Sound.on; e.currentTarget.setAttribute('aria-pressed', Sound.on); e.currentTarget.textContent = Sound.on ? '🔊 音效：開' : '🔇 音效：關'; if (Sound.on) Sound.ok(); });
+  const big = store.get('big', false); if (big) { document.body.classList.add('big'); $('#bigBtn').setAttribute('aria-pressed', 'true'); }
+  $('#bigBtn').addEventListener('click', e => { const on = document.body.classList.toggle('big'); e.currentTarget.setAttribute('aria-pressed', on); store.set('big', on); });
+  safe(initStruct, 'struct'); safe(initSuspects, 'suspects'); safe(initCf, 'cf');
+  safe(initNumLab, 'numlab'); safe(initEm, 'em'); safe(initCases, 'cases');
+  safe(initSb, 'sb'); safe(initBp, 'bp'); safe(initTd, 'td');
+  safe(() => SECTIONS.forEach(S => renderDrill(S.id)), 'drills');
+  safe(updateScores, 'scores'); safe(renderMapping, 'mapping');
+  $('#clearAll').addEventListener('click', () => { store.clear(); QSTATE.results = {}; QSTATE.best = {}; SECTIONS.forEach(S => renderDrill(S.id)); updateScores(); });
+  // 倉區切換（一次只顯示一節）
+  const show = (id, scroll) => {
+    if (!['s31', 's32', 's33'].includes(id)) id = 's31';
+    $$('.sec').forEach(x => x.classList.toggle('on', x.id === id));
+    $$('.zone').forEach(z => z.setAttribute('aria-current', z.dataset.go === id ? 'true' : 'false'));
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    if (scroll) window.scrollTo({ top: $('.zones').offsetTop, behavior: REDUCED ? 'auto' : 'smooth' });
+  };
+  $$('.zone').forEach(z => z.addEventListener('click', () => show(z.dataset.go, true)));
+  $$('.chips [data-jump]').forEach(c => c.addEventListener('click', () => { const t = document.getElementById(c.dataset.jump); if (t) t.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }));
+  document.addEventListener('click', e => { const a = e.target.closest('a[href^="#s3"]'); if (a) { e.preventDefault(); show(a.getAttribute('href').slice(1), true); } });
+  show((location.hash || '#s31').slice(1).split('-')[0], false);
+});
+<\/script>
+</body>
+</html>
+
+</script>
 
 <script>
 const CONFIG = {
@@ -3185,7 +4994,7 @@ const CONFIG = {
 const CHAPTERS = [
   { id: 'ch1', no: 1, name: '專業程式設計基礎', theme: '智能物流倉', ready: true },
   { id: 'ch2', no: 2, name: '控制結構與算法基本組成部分', theme: '程式夜市', ready: true },
-  { id: 'ch3', no: 3, name: '結構化編程與程式質素——測試及偵錯', ready: false },
+  { id: 'ch3', no: 3, name: '結構化編程與程式質素——測試及偵錯', theme: '程式鑑證科', ready: true },
   { id: 'ch4', no: 4, name: '檔案操作與數據處理', ready: false },
   { id: 'ch5', no: 5, name: '檢索算法', ready: false },
   { id: 'ch6', no: 6, name: '數據結構', ready: false },
