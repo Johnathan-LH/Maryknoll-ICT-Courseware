@@ -4985,6 +4985,1812 @@ document.addEventListener('DOMContentLoaded', () => {
 </html>
 
 </script>
+<script type="text/x-chapter" id="src-ch4">
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>選修 C 第 4 章 · 檔案操作與數據處理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --floor:#efe7d4; --floor-dot:#e2d6bb; --paper:#fbf7ec; --paper2:#f1ead8;
+  --ink:#2a2118; --ink2:#5c4f40; --steel:#2f5d46; --steel2:#4f7a63;
+  --yellow:#cfe3c9; --yellow-soft:#e6f0df; --orange:#a8321e; --ok:#2f6b3a; --bad:#a8231b;
+  --card:#fffdf4; --card-dark:#b5a27a; --code:#1f2a24; --codefg:#ece8dc; --codedim:#8f9a90;
+  --wood:#7a5230; --wood2:#5e3d22; --brass:#c9a24b; --rule:#c0392b; --line:#b9cbe0;
+  --mono:"IBM Plex Mono",Consolas,Menlo,"Courier New",monospace;
+  --sans:"Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;
+  --serif:"Noto Serif TC","PMingLiU","Songti TC",serif;
+  --stencil:"Libre Baskerville",Georgia,serif;
+  --fs-scale:1;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{font-size:calc(clamp(16px, .6vw + 10.5px, 23px) * var(--fs-scale)); scroll-behavior:smooth; -webkit-text-size-adjust:100%}
+body{margin:0; color:var(--ink); font-family:var(--sans); line-height:1.6; overflow-x:hidden;
+  background-color:var(--floor);
+  background-image:radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.5), transparent 60%);}
+code,pre,.mono,kbd,samp,textarea.mono,input.mono{font-family:var(--mono); font-variant-ligatures:none; font-feature-settings:"liga" 0,"calt" 0}
+h1,h2,h3,h4{line-height:1.25; margin:.2em 0 .5em}
+a{color:inherit}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:3px dashed var(--orange); outline-offset:3px}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.hazard{background:repeating-linear-gradient(-45deg,var(--yellow) 0 14px,var(--ink) 14px 28px)}
+
+/* ===== 系列橫額 ===== */
+.series{background:var(--ink); color:#f3f1ea; font-size:.82rem; display:flex; align-items:center; gap:1rem; padding:.35rem 1rem; flex-wrap:wrap}
+.series a{color:var(--yellow); text-decoration:none; font-weight:700}
+.series a:hover,.series a:focus-visible{text-decoration:underline}
+.series .tools{margin-left:auto; display:flex; gap:.5rem; flex-wrap:wrap}
+.tog{background:transparent; color:#f3f1ea; border:2px solid #77746a; padding:.1rem .6rem; cursor:pointer; font-size:.8rem; min-height:36px}
+.tog[aria-pressed="true"]{border-color:var(--yellow); color:var(--yellow)}
+
+/* ===== 封面 ===== */
+.hero{max-width:1100px; margin:0 auto; padding:1.6rem 1rem .8rem; text-align:center}
+.hero .kicker{font-family:var(--stencil); letter-spacing:.14em; color:var(--ink2); font-size:1rem}
+.hero h1{font-size:clamp(2rem,3.6vw,3.2rem); font-weight:900; margin:.1em 0 .2em; letter-spacing:.06em}
+.hero h1 .plate{display:inline-block; background:var(--yellow); border:3px solid var(--ink); padding:0 .3em; margin-right:.25em}
+.hero p{margin:.2rem auto; max-width:44em; color:var(--ink2)}
+
+/* ===== 分區按鈕 ===== */
+.zones{display:flex; justify-content:center; gap:.8rem; flex-wrap:wrap; padding:.8rem 1rem; position:sticky; top:0; z-index:40; background:var(--floor); border-bottom:3px solid var(--ink)}
+.zone{position:relative; background:var(--paper); border:3px solid var(--ink); padding:.35rem 1rem; cursor:pointer; text-align:left; min-height:52px}
+.zone b{display:block; font-size:1.02rem}
+.zone small{font-family:var(--stencil); letter-spacing:.12em; color:var(--ink2)}
+.zone[aria-current="true"]{background:var(--yellow); box-shadow:4px 4px 0 var(--ink)}
+.zone[aria-current="true"] b::before{content:"▶ "}
+.zone .badge{position:absolute; top:-.75rem; right:-.5rem; background:var(--ink); color:var(--yellow); font-size:.72rem; padding:0 .4rem; font-weight:700; font-family:var(--mono)}
+
+main{max-width:1180px; margin:0 auto; padding:0 1rem 3rem}
+.sec{display:none; scroll-margin-top:6rem}
+.sec.on{display:block}
+.sec-banner{text-align:center; margin:1.4rem 0 .6rem}
+.sec-banner h2{display:inline-block; font-size:clamp(1.5rem,2.6vw,2.2rem); font-weight:900; margin:0; border-bottom:6px solid var(--yellow); padding:0 .2em}
+.sec-banner p{margin:.4rem 0 0; color:var(--ink2)}
+.chips{display:flex; justify-content:center; flex-wrap:wrap; gap:.5rem; margin:.6rem 0 1.2rem}
+.chips button{background:transparent; border:2px dashed var(--ink2); padding:.25rem .8rem; cursor:pointer; min-height:42px}
+.chips button:hover{border-style:solid; background:var(--paper)}
+
+/* ===== 每個重點一張卡 ===== */
+.card{background:var(--paper); border:3px solid var(--ink); margin:2rem 0 1.6rem; position:relative; padding:1.5rem 1.2rem 1.1rem; scroll-margin-top:6.5rem; min-width:0}
+.card-tag{position:absolute; top:-1rem; left:1rem; background:var(--yellow); border:3px solid var(--ink); padding:0 .7rem; font-weight:900; font-size:1.02rem}
+.book{border-left:8px solid var(--ink); background:var(--paper2); padding:.45rem .9rem; margin:0 0 1rem}
+.book::before{content:"課本"; display:inline-block; font-size:.75rem; font-weight:900; background:var(--ink); color:#fff; padding:0 .35rem; margin-bottom:.2rem}
+.book ul{margin:.1rem 0 0; padding-left:1.2em}
+.book li{margin:.15rem 0}
+.book table{border-collapse:collapse; margin:.5rem 0 .2rem; font-size:.95rem}
+.book th,.book td{border:2px solid var(--ink); padding:.2rem .6rem; text-align:left; vertical-align:top}
+.book th{background:var(--ink); color:#fff}
+.try{font-weight:900; margin:.2rem 0 .5rem}
+.try::before{content:"試一試 ▸ "; color:var(--ink2)}
+.takeaway{border:2px solid var(--ink); background:#fffdf5; padding:.45rem .8rem; margin-top:1rem; font-weight:700}
+.takeaway::before{content:"重點："; background:var(--yellow); padding:0 .3rem; margin-right:.3rem}
+.hint{font-size:.9rem; color:var(--ink2)}
+.ctl{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin-bottom:.8rem}
+.grid2{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.callout{border:2px solid var(--ink); background:var(--yellow-soft); padding:.5rem .8rem; margin:.6rem 0}
+
+/* 按鈕 */
+.btn{background:var(--yellow); color:var(--ink); border:3px solid var(--ink); padding:.3rem .8rem; min-height:44px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:.35em; touch-action:manipulation}
+.btn:active{transform:translate(1px,1px)}
+.btn.alt{background:var(--paper)}
+.btn.dark{background:var(--steel); color:#fff}
+.btn:disabled{opacity:.4; cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--ink); color:var(--yellow)}
+.chk{display:inline-flex; align-items:center; gap:.4em; border:2px solid var(--ink); padding:.2rem .6rem; background:var(--paper); cursor:pointer; min-height:44px}
+.chk input{width:1.2em; height:1.2em; accent-color:var(--ink)}
+.chk.bug{border-style:dashed; background:#f5d2c3}
+.field{display:inline-flex; align-items:center; gap:.4em; flex-wrap:wrap}
+.field input,.field select{border:2px solid var(--ink); background:#fff; padding:.25rem .45rem; min-height:40px; max-width:100%}
+
+/* ===== 程式碼 ===== */
+.codebox{background:var(--code); color:var(--codefg); border:3px solid var(--ink); overflow-x:auto; font-family:var(--mono); font-variant-ligatures:none; font-size:.92rem}
+.codetab{border-collapse:collapse; width:100%; font-family:var(--mono); font-variant-ligatures:none}
+.codetab td{padding:.08rem .5rem; vertical-align:top; white-space:pre; border-bottom:1px solid #2a2d30}
+.codetab .gut{width:1.6em; text-align:center; color:var(--yellow); font-family:var(--sans); font-weight:900}
+.codetab .ln{width:2.2em; text-align:right; color:var(--codedim); user-select:none}
+.codetab .pc{border-left:2px dashed #555; color:#d9d6c8}
+.codetab tr.cur td{background:var(--yellow); color:var(--ink)}
+.codetab tr.cur td *{color:var(--ink)!important}
+.codetab tr.cur .ln{color:var(--ink); font-weight:700}
+.codetab tr.err td{background:#f3c7b4; color:var(--ink); text-decoration:underline wavy var(--bad)}
+.codetab tr.err td *{color:var(--ink)!important}
+.codetab tr.err .gut{text-decoration:none}
+.codetab th{font-family:var(--sans); font-size:.8rem; text-align:left; color:var(--yellow); padding:.2rem .5rem; border-bottom:2px solid #555; font-weight:700}
+.k{color:#ffcc66; font-weight:600}.b{color:#8fd3ff}.s{color:#b6e39a}.c{color:#a5a39a; font-style:italic}.n{color:#ffa98a}.cn{color:#ffd8f0; text-decoration:underline dotted}
+.pk{color:#ffcc66; font-weight:600}.arr{color:#fff; font-weight:700; font-family:var(--sans); font-size:1.1em}
+.pre{margin:0; padding:.6rem .8rem; white-space:pre; overflow-x:auto}
+
+/* ===== 逐步執行器 ===== */
+.stepper{min-width:0}
+.st-grid{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:1rem; align-items:start}
+.st-codehead{display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.3rem; flex-wrap:wrap}
+.st-codehead b{font-size:.95rem}
+.viewsw{display:none}
+.stepper.novars .st-grid{grid-template-columns:minmax(0,1fr)}
+.stepper.novars .console{min-height:2.4rem}
+.st-side{display:flex; flex-direction:column; gap:.8rem; min-width:0}
+.vars{display:flex; flex-wrap:wrap; gap:.55rem; min-height:4.2rem; align-content:flex-start}
+.vars .empty{color:var(--ink2); font-size:.9rem}
+.crate{border:3px solid var(--card-dark); background:var(--card); min-width:5.5rem; max-width:100%; position:relative; padding:0 .55rem .35rem; box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.crate .lbl{margin:-2px -.55rem .2rem; background:#fffdf5; border:2px solid var(--ink); font-family:var(--mono); font-variant-ligatures:none; font-size:.78rem; padding:0 .35rem; white-space:nowrap; font-weight:600; overflow-wrap:normal}
+.crate .val{font-family:var(--mono); font-variant-ligatures:none; font-size:1.05rem; font-weight:600; word-break:break-all; color:var(--ink)}
+.crate.chg{outline:3px solid var(--ink); outline-offset:2px}
+.crate.chg::after{content:"★ 剛更新"; position:absolute; right:-.3rem; bottom:-1.05rem; font-size:.7rem; background:var(--ink); color:var(--yellow); padding:0 .3rem; font-weight:700}
+.crate.anim{animation:drop .35s ease-out}
+@keyframes drop{from{transform:translateY(-10px)} to{transform:none}}
+.console{background:#0f1011; color:#e8e6df; border:3px solid var(--ink); font-family:var(--mono); font-variant-ligatures:none; padding:.4rem .6rem; min-height:3.2rem; font-size:.95rem; white-space:pre-wrap; word-break:break-all}
+.console .pr{color:var(--yellow)}
+.console .er{color:#ffb4a0; font-weight:600}
+.console .new{text-decoration:underline; text-decoration-color:var(--yellow); text-underline-offset:3px}
+.boxtitle{font-weight:900; font-size:.92rem; display:flex; align-items:center; gap:.4rem; margin-bottom:.25rem}
+.note{border:3px solid var(--ink); background:#fffdf5; padding:.5rem .8rem; margin:.8rem 0 .6rem; min-height:2.8rem; display:flex; gap:.6rem}
+.note::before{content:"解說"; font-weight:900; background:var(--ink); color:var(--yellow); padding:0 .4rem; height:fit-content; white-space:nowrap}
+.note.err{background:#f6d7ca; border-style:dashed}
+.note.err::before{content:"✘ 錯誤"}
+.ctrl{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center}
+.ctrl .cnt{font-family:var(--mono); font-variant-ligatures:none; font-weight:600; padding:0 .4rem; border:2px solid var(--ink); background:#fff; min-height:44px; display:flex; align-items:center}
+.ctrl label{display:inline-flex; align-items:center; gap:.3rem; font-size:.9rem}
+.ctrl input[type=range]{width:7rem; accent-color:var(--ink)}
+.trace-wrap{overflow-x:auto; margin-top:.5rem; border:2px solid var(--ink); background:#fff; max-height:20rem; overflow-y:auto}
+details.trace-box{margin-top:.8rem}
+details.trace-box > summary{cursor:pointer; font-weight:900; padding:.3rem 0; list-style:none}
+details.trace-box > summary::before{content:"▶ "} details.trace-box[open] > summary::before{content:"▼ "}
+.trace{border-collapse:collapse; width:100%; font-family:var(--mono); font-variant-ligatures:none; font-size:.9rem}
+.trace th{position:sticky; top:0; background:var(--ink); color:var(--yellow); font-family:var(--sans); padding:.3rem .5rem; text-align:center; font-size:.82rem; white-space:nowrap}
+.trace td{border:1px solid #9a968a; padding:.2rem .5rem; text-align:center; white-space:nowrap}
+.trace tr.cur td{background:var(--yellow-soft); font-weight:700; border-top:3px solid var(--ink); border-bottom:3px solid var(--ink)}
+.trace tr.cur td:first-child::before{content:"▶ "}
+.trace tr.fut{display:none}
+.trace td.er{color:var(--bad); font-weight:700}
+.predict{border:3px dashed var(--ink); background:var(--paper2); padding:.6rem .8rem; margin-bottom:.8rem}
+.predict .q{font-weight:900; margin-bottom:.4rem}
+.predict .q::before{content:"① 先預測 "; background:var(--ink); color:var(--yellow); padding:0 .35rem; margin-right:.3rem}
+.predict .opts{display:flex; flex-wrap:wrap; gap:.5rem}
+.opt{border:2px solid var(--ink); background:#fff; padding:.3rem .7rem; cursor:pointer; min-height:44px; text-align:left; font-family:var(--mono); font-variant-ligatures:none; white-space:pre-wrap}
+.opt[aria-pressed="true"]{background:var(--ink); color:var(--yellow)}
+.opt[aria-pressed="true"]::before{content:"☛ "}
+.verdict{margin-top:.5rem; font-weight:700}
+.verdict.ok::before{content:"✔ "; } .verdict.no::before{content:"✘ "}
+.verdict.ok{color:var(--ok)} .verdict.no{color:var(--bad)}
+.stamp{display:inline-block; border:3px solid currentColor; padding:.05rem .5rem; font-weight:900; transform:rotate(-2deg); letter-spacing:.05em}
+.stamp.ok{color:var(--ok)} .stamp.no{color:var(--bad); border-style:dashed}
+
+/* ===== 重構工作台 ===== */
+.refopts{display:flex; flex-wrap:wrap; gap:.5rem; margin:.4rem 0 .7rem}
+.shipcheck{display:grid; grid-template-columns:repeat(3,minmax(0,auto)); gap:.6rem; align-items:center; border:3px solid var(--ink); background:#fff; padding:.5rem .8rem; margin:.6rem 0}
+.shipcheck .out{font-family:var(--mono); font-variant-ligatures:none; font-size:1.25rem; font-weight:700; border:2px solid var(--ink); padding:.1rem .6rem; background:var(--paper)}
+.meter{display:flex; gap:3px; align-items:center}
+.meter i{width:1.1rem; height:1.1rem; border:2px solid var(--ink); display:inline-block}
+.meter i.on{background:var(--ink)}
+
+/* ===== 整理前後 ===== */
+.ba{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.ba h4{margin:0 0 .3rem; font-size:1rem}
+.steps-list{list-style:none; padding:0; margin:.6rem 0; display:flex; flex-wrap:wrap; gap:.4rem}
+.steps-list li{border:2px solid var(--ink2); padding:.1rem .6rem; font-size:.92rem; background:#fff}
+.steps-list li.done{border-color:var(--ink); background:var(--ink); color:var(--yellow)}
+.steps-list li.done::before{content:"✔ "}
+.steps-list li.now{outline:3px solid var(--yellow); outline-offset:1px}
+.result{display:flex; flex-wrap:wrap; gap:1rem; align-items:center; border:2px solid var(--ink); background:#fff; padding:.5rem .8rem; margin-top:.8rem}
+.result .out{font-family:var(--mono); font-variant-ligatures:none; font-size:1.2rem; font-weight:700; border:2px solid var(--ink); padding:0 .6rem; background:var(--paper)}
+.chg-line{background:rgba(242,194,20,.28); box-shadow:-6px 0 0 var(--yellow)}
+.cmt{border:2px solid var(--ink); background:#fff; padding:.6rem .8rem; margin:.6rem 0}
+.cmt .copts{display:grid; gap:.4rem; margin-top:.4rem}
+.cmt .why{margin-top:.4rem; font-weight:700}
+.cmt .why.ok{color:var(--ok)} .cmt .why.no{color:var(--bad)}
+.cmt .why.ok::before{content:"✔ "} .cmt .why.no::before{content:"✘ "}
+/* ===== 標籤機 ===== */
+.labeler{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.ship-label{background:#fffdf5; border:3px solid var(--ink); padding:.6rem .8rem; clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%)}
+.ship-label .bar{height:26px; background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 7px,transparent 7px 9px,var(--ink) 9px 10px,transparent 10px 13px); margin:.3rem 0}
+.ship-label input{width:100%; font-size:1.3rem; padding:.3rem .5rem; border:3px solid var(--ink)}
+.checks{list-style:none; padding:0; margin:.5rem 0}
+.checks li{padding:.25rem .3rem .25rem 2.1rem; position:relative; border-bottom:1px dashed #a8a395}
+.checks li::before{position:absolute; left:.2rem; top:.2rem; font-weight:900; width:1.5rem; text-align:center; border:2px solid var(--ink); line-height:1.25}
+.checks li.ok::before{content:"✔"; background:var(--ink); color:#fff}
+.checks li.no::before{content:"✘"; background:#fff; color:var(--bad); border-style:dashed}
+.checks li.na::before{content:"–"}
+.pyreact{border:2px solid var(--ink); background:var(--code); color:var(--codefg); padding:.4rem .6rem; font-family:var(--mono); font-variant-ligatures:none; white-space:pre-wrap; word-break:break-all}
+
+/* ===== 風格巡倉 / 找錯 ===== */
+.linepick{list-style:none; margin:0; padding:0; background:var(--code); border:3px solid var(--ink)}
+.linepick li{display:flex; align-items:stretch; border-bottom:1px solid #2e3134}
+.linepick button{flex:1; text-align:left; background:transparent; color:var(--codefg); border:0; padding:.25rem .5rem; cursor:pointer; white-space:pre; overflow-x:auto; font-family:var(--mono); font-variant-ligatures:none; min-height:40px; display:flex; gap:.6rem; align-items:center}
+.linepick .ln{color:var(--codedim); width:1.8em; text-align:right; flex:0 0 auto}
+.linepick .flag{flex:0 0 auto; width:4.6rem; font-family:var(--sans); font-size:.78rem; font-weight:900; text-align:center}
+.linepick li.sel button{background:#3a3016; box-shadow:inset 6px 0 0 var(--yellow)}
+.linepick li.sel .flag::before{content:"⚑ 已標記"; color:var(--yellow)}
+.linepick li.r-ok .flag::before{content:"✔ 正確"!important; color:#9fe0a8}
+.linepick li.r-no .flag::before{content:"✘ 判斷錯"!important; color:#ffb4a0}
+.linepick li.r-ok button,.linepick li.r-no button{box-shadow:none}
+.explist{list-style:none; padding:0; margin:.6rem 0 0}
+.explist li{border:2px solid var(--ink); background:#fff; padding:.35rem .6rem; margin:.35rem 0}
+.explist li b.badtag{background:var(--ink); color:var(--yellow); padding:0 .3rem; margin-right:.3rem}
+.explist li b.goodtag{border:2px solid var(--ink); padding:0 .3rem; margin-right:.3rem}
+
+/* ===== 貨格 ===== */
+.yard{border:3px dashed var(--ink); background:var(--paper2); padding:.6rem; display:flex; flex-wrap:wrap; gap:.6rem; min-height:4.5rem}
+.parcel{border:3px solid var(--card-dark); background:var(--card); padding:.35rem .6rem .4rem; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; max-width:20rem; position:relative; box-shadow:2px 2px 0 rgba(0,0,0,.3); font-weight:700; font-size:.95rem}
+.parcel small{display:block; font-weight:400; font-family:var(--mono); font-variant-ligatures:none; font-size:.8rem}
+.parcel.sel{outline:4px solid var(--ink); outline-offset:2px}
+.parcel.sel::after{content:"已選取"; position:absolute; top:-.9rem; right:.3rem; background:var(--ink); color:var(--yellow); font-size:.7rem; padding:0 .3rem}
+.parcel.done{cursor:default; background:#d9c49d; border-style:solid}
+.parcel.done::before{content:"✔ "; font-weight:900}
+.parcel.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.ghost{position:fixed; pointer-events:none; z-index:999; opacity:.92; transform:rotate(-3deg)}
+.racks{display:grid; grid-template-columns:minmax(0,3fr) minmax(0,5fr) minmax(0,1.3fr); gap:.8rem; margin-top:.8rem}
+.rack{border:4px solid var(--steel); border-top-width:10px; background:linear-gradient(#bdb8aa,#bdb8aa) bottom/100% 6px no-repeat, var(--paper2); padding:.4rem .4rem .8rem}
+.rack h4{margin:0 0 .4rem; font-size:.95rem; background:var(--steel); color:#fff; padding:.1rem .4rem; display:inline-block}
+.slots{display:grid; grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr)); gap:.45rem}
+.slot{border:3px dashed var(--ink2); min-height:5.2rem; background:#ece8dc; padding:.3rem; display:flex; flex-direction:column; gap:.3rem; cursor:pointer; position:relative}
+.slot .sname{font-weight:900; font-size:.95rem}
+.slot .sname i{font-style:normal; font-family:var(--mono); font-variant-ligatures:none; font-size:.75rem; font-weight:400; display:block}
+.slot.hov{border-style:solid; background:var(--yellow-soft)}
+.slot.ready{border-color:var(--ink)}
+.slot .parcel{font-size:.78rem; padding:.2rem .4rem; max-width:none}
+
+/* ===== 堆疊 / 隊列 ===== */
+.sq{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem}
+.stackviz{display:flex; flex-direction:column-reverse; align-items:center; gap:4px; min-height:13rem; border:3px solid var(--ink); border-top:0; background:var(--paper2); padding:.4rem; justify-content:flex-start}
+.pallet{width:70%; text-align:center; background:var(--card); border:3px solid var(--card-dark); font-weight:900; padding:.15rem; position:relative}
+.pallet.top::after{content:"◀ 頂 (top)"; position:absolute; left:100%; margin-left:.4rem; white-space:nowrap; font-size:.8rem; background:var(--ink); color:var(--yellow); padding:0 .3rem}
+.queueviz{display:flex; gap:6px; align-items:center; min-height:5.5rem; border:3px solid var(--ink); background:var(--paper2); padding:.4rem; overflow-x:auto}
+.truck{flex:0 0 auto; border:3px solid var(--ink); background:#fff; padding:.2rem .5rem; font-weight:700; position:relative; margin-top:1.2rem}
+.truck .pos{position:absolute; top:-1.3rem; left:0; font-size:.72rem; background:var(--ink); color:var(--yellow); padding:0 .3rem; white-space:nowrap}
+.oplog{max-height:9rem; overflow-y:auto; margin-top:.5rem}
+
+/* ===== 作用範圍倉 ===== */
+.scope{border:3px solid var(--ink); background:#fff; padding:.6rem; margin-top:.8rem}
+.board{border:4px double var(--ink); background:#f6eecf; padding:.4rem .6rem .6rem}
+.board h4,.bayx h4,.mainx h4{margin:0 0 .4rem; font-size:.98rem; display:flex; gap:.4rem; flex-wrap:wrap; align-items:center}
+.pin{font-size:.75rem; border:2px solid var(--ink); padding:0 .3rem; font-weight:700; background:#fff}
+.scope-row{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); gap:.7rem; margin-top:.7rem}
+.mainx{border:3px solid var(--ink); padding:.5rem; background:var(--paper2); position:relative}
+.bayx{border:4px solid var(--ink); background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(0,0,0,.04) 30px 31px), var(--paper2); padding:.5rem; position:relative; min-height:9rem}
+.bayx.closed{background:repeating-linear-gradient(90deg,#9ea3a8 0 6px,#b8bcc0 6px 12px)}
+.bayx.closed .shelf{visibility:hidden}
+.door{font-weight:900; font-size:.8rem; padding:0 .4rem; border:2px solid var(--ink); background:#fff}
+.here{background:var(--ink); color:var(--yellow); font-size:.78rem; padding:0 .4rem; font-weight:900}
+.shelf{display:flex; flex-wrap:wrap; gap:.5rem; align-items:flex-start; padding:.3rem 0 .5rem; border-bottom:6px solid var(--steel2); margin-bottom:.4rem; min-height:3.6rem}
+.shelf > .sl{flex:0 0 100%; font-size:.78rem; font-weight:700}
+.crate.g{border-style:double; border-width:5px}
+.crate.p{border-style:dashed}
+.crate.in{animation:boxin .7s ease-out}
+@keyframes boxin{from{transform:translateX(-160%) rotate(-6deg); opacity:.2} to{transform:none; opacity:1}}
+.waybill{border:2px dashed var(--ink); background:#fffdf5; padding:.2rem .5rem; font-family:var(--mono); font-variant-ligatures:none; font-size:.85rem; display:inline-block; margin:.2rem 0}
+.lookup{margin-top:.6rem; border:3px dashed var(--bad); background:#f8e0d6; padding:.4rem .6rem; font-weight:700}
+.legend{display:flex; flex-wrap:wrap; gap:.8rem; font-size:.85rem; margin-top:.5rem}
+.legend span{display:inline-flex; align-items:center; gap:.3rem}
+.legend i{display:inline-block; width:1.6rem; height:1rem; background:var(--card)}
+
+/* ===== 練習 ===== */
+.drill{border:4px solid var(--ink); background:var(--paper); margin:1.6rem 0}
+.drill > .dh{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; padding:.5rem .9rem; background:var(--steel); color:#fff}
+.drill > .dh h3{margin:0; font-size:1.2rem}
+.score{margin-left:auto; display:flex; gap:.6rem; flex-wrap:wrap; font-weight:700}
+.score span{background:var(--ink); padding:.05rem .5rem; border:2px solid var(--yellow)}
+.qs{padding:.8rem; display:grid; gap:1rem}
+.q{border:3px solid var(--ink); background:#fff; padding:.7rem .9rem; min-width:0}
+.q .qh{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:.4rem}
+.q .qn{font-family:var(--stencil); font-weight:900; font-size:1.3rem; background:var(--yellow); border:2px solid var(--ink); padding:0 .4rem; line-height:1.3}
+.q .qt{font-size:.8rem; font-weight:700; border:2px solid var(--ink); padding:0 .4rem}
+.q .qstat{margin-left:auto; font-size:.85rem; font-weight:700}
+.q .stem{margin:.2rem 0 .5rem; font-weight:700}
+.q .opts{display:grid; gap:.4rem}
+.q .opt{font-family:var(--sans); width:100%}
+.q .opt.mono{font-family:var(--mono)}
+.q .opt.right{border-width:4px; background:#e1f0e3}
+.q .opt.right::after{content:"  ✔ 正確答案"; font-weight:900; color:var(--ok); font-family:var(--sans)}
+.q .opt.wrong{border-style:dashed; background:#f8e0d6}
+.q .opt.wrong::after{content:"  ✘ 你的選擇"; font-weight:900; color:var(--bad); font-family:var(--sans)}
+.q .acts{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem}
+.fb{margin-top:.6rem; border-left:8px solid var(--ink); padding:.4rem .7rem; background:var(--paper2)}
+.fb.ok{border-left-style:solid} .fb.no{border-left-style:dashed; background:#f8e6de}
+.fb .vd{font-weight:900}
+.fb.ok .vd{color:var(--ok)} .fb.no .vd{color:var(--bad)}
+.fb.ok .vd::before{content:"✔ "} .fb.no .vd::before{content:"✘ "}
+.tt{border-collapse:collapse; font-family:var(--mono); font-variant-ligatures:none; margin:.4rem 0; max-width:100%}
+.tt-wrap{overflow-x:auto}
+.tt th{background:var(--ink); color:var(--yellow); font-family:var(--sans); padding:.25rem .5rem; font-size:.85rem; white-space:nowrap}
+.tt td{border:2px solid var(--ink); padding:.15rem .3rem; text-align:center}
+.tt td.given{background:var(--paper2)}
+.tt input{width:6.2rem; font-family:var(--mono); font-variant-ligatures:none; text-align:center; border:2px solid var(--ink2); padding:.2rem; min-height:38px; font-size:.95rem}
+.tt input.wide{width:9rem}
+.tt td.cok{background:#e1f0e3} .tt td.cok::after{content:" ✔"; color:var(--ok); font-weight:900}
+.tt td.cno{background:#f8e0d6} .tt td.cno::after{content:" ✘"; color:var(--bad); font-weight:900}
+.fillcode{background:var(--code); color:var(--codefg); border:3px solid var(--ink); padding:.5rem .7rem; font-family:var(--mono); font-variant-ligatures:none; white-space:pre; overflow-x:auto; line-height:2}
+.fillcode input{font-family:var(--mono); font-variant-ligatures:none; background:#fff; color:var(--ink); border:3px solid var(--yellow); width:7.5rem; padding:0 .3rem; font-size:.95rem; min-height:34px}
+.fillcode input.cok{border-color:#7fd08a; border-style:solid; background:#e1f0e3}
+.fillcode input.cno{border-color:#ff9b80; border-style:dashed; background:#f8e0d6}
+.parsons{list-style:none; margin:0; padding:0; border:3px solid var(--ink); background:var(--code)}
+.parsons li{display:flex; align-items:center; gap:.3rem; border-bottom:1px solid #2e3134; color:var(--codefg); background:var(--code); touch-action:none}
+.parsons li.dragging{opacity:.35}
+.parsons li.dropmark{box-shadow:inset 0 4px 0 var(--yellow)}
+.parsons .grip{cursor:grab; padding:.3rem .5rem; color:var(--yellow); font-weight:900; user-select:none; -webkit-user-select:none; min-height:44px; display:flex; align-items:center}
+.parsons code{flex:1; white-space:pre; overflow-x:auto; padding:.2rem 0}
+.parsons .mv{display:flex; gap:2px}
+.parsons .mv button{background:#33373b; color:#fff; border:2px solid #5a6066; width:40px; height:40px; cursor:pointer; font-size:.9rem}
+.parsons li.pok{box-shadow:inset 6px 0 0 #7fd08a} .parsons li.pok code::after{content:"   ✔"; color:#9fe0a8; font-family:var(--sans)}
+.parsons li.pno{box-shadow:inset 6px 0 0 #ff9b80} .parsons li.pno code::after{content:"   ✘ 位置不對"; color:#ffb4a0; font-family:var(--sans)}
+.typed{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center}
+.typed input{font-family:var(--mono); font-variant-ligatures:none; border:3px solid var(--ink); padding:.3rem .5rem; min-height:44px; width:14rem; max-width:100%}
+
+.report{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:1rem}
+.manifest{border:3px solid var(--ink); background:#fff; padding:.7rem .9rem; position:relative}
+.manifest .big{font-family:var(--stencil); font-weight:900; font-size:2.6rem; line-height:1}
+.bar2{height:14px; border:2px solid var(--ink); background:#fff; margin:.4rem 0}
+.bar2 i{display:block; height:100%; background:repeating-linear-gradient(-45deg,var(--ink) 0 5px,var(--steel2) 5px 10px)}
+.map{width:100%; border-collapse:collapse; font-size:.92rem}
+.map th,.map td{border:2px solid var(--ink); padding:.3rem .5rem; vertical-align:top; text-align:left}
+.map th{background:var(--ink); color:#fff}
+.map-wrap{overflow-x:auto}
+details.teacher > summary{cursor:pointer; font-weight:900; padding:.5rem .8rem; background:var(--ink); color:var(--yellow); list-style:none}
+details.teacher > summary::before{content:"▶ "} details.teacher[open] > summary::before{content:"▼ "}
+footer{max-width:1180px; margin:0 auto; padding:1rem; font-size:.85rem; color:var(--ink2)}
+
+/* ===== 響應式 ===== */
+@media (max-width: 1100px){
+  .st-grid{grid-template-columns:minmax(0,1fr)}
+  .racks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .racks .rack:nth-child(2){grid-column:1 / -1; grid-row:1}
+}
+@media (max-width: 820px){
+  .report,.ba{grid-template-columns:minmax(0,1fr)}
+  .grid2,.labeler,.sq,.scope-row{grid-template-columns:minmax(0,1fr)}
+  .racks{grid-template-columns:minmax(0,1fr)}
+  .racks .rack:nth-child(2){grid-column:auto; grid-row:auto}
+  .viewsw{display:inline-flex}
+  .codetab.only-py .pc,.codetab.only-py th.pch{display:none}
+  .codetab.only-pc .py,.codetab.only-pc th.pyh{display:none}
+  
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important; transition:none!important}
+}
+body.big{--fs-scale:1.15}
+
+/* ===== 第 4 章：舊式圖書館檔案室 ===== */
+.hero{padding-top:1.2rem}
+.hero .kicker{font-style:italic; letter-spacing:.08em; font-family:var(--stencil)}
+.hero h1,.sec-banner h2,.card-tag{font-family:var(--serif)}
+.hero h1 .plate{background:linear-gradient(#d9b863,#b8913a); border:3px solid var(--wood2); color:var(--wood2); box-shadow:inset 0 0 0 3px #e9d28f; padding:.05em .5em}
+.zones{background:var(--wood); border-bottom:6px solid var(--wood2)}
+.zone{background:var(--paper); border-color:var(--wood2)}
+.zone small{font-style:italic}
+.zone[aria-current="true"]{background:linear-gradient(#e2c579,#c9a24b); box-shadow:4px 4px 0 var(--wood2)}
+.sec-banner h2{border-bottom:4px double var(--steel)}
+.card{border-color:var(--wood2)}
+.card-tag{background:linear-gradient(#e2c579,#c9a24b); border-color:var(--wood2); color:var(--wood2); box-shadow:inset 0 0 0 2px #ecd697}
+.book::before{content:"課本"; background:var(--steel)}
+.book{border-left-color:var(--steel)}
+.takeaway::before{content:"歸檔："; background:#e2c579}
+.try::before{content:"借閱 ▸ "}
+.btn{background:var(--yellow)}
+.btn.dark{background:var(--steel)}
+.codetab tr.cur td{background:#cfe3c9}
+.drill > .dh{background:var(--steel)}
+/* 抽屜與索引卡 */
+.drawers{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr)); gap:1rem; margin-top:.8rem}
+.drawer{background:linear-gradient(var(--wood),var(--wood2)); padding:.5rem .55rem .7rem; border:3px solid var(--wood2); position:relative; min-width:0}
+.drawer .plate{display:flex; justify-content:space-between; gap:.5rem; align-items:center; background:linear-gradient(#e2c579,#b8913a); border:2px solid #4a3019; padding:.1rem .6rem; font-family:var(--mono); font-weight:600; margin:0 auto .5rem; width:fit-content; max-width:100%; color:#3a2612}
+.drawer .plate small{font-family:var(--sans); font-weight:700; font-size:.75rem}
+.drawer.gone{opacity:.45}
+.drawer.gone .plate::after{content:"（已刪除）"; font-family:var(--sans); font-size:.75rem}
+.cards{display:flex; flex-direction:column; gap:4px; min-height:2.6rem}
+.icard{background:var(--card); border:1px solid #cdbf9c; padding:.2rem .5rem .2rem 1.9rem; font-family:var(--mono); font-variant-ligatures:none; font-size:.92rem; position:relative; white-space:pre-wrap; word-break:break-all;
+  background-image:linear-gradient(var(--rule),var(--rule)); background-size:100% 2px; background-repeat:no-repeat; background-position:0 0}
+.icard .no{position:absolute; left:.35rem; top:.2rem; color:#8a7a5e; font-size:.75rem}
+.icard .nl{color:#2f5d8a; font-weight:700; background:#e5eef8; padding:0 .15rem; margin-left:.1rem}
+.icard .mk{float:right; font-family:var(--sans); font-size:.78rem; font-weight:900; margin-left:.4rem; padding:0 .3rem; border:1.5px solid var(--ink)}
+.icard.cur{outline:3px solid #1f6b46; outline-offset:1px; background-color:#eef7ea}
+.icard.cur::before{content:"▶"; position:absolute; left:-1.05rem; top:.15rem; color:#e9d28f; font-family:var(--sans)}
+.icard.new{outline:3px dashed var(--ink)}
+.icard.skip{opacity:.55; text-decoration:line-through}
+.icard.anim{animation:cardin .4s ease-out}
+@keyframes cardin{from{transform:translateX(-24px); opacity:.2} to{transform:none; opacity:1}}
+.empty-drawer{color:#efe2c3; font-size:.85rem; padding:.4rem}
+.mem{margin-top:.4rem; font-size:.85rem; color:#f4ead2}
+/* 字符檢視 */
+.chars{display:flex; flex-wrap:wrap; gap:2px; font-family:var(--mono); font-variant-ligatures:none; background:#fff; border:2px solid var(--ink); padding:.4rem}
+.chars span{min-width:1.35rem; text-align:center; border:1px solid #d6ccb4; padding:.05rem .1rem}
+.chars span.sep{background:var(--ink); color:#fff; font-weight:700}
+.chars span.nl{background:#e5eef8; color:#2f5d8a; font-weight:900; border-color:#2f5d8a}
+.chars span.br{flex-basis:100%; height:0; border:0; padding:0; min-width:0}
+.fieldtab{border-collapse:collapse; margin-top:.6rem; font-size:.95rem}
+.fieldtab th,.fieldtab td{border:2px solid var(--ink); padding:.2rem .6rem; text-align:left}
+.fieldtab th{background:var(--steel); color:#fff}
+.fieldtab td.warn{background:#f6e1dd; font-weight:700}
+textarea.fileedit{width:100%; min-height:6.5rem; font-family:var(--mono); font-variant-ligatures:none; font-size:.95rem; border:2px solid var(--ink); padding:.4rem; background:var(--card); resize:vertical;
+  background-image:repeating-linear-gradient(transparent 0 1.55em, #dde6f1 1.55em 1.6em); line-height:1.6em}
+.editor-bar{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin:.3rem 0}
+.pipe{display:grid; gap:.5rem}
+.pipe > div{border:2px solid var(--ink); background:#fff; padding:.4rem .6rem; font-family:var(--mono); font-variant-ligatures:none; word-break:break-all}
+.pipe > div b{font-family:var(--sans); display:inline-block; min-width:8.5rem}
+.pipe .arrow{border:0; background:transparent; padding:0 .6rem; color:var(--ink2); font-family:var(--sans)}
+.pipe .er{background:#f6e1dd; color:var(--bad); font-weight:700}
+.idx{display:inline-flex; flex-wrap:wrap; gap:.4rem}
+.idx span{border:2px solid var(--ink); padding:.05rem .4rem; background:var(--paper)}
+.idx span i{font-style:normal; font-size:.75rem; color:var(--ink2); display:block; font-family:var(--sans)}
+.membar{height:1.4rem; background:#fff; border:2px solid var(--ink); position:relative; margin:.2rem 0 .6rem}
+.membar i{display:block; height:100%; background:repeating-linear-gradient(-45deg,var(--steel) 0 6px,var(--steel2) 6px 12px)}
+.membar span{position:absolute; right:.4rem; top:0; font-size:.8rem; font-weight:700}
+.q .stem{white-space:pre-line}
+.stepper.wide .st-grid{grid-template-columns:minmax(0,1fr)}
+.stepper.wide .st-side{flex-direction:row; flex-wrap:wrap}
+.stepper.wide .st-side > div{flex:1 1 18rem; min-width:0}
+</style>
+</head>
+<body>
+<div class="series" role="banner">
+  <span>第 4 章 · 舊式圖書館檔案室</span>
+  <span class="tools">
+    <button class="tog" id="sndBtn" aria-pressed="false">🔇 音效：關</button>
+    <button class="tog" id="bigBtn" aria-pressed="false">A+ 放大字體</button>
+  </span>
+</div>
+
+<header class="hero">
+  <div class="kicker">The Card Catalogue Room</div>
+  <h1><span class="plate">舊式圖書館檔案室</span></h1>
+  <p>文字檔就像<b>卡片目錄抽屜</b>：每張卡是一條<b>記錄</b>，卡上的欄位用<b>逗號</b>分隔。讀取是逐張翻閱，更新是由<b>抄寫員</b>把卡片逐張抄到新抽屜。</p>
+</header>
+
+<nav class="zones" aria-label="檔案室">
+  <button class="zone" data-go="s41"><b>4.1 文字檔操作</b><small>The Drawer</small><span class="badge" data-score="41"></span></button>
+  <button class="zone" data-go="s42"><b>4.2 讀取文字檔</b><small>Reading Room</small><span class="badge" data-score="42"></span></button>
+  <button class="zone" data-go="s43"><b>4.3 更新文字檔</b><small>Scribe's Desk</small><span class="badge" data-score="43"></span></button>
+</nav>
+
+<main>
+<\!-- ================= 4.1 ================= -->
+<section class="sec" id="s41">
+  <div class="sec-banner"><h2>4.1 文字檔操作</h2><p>字符 · 記錄 · 分隔符 · 五種檔案操作</p></div>
+  <div class="chips"><button data-jump="c41a">① 文字檔與分隔符</button><button data-jump="c41b">② 五種檔案操作</button><button data-jump="drill41">🎯 練習</button></div>
+
+  <article class="card" id="c41a">
+    <div class="card-tag">① 文字檔：字符、記錄、分隔符</div>
+    <div class="book"><ul><li>文字檔以<b>字符</b>（字母、數字、符號）的形式儲存數據，通常以<b>每行儲存一條記錄</b>，其中數據欄位由<b>分隔符</b>（例如 csv 檔案中的逗號）分隔。</li></ul></div>
+    <p class="try">修改 <code>students.txt</code>，看看電腦實際儲存的字符：黑底是分隔符（逗號），<b>↵</b> 是換行字符 <code>\n</code>，每遇到一個 ↵ 便是一條記錄的結束。</p>
+    <div class="fe" data-fe></div>
+    <div class="ctl" style="margin-top:.4rem"><button class="btn alt" id="badComma">✘ 錯誤示範：加入一個名字中有逗號的記錄</button></div>
+    <div class="boxtitle" style="margin-top:.6rem">電腦儲存的字符</div>
+    <div class="chars" id="charView"></div>
+    <div style="overflow-x:auto"><table class="fieldtab" id="fieldTab"></table></div>
+    <div class="takeaway">一行一條記錄；欄位之間用分隔符隔開。分隔符不可以出現在欄位的內容裏，否則欄位會錯位。</div>
+  </article>
+
+  <article class="card" id="c41b">
+    <div class="card-tag">② 五種檔案操作</div>
+    <div class="book"><ul><li>檔案操作包括<b>讀取、添加、插入、修訂和刪除</b>記錄。學習這些操作對於建立穩妥且準確地處理真實數據的程式非常重要。</li></ul></div>
+    <p class="try">按一種操作，看看抽屜裏的卡片怎樣改變。（程式寫法在 4.2 和 4.3 學習）</p>
+    <div class="ctl" id="opBtns">
+      <button class="btn alt" data-op="read">讀取</button>
+      <button class="btn alt" data-op="append">添加 S005</button>
+      <button class="btn alt" data-op="insert">插入 S003</button>
+      <button class="btn alt" data-op="modify">修訂 S002 的分數</button>
+      <button class="btn alt" data-op="delete">刪除 S001</button>
+      <button class="btn alt" data-op="reset">⟲ 還原</button>
+    </div>
+    <div class="note" id="opNote">揀一種操作。</div>
+    <div class="drawers" id="opDrawer"></div>
+    <div class="takeaway">添加：放在最後；插入：放在中間的正確位置；修訂：改一張卡；刪除：拿走一張卡；讀取：只看不改。</div>
+  </article>
+
+  <div class="drill" id="drill41"></div>
+</section>
+
+<\!-- ================= 4.2 ================= -->
+<section class="sec" id="s42">
+  <div class="sec-banner"><h2>4.2 讀取文字檔</h2><p>with open · strip() · split(",") · 逐行讀取與 readlines()</p></div>
+  <div class="chips"><button data-jump="c42a">① with open</button><button data-jump="c42b">② strip 與 split</button><button data-jump="c42c">③ 兩種讀取方法</button><button data-jump="drill42">🎯 練習</button></div>
+
+  <article class="card" id="c42a">
+    <div class="card-tag">① 用 with open(...) 開啟檔案</div>
+    <div class="book"><ul><li>使用 <code>with open(...)</code> 語句可以穩妥地開啟檔案。這是首選的方法，因為它確保檔案在使用完成後，<b>自動關閉</b>，避免數據遺失。</li></ul></div>
+    <p class="try">寫入一條記錄後立即讀回。比較忘記關閉檔案和用 <code>with</code> 兩種寫法：寫入的內容會先放在<b>緩衝區</b>，關閉檔案時才寫到磁碟。</p>
+    <div class="ctl">
+      <button class="btn alt" data-wb="open" aria-pressed="true">✘ 用 open()，忘記關閉</button>
+      <button class="btn alt" data-wb="with" aria-pressed="false">✔ 用 with open()</button>
+    </div>
+    <div id="wbStepper"></div>
+    <div class="takeaway">with 區塊一結束，檔案便自動關閉，緩衝區的內容一定寫進檔案；自己用 open() 便要記得 close()。</div>
+  </article>
+
+  <article class="card" id="c42b">
+    <div class="card-tag">② strip() 與 split(",")</div>
+    <div class="book"><ul>
+      <li><code>strip()</code>：移除多餘的空白字符，包括行末的<b>換行字符（\n）</b>。</li>
+      <li><code>split(",")</code>：根據分隔符（逗號）把字串分割成<b>列表</b>，允許存取各個欄位（例如 sid、name、score）。</li></ul></div>
+    <p class="try">揀一行記錄，看它經過 strip() 和 split(",") 之後變成甚麼。再試兩個錯誤示範。</p>
+    <div class="fe" data-fe></div>
+    <div class="ctl" style="margin-top:.4rem">
+      <label class="field">第 <select id="spLine"></select> 行</label>
+      <label class="chk bug"><input type="checkbox" id="spNoStrip"> ✘ 不用 strip()</label>
+      <label class="chk bug"><input type="checkbox" id="spNoComma"> ✘ 用 split()，不加 ","</label>
+    </div>
+    <div class="pipe" id="spPipe"></div>
+    <div class="takeaway">先 strip() 去掉 \n，再 split(",") 分成欄位：fields[0] 是 sid，fields[1] 是 name，fields[2] 是 score（仍是字串，計算前要 int()）。</div>
+  </article>
+
+  <article class="card" id="c42c">
+    <div class="card-tag">③ 兩種讀取方法</div>
+    <div class="book"><ul>
+      <li><b>逐行讀取</b>：迭代遍歷檔案（<code>for line in f</code>）以一次處理一條記錄。</li>
+      <li>以 <code>readlines()</code> 讀取：把整個檔案載入到列表中，其中每一行成為列表中的一個元素（例如 <code>lines[0]</code>）。</li></ul></div>
+    <p class="try">計算平均分。切換兩種方法，逐行執行，留意抽屜中哪張卡正被讀取、記憶體中有多少條記錄。可以修改檔案內容（例如加一行空白或錯誤的分數）。</p>
+    <div class="fe" data-fe></div>
+    <div class="ctl" style="margin-top:.4rem">
+      <button class="btn alt" data-rd="loop" aria-pressed="true">逐行讀取 for line in f</button>
+      <button class="btn alt" data-rd="readlines" aria-pressed="false">readlines() 載入列表</button>
+    </div>
+    <div id="rdStepper"></div>
+    <div class="takeaway">逐行讀取：記憶體中每次只有一條記錄；readlines()：整個檔案變成列表，可以用索引（lines[0]）隨時存取任何一行。</div>
+  </article>
+
+  <div class="drill" id="drill42"></div>
+</section>
+
+<\!-- ================= 4.3 ================= -->
+<section class="sec" id="s43">
+  <div class="sec-banner"><h2>4.3 更新文字檔</h2><p>逐行 vs 列表 · 添加 "a" · 暫存檔策略</p></div>
+  <div class="chips"><button data-jump="c43a">① 兩種更新方法</button><button data-jump="c43b">② 添加記錄</button><button data-jump="c43c">③ 修訂、刪除、插入</button><button data-jump="drill43">🎯 練習</button></div>
+
+  <article class="card" id="c43a">
+    <div class="card-tag">① 逐行 vs 載入列表</div>
+    <div class="book"><ul><li><b>更新方法</b>：透過逐行讀取或把整個檔案載入到列表中來更新檔案。<b>逐行方法</b>對於大型檔案通常<b>更節省記憶體</b>，而<b>列表方法更容易重新排序記錄</b>，但使用更多記憶體。</li></ul></div>
+    <p class="try">拉動記錄數目，比較兩種方法需要的記憶體（假設每條記錄約 30 個字符）。</p>
+    <div class="ctl"><label class="field">記錄數目 <input type="range" id="memN" min="1" max="6" value="2" style="width:12rem"></label><b id="memLabel"></b></div>
+    <div class="grid2">
+      <div><div class="boxtitle">逐行方法</div><div class="codebox"><pre class="pre" id="memCodeA"></pre></div><div class="membar" id="memA"></div><div id="memNoteA" class="hint"></div></div>
+      <div><div class="boxtitle">列表方法</div><div class="codebox"><pre class="pre" id="memCodeB"></pre></div><div class="membar" id="memB"></div><div id="memNoteB" class="hint"></div></div>
+    </div>
+    <div class="takeaway">檔案很大 → 逐行方法；要重新排序 → 列表方法（lines.sort()），代價是要把全部記錄放進記憶體。</div>
+  </article>
+
+  <article class="card" id="c43b">
+    <div class="card-tag">② 添加記錄："a" 模式</div>
+    <div class="book"><ul><li><b>添加記錄</b>：這是最簡單的操作。檔案以<b>添加模式（"a"）</b>開啟，新記錄使用 <code>f.write()</code> 直接寫入<b>末端</b>。</li></ul></div>
+    <p class="try">比較 "a" 和 "w" 兩種模式：先預測抽屜裏最後會剩下多少張卡。</p>
+    <div class="fe" data-fe></div>
+    <div class="ctl" style="margin-top:.4rem">
+      <label class="field">新記錄 <input class="mono" id="apRec" value="S005,何美玲,88" size="16"></label>
+      <button class="btn alt" data-ap="a" aria-pressed="true">✔ 用 "a"（添加）</button>
+      <button class="btn alt" data-ap="w" aria-pressed="false">✘ 用 "w"（寫入）</button>
+    </div>
+    <div id="apStepper"></div>
+    <div class="takeaway">"a" 把新記錄加在末端，原有記錄保留；"w" 一開啟便清空整個檔案。記得在記錄後加上 "\n"。</div>
+  </article>
+
+  <article class="card" id="c43c">
+    <div class="card-tag">③ 暫存檔策略：修訂、刪除、插入</div>
+    <div class="book">
+      <ul><li><b>修訂、刪除和插入</b>：由於文字檔無法輕易地「在中間」編輯，因此使用<b>暫存檔策略</b>：
+        <ul><li>以讀取模式（"r"）開啟原始檔案。</li><li>以寫入模式（"w"）開啟暫存檔（例如 temp.txt）。</li><li>把記錄從原始檔案複製到暫存檔，在此過程中應用更改（修改、跳過或插入行）。</li><li>使用 <code>os.replace()</code> 把原始檔案替換為暫存檔。</li></ul></li></ul>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>操作</th><th>複製時的操作邏輯</th></tr></thead>
+        <tbody>
+          <tr><td>修訂</td><td>如果 ID 匹配，則寫入更新後的記錄到暫存檔；否則，寫入原始記錄到暫存檔。</td></tr>
+          <tr><td>刪除</td><td>如果 ID 匹配，則跳過寫入該行；否則，寫入原始記錄到暫存檔。</td></tr>
+          <tr><td>插入</td><td>假設數據已排序，比較 ID 以找到正確的位置，寫入新記錄到暫存檔，然後繼續複製。</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="try">抄寫員把卡片由原抽屜逐張抄到暫存抽屜。揀一種操作，逐行執行。</p>
+    <div class="fe" data-fe></div>
+    <div class="ctl" style="margin-top:.4rem">
+      <button class="btn alt" data-up="mod" aria-pressed="true">修訂</button>
+      <button class="btn alt" data-up="del" aria-pressed="false">刪除</button>
+      <button class="btn alt" data-up="ins" aria-pressed="false">插入</button>
+      <button class="btn alt" data-up="bad" aria-pressed="false" style="border-style:dashed">✘ 直接用 "w" 開原檔</button>
+    </div>
+    <div class="ctl">
+      <label class="field">ID <input class="mono" id="upId" value="S002" size="6"></label>
+      <label class="field">姓名 <input class="mono" id="upName" value="李小明" size="8"></label>
+      <label class="field">分數 <input class="mono" id="upScore" value="70" size="4"></label>
+    </div>
+    <div id="upStepper"></div>
+    <div class="takeaway">不在原檔中間修改，而是一邊複製、一邊修改／跳過／插入，最後用 os.replace() 以暫存檔取代原檔。</div>
+  </article>
+
+  <div class="drill" id="drill43"></div>
+</section>
+
+<section class="card" id="report" style="margin-top:3rem">
+  <div class="card-tag">✔ 借閱紀錄</div>
+  <div class="report" id="reportCards"></div>
+  <div class="ctl" style="margin-top:.8rem"><span class="hint" id="reportTotal"></span><button class="btn alt" id="clearAll" style="margin-left:auto">清除本裝置上的紀錄</button></div>
+  <details class="teacher" style="margin-top:1rem">
+    <summary>教師用：課本重點 → 對應的互動或練習</summary>
+    <div class="map-wrap" style="padding-top:.5rem"><table class="map" id="mapTable"></table></div>
+  </details>
+</section>
+</main>
+<footer>舊式圖書館檔案室 · DSE ICT 選修單元 C 第 4 章 · 呂Sir 的 ICT 互動課件</footer>
+<script>
+const CONFIG = { INDEX_URL: "./", STORAGE_KEY: "electiveC-ch4-progress-v1" };
+const SECTIONS = [
+  { id: '41', name: '4.1 文字檔操作', anchor: '#s41' },
+  { id: '42', name: '4.2 讀取文字檔', anchor: '#s42' },
+  { id: '43', name: '4.3 更新文字檔', anchor: '#s43' }
+];
+const FILE3 = 'students.txt 的內容：\nS001,陳大文,78\nS002,李小明,65\nS004,王家欣,91\n';
+const QUESTIONS = [
+  /* ---------- 4.1 ---------- */
+  { id: 'q1', sec: '41', type: 'mc', tag: '概念', stem: '在 csv 檔案中，同一條記錄的各個欄位一般用甚麼分隔？',
+    options: [
+      { t: '換行字符 \\n', why: '換行字符分隔的是「記錄」（一行一條），不是欄位。' },
+      { t: '逗號 ,', ok: 1, why: 'csv 即逗號分隔值（comma-separated values），欄位之間用逗號分隔。' },
+      { t: '空格', why: '空格可能出現在欄位內容中（例如英文姓名），csv 用逗號。' },
+      { t: '分號 ;', why: '課本提到的 csv 分隔符是逗號。' }] },
+  { id: 'q2', sec: '41', type: 'mc', tag: '預測輸出', stem: '以下程式的輸出是甚麼？', code: 'record = "S001,陳大文,78"\nprint(len(record.split(",")))',
+    options: [
+      { t: '3', mono: 1, ok: 1, why: '以逗號分割後得到 [\'S001\', \'陳大文\', \'78\']，共 3 個元素。' },
+      { t: '2', mono: 1, why: '2 是逗號的數目；分割後的欄位比逗號多一個。' },
+      { t: '11', mono: 1, why: '11 是整個字串的字符數目；len() 的對象是 split 後的列表。' },
+      { t: '1', mono: 1, why: '用 split(",") 會按逗號分開，不會只得到一個元素。' }] },
+  { id: 'q3', sec: '41', type: 'mc', tag: '情境選擇', stem: '同學 S001 轉校了，要把他的記錄從 students.txt 中移除。這屬於哪一種檔案操作？',
+    options: [
+      { t: '修訂', why: '修訂是更改記錄的內容，記錄仍然存在。' },
+      { t: '刪除', ok: 1, why: '把整條記錄移除，是刪除。' },
+      { t: '添加', why: '添加是把新記錄加到檔案末端。' },
+      { t: '讀取', why: '讀取不會改變檔案。' }] },
+  { id: 'q4', sec: '41', type: 'mc', tag: '情境選擇', stem: 'students.txt 按 ID 排序（S001、S002、S004）。新同學 S003 的記錄應放在 S002 和 S004 之間。應使用：',
+    options: [
+      { t: '添加', why: '添加會把記錄放在末端（S004 之後），排序便亂了。' },
+      { t: '插入', ok: 1, why: '插入是把新記錄放在正確的位置，保持次序。' },
+      { t: '修訂', why: '修訂是更改現有記錄，不會增加記錄。' },
+      { t: '刪除', why: '刪除會減少記錄。' }] },
+  { id: 'q5', sec: '41', type: 'mc', tag: '預測輸出', stem: '某記錄的姓名中誤用了逗號。以下程式的輸出是甚麼？', code: 'line = "S007,陳,大文,80"\nfields = line.split(",")\nprint(fields[2])',
+    options: [
+      { t: '80', mono: 1, why: '分割後是 [\'S007\', \'陳\', \'大文\', \'80\']，80 已移到 fields[3]。' },
+      { t: '大文', mono: 1, ok: 1, why: '姓名中多了一個逗號，欄位錯位：fields[2] 變成「大文」。所以分隔符不可以出現在欄位內容中。' },
+      { t: '陳,大文', mono: 1, why: 'split(",") 會在每一個逗號切開，「陳」和「大文」被分成兩個欄位。' },
+      { t: 'IndexError', mono: 1, why: '列表有 4 個元素，fields[2] 存在。' }] },
+
+  /* ---------- 4.2 ---------- */
+  { id: 'q6', sec: '42', type: 'mc', tag: '概念', stem: '為甚麼開啟檔案時首選 with open(...) 語句？',
+    options: [
+      { t: '它令讀取速度加快', why: '與速度無關。' },
+      { t: '它確保檔案在使用完成後自動關閉，避免數據遺失', ok: 1, why: 'with 區塊一結束，檔案便自動關閉，緩衝區的內容一定會寫入檔案。' },
+      { t: '它可以同時以 "r" 和 "w" 開啟同一個檔案', why: '模式仍然由 open() 的第二個參數決定。' },
+      { t: '它會自動移除每行的 \\n', why: '移除 \\n 要用 strip()。' }] },
+  { id: 'q7', sec: '42', type: 'mc', tag: '預測輸出', stem: '以下程式的輸出是甚麼？', code: 'line = "S001,陳大文,78\\n"\nprint(len(line), len(line.strip()))',
+    options: [
+      { t: '12 11', mono: 1, ok: 1, why: '字串共 11 個可見字符，加上 \\n 共 12 個；strip() 去掉 \\n 後是 11。' },
+      { t: '11 11', mono: 1, why: '\\n 也是一個字符，第一個 len() 會把它計算在內。' },
+      { t: '13 11', mono: 1, why: '\\n 在字串中只是一個字符（換行），不是兩個。' },
+      { t: '12 12', mono: 1, why: 'strip() 會移除行末的換行字符。' }] },
+  { id: 'q8', sec: '42', type: 'trace', tag: '填寫追蹤表', stem: FILE3 + '完成追蹤表（fields[2] 寫成字串，例如 \'78\'），並寫出輸出。',
+    code: 'total = 0\ncount = 0\nwith open("students.txt", "r") as f:\n    for line in f:\n        fields = line.strip().split(",")\n        total = total + int(fields[2])\n        count = count + 1\nprint(total / count)',
+    cols: ['fields[0]', 'fields[2]', 'total', 'count'],
+    rows: [
+      { c: [{ g: "'S001'" }, { a: ["'78'", '78'] }, { a: ['78'] }, { a: ['1'] }], why: '第一行：分數 \'78\'，total = 0 + 78。' },
+      { c: [{ g: "'S002'" }, { a: ["'65'", '65'] }, { a: ['143'] }, { a: ['2'] }], why: '78 + 65 = 143。' },
+      { c: [{ g: "'S004'" }, { a: ["'91'", '91'] }, { a: ['234'] }, { a: ['3'] }], why: '143 + 91 = 234。' }],
+    output: { a: ['78.0'], why: '234 / 3 = 78.0（/ 的結果是浮點數）。' } },
+  { id: 'q9', sec: '42', type: 'fill', tag: '程式碼填空', stem: '填寫空格，把一行記錄去掉 \\n 後以逗號分割成欄位。',
+    code: 'fields = line.[[0]]().[[1]](",")',
+    blanks: [
+      { a: ['strip'], wrong: { 'split': '要先去掉 \\n，所以第一個是 strip。', 'trim': 'Python 用 strip()，trim 是其他語言的寫法。', 'remove': '字串沒有 remove() 方法。' }, model: 'strip', why: 'strip() 移除多餘的空白字符，包括 \\n。' },
+      { a: ['split'], wrong: { 'strip': 'strip(",") 只會移除兩端的逗號，不會分割。', 'divide': 'Python 字串沒有 divide()。', 'cut': 'Python 字串沒有 cut()。' }, model: 'split', why: 'split(",") 按逗號把字串分割成列表。' }] },
+  { id: 'q10', sec: '42', type: 'mc', tag: '預測輸出', stem: FILE3 + '以下程式的輸出是甚麼？', code: 'with open("students.txt", "r") as f:\n    lines = f.readlines()\nprint(lines[2].strip().split(",")[1])',
+    options: [
+      { t: '李小明', mono: 1, why: '李小明在 lines[1]；索引由 0 開始。' },
+      { t: '王家欣', mono: 1, ok: 1, why: 'lines[2] 是第三行 S004,王家欣,91，[1] 是姓名欄位。' },
+      { t: '91', mono: 1, why: '91 是 [2]（分數），題目取的是 [1]。' },
+      { t: 'IndexError', mono: 1, why: '檔案有 3 行，lines[2] 存在。' }] },
+  { id: 'q11', sec: '42', type: 'find', tag: '找錯', stem: '執行時第 4 行出現 IndexError: list index out of range。點選造成錯誤的「原因」那一行。',
+    lines: [
+      { c: 'with open("students.txt", "r") as f:', why: '以讀取模式開啟檔案，正確。' },
+      { c: '    for line in f:', why: '逐行讀取，正確。' },
+      { c: '        fields = line.strip().split()', ok: 1, why: 'split() 沒有指明逗號，會按空白分割；記錄內沒有空格，結果只有一個元素，所以 fields[1] 不存在。應為 split(",")。' },
+      { c: '        print(fields[1])', why: '錯誤在這行出現，但這只是症狀；原因是上一行分割錯了。' }] },
+  { id: 'q12', sec: '42', type: 'mc', tag: '情境選擇', stem: '要逐條處理一個 2 GB 的記錄檔，而電腦記憶體有限。最合適的讀取方法是：',
+    options: [
+      { t: 'for line in f 逐行讀取', ok: 1, why: '逐行讀取每次只把一條記錄放進記憶體，適合大型檔案。' },
+      { t: 'lines = f.readlines()', why: 'readlines() 會把整個 2 GB 檔案載入記憶體，可能不夠用。' },
+      { t: '用 "w" 模式開啟', why: '"w" 會清空檔案，而且不能讀取。' },
+      { t: '用 "a" 模式開啟', why: '"a" 用於添加記錄，不能讀取。' }] },
+  { id: 'q13', sec: '42', type: 'parsons', tag: '排列程式碼', stem: '排列程式碼：逐行讀取 students.txt，輸出每位學生的姓名，最後輸出「完成」。',
+    lines: [
+      { c: 'with open("students.txt", "r") as f:', why: '先開啟檔案。' },
+      { c: '    for line in f:', why: '在 with 區塊內逐行讀取。' },
+      { c: '        fields = line.strip().split(",")', why: '先把每行分割成欄位。' },
+      { c: '        print(fields[1])', why: '分割後才可以取出姓名欄位。' },
+      { c: 'print("完成")', why: '全部讀完後才輸出「完成」，所以沒有縮排。' }] },
+  { id: 'q14', sec: '42', type: 'mc', tag: '預測輸出', stem: '以下程式（沒有使用 strip()）的輸出是甚麼？', code: 'line = "S001,陳大文,78\\n"\nfields = line.split(",")\nprint(fields[2] == "78")',
+    options: [
+      { t: 'True', mono: 1, why: 'fields[2] 其實是 \'78\\n\'，尾部有換行字符。' },
+      { t: 'False', mono: 1, ok: 1, why: '沒有 strip()，fields[2] 是 \'78\\n\'，與 "78" 不相等。' },
+      { t: '78', mono: 1, why: '== 比較的結果是布爾值。' },
+      { t: 'IndexError', mono: 1, why: '列表有 3 個元素，fields[2] 存在。' }] },
+
+  /* ---------- 4.3 ---------- */
+  { id: 'q15', sec: '43', type: 'mc', tag: '概念', stem: '要把新記錄加到 students.txt 的末端，並保留原有記錄，應以哪種模式開啟檔案？',
+    options: [
+      { t: '"r"', why: '"r" 只能讀取，不能寫入。' },
+      { t: '"w"', why: '"w" 一開啟便清空檔案，原有記錄會消失。' },
+      { t: '"a"', ok: 1, why: '添加模式 "a" 保留原有內容，f.write() 直接寫入末端。' },
+      { t: '"x"', why: '"x" 只用於建立新檔案；課本的添加操作用 "a"。' }] },
+  { id: 'q16', sec: '43', type: 'mc', tag: '預測輸出', stem: FILE3 + '執行以下程式後，students.txt 有多少條記錄？', code: 'with open("students.txt", "w") as f:\n    f.write("S005,何美玲,88\\n")',
+    options: [
+      { t: '4 條', why: '要 "a" 模式才會保留原有記錄再加一條。' },
+      { t: '1 條', ok: 1, why: '"w" 模式開啟時先清空檔案，只剩下新寫入的一條。' },
+      { t: '3 條', why: '新記錄確實寫入了；但原有記錄已被清空。' },
+      { t: '0 條', why: 'f.write() 寫入了一條記錄。' }] },
+  { id: 'q17', sec: '43', type: 'trace', tag: '填寫追蹤表', stem: FILE3 + '以下程式修訂 S002 的記錄。完成追蹤表：寫出每次寫入 temp.txt 的內容（不用寫 \\n），並寫出完成後 students.txt 第 2 行的內容。',
+    code: 'import os\ntarget = "S002"\nwith open("students.txt", "r") as f:\n    with open("temp.txt", "w") as t:\n        for line in f:\n            fields = line.strip().split(",")\n            if fields[0] == target:\n                t.write("S002,李小明,70\\n")\n            else:\n                t.write(line)\nos.replace("temp.txt", "students.txt")',
+    cols: ['fields[0]', 'fields[0] == target', '寫入 temp.txt 的內容'], wide: 1,
+    rows: [
+      { c: [{ g: "'S001'" }, { a: ['False'] }, { a: ['S001,陳大文,78'] }], why: '不匹配，照抄原始記錄。' },
+      { c: [{ g: "'S002'" }, { a: ['True'] }, { a: ['S002,李小明,70'] }], why: 'ID 匹配，寫入更新後的記錄。' },
+      { c: [{ g: "'S004'" }, { a: ['False'] }, { a: ['S004,王家欣,91'] }], why: '不匹配，照抄原始記錄。' }],
+    output: { a: ['S002,李小明,70'], why: 'os.replace() 以 temp.txt 取代原檔，第 2 行是修訂後的記錄。' } },
+  { id: 'q18', sec: '43', type: 'fill', tag: '程式碼填空', stem: '填寫空格，使程式刪除 ID 為 S002 的記錄。',
+    code: 'for line in f:\n    fields = line.strip().split(",")\n    if fields[0] [[0]] "S002":\n        t.write(line)',
+    blanks: [
+      { a: ['!='], wrong: { '==': '這樣只會保留 S002，其他記錄全部被刪除——剛好相反。', '<>': 'Python 3 不支援 <>，要寫 !=。', '>': '只保留 ID 大於 S002 的記錄，S001 也會被刪除。' }, model: '!=', why: 'ID 不匹配才寫入暫存檔；匹配的那一條被跳過，即被刪除。' }] },
+  { id: 'q19', sec: '43', type: 'mc', tag: '概念', stem: 'os.replace("temp.txt", "students.txt") 的作用是：',
+    options: [
+      { t: '把 students.txt 的內容複製到 temp.txt', why: '方向相反：是用 temp.txt 取代 students.txt。' },
+      { t: '用暫存檔 temp.txt 取代原始檔案 students.txt', ok: 1, why: '完成複製和修改後，用暫存檔取代原檔，temp.txt 隨即不再存在。' },
+      { t: '刪除兩個檔案', why: 'students.txt 會保留，內容換成 temp.txt 的內容。' },
+      { t: '把兩個檔案合併', why: 'os.replace() 不會合併內容。' }] },
+  { id: 'q20', sec: '43', type: 'find', tag: '找錯', stem: '以下程式本應修訂一條記錄，執行後 students.txt 的全部記錄卻消失了。點選出錯的一行。',
+    lines: [
+      { c: 'import os', why: '匯入 os 模組，正確。' },
+      { c: 'with open("students.txt", "w") as f:', ok: 1, why: '原始檔案應以 "r" 開啟。"w" 一開啟便清空了檔案，接着讀取時又出錯，全部記錄遺失。' },
+      { c: '    with open("temp.txt", "w") as t:', why: '暫存檔以 "w" 開啟是正確的。' },
+      { c: '        for line in f:', why: '逐行複製的寫法正確，問題在 f 的開啟模式。' },
+      { c: '            t.write(line)', why: '寫入暫存檔，正確。' },
+      { c: 'os.replace("temp.txt", "students.txt")', why: '以暫存檔取代原檔，正確（但程式根本未能執行到這行）。' }] },
+  { id: 'q21', sec: '43', type: 'parsons', tag: '排列程式碼', stem: '第一行 import os 已寫好。排列其餘程式碼，刪除 ID 為 S002 的記錄。',
+    lines: [
+      { c: 'with open("students.txt", "r") as f:', why: '先以 "r" 開啟原始檔案。' },
+      { c: '    with open("temp.txt", "w") as t:', why: '再以 "w" 開啟暫存檔。' },
+      { c: '        for line in f:', why: '兩個檔案都開啟後，才逐行複製。' },
+      { c: '            if line.strip().split(",")[0] != "S002":', why: '每行先檢查 ID。' },
+      { c: '                t.write(line)', why: 'ID 不匹配才寫入暫存檔。' },
+      { c: 'os.replace("temp.txt", "students.txt")', why: '兩個檔案都關閉後，最後才取代原檔。' }] },
+  { id: 'q22', sec: '43', type: 'mc', tag: '概念', stem: '用暫存檔策略插入新記錄時，為甚麼要假設數據已按 ID 排序？',
+    options: [
+      { t: '這樣才可以比較 ID，找到新記錄的正確位置', ok: 1, why: '數據已排序，遇到第一個 ID 比新記錄大的記錄，便知道新記錄應放在它前面。' },
+      { t: '因為 os.replace() 只接受已排序的檔案', why: 'os.replace() 不理會檔案內容。' },
+      { t: '因為未排序的檔案不能以 "r" 開啟', why: '任何文字檔都可以讀取。' },
+      { t: '因為插入後檔案會自動排序', why: '檔案不會自動排序，要靠程式把記錄寫在正確位置。' }] }
+];
+const MAPPING = [
+  ['4.1 (1) 文字檔以字符儲存；每行一條記錄；欄位以分隔符（逗號）分隔', '4.1 ① 字符檢視（逗號、↵）及欄位表；錯誤示範：名字含逗號令欄位錯位', 'Q1、Q2、Q5'],
+  ['4.1 (2) 讀取、添加、插入、修訂、刪除', '4.1 ② 抽屜示範五種操作', 'Q3、Q4'],
+  ['4.2 (1) with open(...)：自動關閉，避免數據遺失', '4.2 ① 忘記關閉 vs with（緩衝區與磁碟兩個抽屜）', 'Q6'],
+  ['4.2 (2) strip()：移除空白及 \\n', '4.2 ② 逐步顯示 strip 前後；錯誤示範：不用 strip 令比較失敗', 'Q7、Q9、Q14'],
+  ['4.2 (2) split(",")：分割成列表，存取 sid、name、score', '4.2 ② fields[0]–[2]；錯誤示範：split() 不加逗號 → IndexError', 'Q9、Q11'],
+  ['4.2 (3) 逐行讀取 for line in f', '4.2 ③ 逐行計平均分（抽屜游標、記憶體 1 條、追蹤表）', 'Q8、Q12、Q13'],
+  ['4.2 (3) readlines() 載入列表（lines[0]）', '4.2 ③ readlines 模式（記憶體全部記錄、lines[0]）', 'Q10、Q12'],
+  ['4.3 (1) 逐行（省記憶體）vs 列表（易重新排序、多用記憶體）', '4.3 ① 記錄數目滑桿與記憶體比較', 'Q12'],
+  ['4.3 (2) 添加：以 "a" 開啟，f.write() 寫入末端', '4.3 ② "a" vs "w"（錯誤示範：w 清空全部記錄）', 'Q15、Q16'],
+  ['4.3 (3) 暫存檔策略："r" 原檔、"w" temp.txt、邊複製邊修改、os.replace()', '4.3 ③ 抄寫員：兩個抽屜逐張複製，最後取代；錯誤示範：用 "w" 開原檔', 'Q17、Q19、Q20、Q21'],
+  ['4.3 表：修訂（匹配寫更新記錄，否則寫原記錄）', '4.3 ③ 修訂模式', 'Q17'],
+  ['4.3 表：刪除（匹配便跳過）', '4.3 ③ 刪除模式', 'Q18、Q21'],
+  ['4.3 表：插入（已排序，比較 ID 找位置，寫入後繼續複製）', '4.3 ③ 插入模式（done 標記、放在末端的情況）', 'Q22'],
+  ['DSE 要求：偽代碼與 Python 並列、追蹤表、錯誤示範', '逐步執行器（4.2 ①③、4.3 ②③），追蹤表可展開', 'Q8、Q17（填寫追蹤表）']
+];
+<\/script>
+<script>
+
+/* ================= 共用工具 ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function parseIntList(s, max = 12) {
+  const out = [];
+  String(s).split(/[,，\s]+/).forEach(t => { if (t === '') return; const n = Number(t); if (Number.isInteger(n) && Math.abs(n) <= 9999) out.push(n); });
+  return out.slice(0, max);
+}
+function clampInt(v, lo, hi, d) { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; }
+
+const store = {
+  read() { try { return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '{}') || {}; } catch (e) { return {}; } },
+  get(k, d) { const o = this.read(); return (o && k in o) ? o[k] : d; },
+  set(k, v) { try { const o = this.read(); o[k] = v; localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(o)); } catch (e) { /* 寫入失敗也照常運作 */ } },
+  clear() { try { localStorage.removeItem(CONFIG.STORAGE_KEY); } catch (e) {} }
+};
+
+const Sound = {
+  on: false, ctx: null,
+  beep(f = 600, d = .06, type = 'square', vol = .06) {
+    if (!this.on) return;
+    try {
+      this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g); g.connect(this.ctx.destination); o.start(t); o.stop(t + d + .02);
+    } catch (e) {}
+  },
+  step() { this.beep(520, .04); }, ok() { this.beep(880, .14, 'triangle', .09); }, bad() { this.beep(170, .2, 'sawtooth', .05); }
+};
+
+/* ================= Python 值的表示（與 Python 3 repr 一致） ================= */
+const PY = {
+  int: n => String(n),
+  float(x) {
+    if (Number.isNaN(x)) return 'nan';
+    if (!Number.isFinite(x)) return x > 0 ? 'inf' : '-inf';
+    if (x === 0) return Object.is(x, -0) ? '-0.0' : '0.0';
+    const a = Math.abs(x);
+    if (a >= 1e16 || a < 1e-4) {
+      let [m, e] = x.toExponential().split('e');
+      const sign = e[0] === '-' ? '-' : '+'; let d = e.replace(/^[+-]/, ''); if (d.length < 2) d = '0' + d;
+      return m + 'e' + sign + d;
+    }
+    if (Number.isInteger(x)) return x.toFixed(0) + '.0';
+    return String(x);
+  },
+  str(s) {
+    s = String(s);
+    const q = (s.includes("'") && !s.includes('"')) ? '"' : "'";
+    let b = s.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\t/g, '\\t').replace(/\r/g, '\\r');
+    if (q === "'") b = b.replace(/'/g, "\\'");
+    return q + b + q;
+  },
+  bool: b => b ? 'True' : 'False',
+  list: arr => '[' + arr.join(', ') + ']'
+};
+function noisyFloat(s) { const m = /\.(\d+)/.exec(s); return !!(m && m[1].length >= 10); }
+
+/* ================= 語法顯示 ================= */
+const PY_KW = new Set(['def', 'return', 'for', 'in', 'if', 'elif', 'else', 'while', 'class', 'True', 'False', 'None', 'and', 'or', 'not', 'import', 'with', 'as', 'pass', 'global']);
+const PY_BI = new Set(['print', 'len', 'int', 'float', 'str', 'range', 'input', 'self', 'append', 'pop', 'sum']);
+function hlPy(src) {
+  const re = /("""[\s\S]*?"""|"[^"]*"|'[^']*'|#[^\n]*|\b\d+(?:\.\d+)?\b|\b[A-Za-z_]\w*\b)/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index)); const t = m[0];
+    if (t[0] === '#') out += `<span class="c">${esc(t)}</span>`;
+    else if (t[0] === '"' || t[0] === "'") out += `<span class="s">${esc(t)}</span>`;
+    else if (/^\d/.test(t)) out += `<span class="n">${esc(t)}</span>`;
+    else if (PY_KW.has(t)) out += `<span class="k">${t}</span>`;
+    else if (PY_BI.has(t)) out += `<span class="b">${t}</span>`;
+    else if (/^[A-Z][A-Z0-9_]+$/.test(t)) out += `<span class="cn">${t}</span>`;
+    else out += esc(t);
+    last = m.index + t.length;
+  }
+  return out + esc(src.slice(last));
+}
+const PC_KW = /\b(FUNCTION|END|RETURN|FOR|EACH|IN|NEXT|IF|THEN|ELSE|OUTPUT|WHILE|DO|TYPE|ENDTYPE|NEW|AND|OR|NOT|TRUE|FALSE|OPEN|READ|WRITE|APPEND|AS|CLOSE|REPLACE|WITH|SPLIT|TRIM|INT|LENGTH)\b/g;
+function hlPc(src) {
+  const ci = src.indexOf('//');
+  const code = ci >= 0 ? src.slice(0, ci) : src, com = ci >= 0 ? src.slice(ci) : '';
+  let h = esc(code).replace(PC_KW, '<span class="pk">$1</span>').replace(/←/g, '<span class="arr">←</span>');
+  return h + (com ? `<span class="c">${esc(com)}</span>` : '');
+}
+
+/* ================= 執行記錄器 ================= */
+class Rec {
+  constructor(startNote) { this.steps = []; this.v = {}; this.out = []; this.touched = new Set(); this.push(null, startNote || '按「▶ 下一步」開始逐行執行。'); }
+  set(k, val) { this.v[k] = val; this.touched.add(k); }
+  del(...ks) { ks.forEach(k => delete this.v[k]); }
+  print(s) { this.out.push(String(s)); }
+  push(line, note, extra = {}) {
+    const prev = this.steps[this.steps.length - 1];
+    const vars = Object.assign({}, this.v), changed = [];
+    for (const k in vars) if (this.touched.has(k) || !prev || prev.vars[k] !== vars[k]) changed.push(k);
+    const newOut = prev ? this.out.slice(prev.out.length) : [];
+    this.steps.push(Object.assign({ line, vars, out: this.out.slice(), newOut, note, changed: prev ? changed : [] }, extra));
+    this.touched = new Set();
+  }
+}
+
+/* ================= 逐步執行器 ================= */
+class Stepper {
+  /* prog: { rows(p), cols(p), run(p), predict?(p), explain?(p), varLabel?(k) }  getP: () => params  hooks: { onStep(step, i, steps) } */
+  constructor(root, prog, getP, hooks = {}) {
+    this.root = root; this.prog = prog; this.getP = getP; this.hooks = hooks; this.timer = null; this.view = 'py';
+    root.classList.add('stepper'); if (hooks.breakpoints) root.classList.add('bp-on'); if (hooks.wide) root.classList.add('wide'); if (hooks.noVars) root.classList.add('novars');
+    root.innerHTML = `
+      <div class="st-pred"></div>
+      <div class="st-grid">
+        <div>
+          <div class="st-codehead"><b>程式碼（Python ｜ 偽代碼）</b>
+            <span class="viewsw" role="group" aria-label="切換顯示"><button class="btn alt" data-v="py" aria-pressed="true">Python</button><button class="btn alt" data-v="pc" aria-pressed="false">偽代碼</button></span></div>
+          <div class="codebox"><table class="codetab only-py"><thead><tr><th></th><th></th><th class="pyh">Python</th><th class="pch">偽代碼</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="st-side">
+          <div${hooks.noVars ? ' hidden' : ''}><div class="boxtitle">📦 變量（貨箱）</div><div class="vars"></div></div>
+          <div><div class="boxtitle">🖨 輸出</div><div class="console" aria-live="polite"></div></div>
+        </div>
+      </div>
+      <div class="note" aria-live="polite"></div>
+      <div class="ctrl">
+        <button class="btn alt" data-a="reset" title="重設">⟲ 重設</button>
+        <button class="btn alt" data-a="prev" title="上一步">◀ 上一步</button>
+        <button class="btn" data-a="next" title="下一步">▶ 下一步</button>
+        <button class="btn dark" data-a="play" aria-pressed="false">⏵ 自動播放</button>
+        ${hooks.breakpoints ? '<button class="btn alt" data-a="bp">⏩ 執行到斷點</button>' : ''}
+        <label>速度 <input type="range" min="1" max="5" value="3" data-a="speed" aria-label="自動播放速度"></label>
+        <span class="cnt" aria-live="off"></span>
+      </div>
+      <div class="hook"></div>
+      <details class="trace-box"${hooks.traceOpen ? ' open' : ''}><summary>📋 追蹤表 <span class="hint">（只記下該步改變了的值；▶ 為目前一步）</span></summary>
+      <div class="trace-wrap"><table class="trace"></table></div></details>`;
+    this.$ = s => root.querySelector(s);
+    root.querySelector('.ctrl').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const a = b.dataset.a;
+      if (a === 'next') { this.stop(); this.step(1); } else if (a === 'prev') { this.stop(); this.step(-1); }
+      else if (a === 'reset') { this.stop(); this.go(0); } else if (a === 'bp') { this.stop(); this.runToBp(); } else if (a === 'play') { this.timer ? this.stop() : this.play(); }
+    });
+    root.querySelector('.viewsw').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return; this.view = b.dataset.v;
+      $$('.viewsw button', root).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const t = this.$('.codetab'); t.classList.toggle('only-py', this.view === 'py'); t.classList.toggle('only-pc', this.view === 'pc');
+    });
+    this.bps = new Set();
+    if (hooks.breakpoints) root.querySelector('.codetab tbody').addEventListener('click', e => {
+      const td = e.target.closest('td.ln'); if (!td || !td.textContent) return;
+      const id = td.parentElement.dataset.id; this.bps.has(id) ? this.bps.delete(id) : this.bps.add(id); this.paintBps();
+    });
+    this.rebuild();
+  }
+  paintBps() {
+    $$('.codetab tbody tr', this.root).forEach(tr => { const on = this.bps.has(tr.dataset.id); tr.classList.toggle('bp', on); tr.querySelector('.ln').setAttribute('aria-pressed', on); });
+    if (this.hooks.onBp) this.hooks.onBp(this);
+  }
+  runToBp() {
+    if (this.i === 0 && this.pred && this.choice == null) this.skipPred = true;
+    // 斷點：在該行「執行之前」暫停 → 顯示上一步的狀態，並標示即將執行的行
+    let k = this.i + 1;
+    if (this.pauseLine != null) k = this.i + 2;
+    while (k < this.steps.length && !this.bps.has(this.steps[k].line)) k++;
+    if (this.bps.size === 0 || k >= this.steps.length) {
+      this.go(this.steps.length - 1);
+      this.$('.note').textContent = (this.bps.size === 0 ? '未設定斷點：先點選左邊的行號（出現 ●）。' : '之後再沒有經過斷點的步驟，') + '程式已執行到最後。';
+      return;
+    }
+    this.go(k - 1);
+    this.pauseLine = this.steps[k].line;
+    $$('.codetab tbody tr', this.root).forEach(tr => { const on = tr.dataset.id === this.pauseLine; tr.classList.toggle('pause', on); if (on) tr.querySelector('.gut').textContent = '⏸'; });
+    this.$('.note').textContent = `⏸ 在斷點暫停：第 ${this.lineNo[this.pauseLine]} 行「即將執行」，還未執行。右邊是此刻的變量，檢查後再按「⏩ 執行到斷點」繼續。`;
+  }
+  rebuild() {
+    this.stop();
+    this.p = this.getP();
+    this.rows = this.prog.rows(this.p).filter(Boolean);
+    this.cols = this.prog.cols(this.p);
+    this.steps = this.prog.run(this.p);
+    this.pred = this.prog.predict ? this.prog.predict(this.p) : null;
+    this.choice = null; this.skipPred = false;
+    // Python 行號
+    let n = 0; this.lineNo = {};
+    this.rows.forEach(r => { if (r.py !== '' || r.blank) { n++; this.lineNo[r.id] = n; } });
+    const tb = this.$('.codetab tbody');
+    tb.innerHTML = this.rows.map(r => `<tr data-id="${r.id}"><td class="gut"></td><td class="ln">${this.lineNo[r.id] || ''}</td><td class="py">${hlPy(r.py)}</td><td class="pc">${hlPc(r.pc || '')}</td></tr>`).join('');
+    // 追蹤表
+    const th = `<thead><tr><th>步</th><th>行</th>${this.cols.map(c => `<th>${esc(c)}</th>`).join('')}<th>輸出</th></tr></thead>`;
+    const body = this.steps.slice(1).map((s, i) => `<tr class="fut"><td>${i + 1}</td><td>${this.lineNo[s.line] || '–'}</td>${this.cols.map(c => {
+      const v = s.changed.includes(c) && c in s.vars ? s.vars[c] : ''; return `<td>${esc(v)}</td>`; }).join('')}<td class="${s.err ? 'er' : ''}">${esc(s.newOut.join(' ⏎ '))}</td></tr>`).join('');
+    this.$('.trace').innerHTML = th + '<tbody>' + body + '</tbody>';
+    this.renderPred();
+    if (this.hooks.breakpoints) { const valid = new Set(this.rows.map(r => r.id)); this.bps.forEach(b => { if (!valid.has(b)) this.bps.delete(b); }); this.paintBps(); }
+    this.go(0);
+  }
+  renderPred() {
+    const box = this.$('.st-pred');
+    if (!this.pred) { box.innerHTML = ''; return; }
+    box.innerHTML = `<div class="predict"><div class="q">${this.pred.q}</div><div class="opts">${this.pred.options.map((o, i) => `<button class="opt" data-i="${i}" aria-pressed="false">${esc(o.t)}</button>`).join('')}</div><div class="verdict" aria-live="polite"></div></div>`;
+    box.querySelector('.opts').addEventListener('click', e => {
+      const b = e.target.closest('.opt'); if (!b) return;
+      this.choice = +b.dataset.i;
+      $$('.opt', box).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      const v = box.querySelector('.verdict'); v.className = 'verdict'; v.textContent = '已記下你的預測。現在逐行執行，看看結果。';
+      if (this.i === this.steps.length - 1) this.revealPred();
+    });
+  }
+  revealPred() {
+    if (!this.pred) return;
+    const v = this.$('.st-pred .verdict'); if (!v) return;
+    if (this.choice == null) { v.className = 'verdict'; v.textContent = '（你沒有作預測）' + (this.pred.options.find(o => o.ok) ? ` 正確答案：${this.pred.options.find(o => o.ok).t}` : ''); return; }
+    const o = this.pred.options[this.choice];
+    v.className = 'verdict ' + (o.ok ? 'ok' : 'no');
+    v.textContent = (o.ok ? '預測正確！' : '預測不正確。') + ' ' + (o.why || '');
+    o.ok ? Sound.ok() : Sound.bad();
+  }
+  step(d) {
+    if (d > 0 && this.i === 0 && this.pred && this.choice == null && !this.skipPred) {
+      this.skipPred = true;
+      const v = this.$('.st-pred .verdict'); if (v) { v.className = 'verdict'; v.textContent = '先作預測，再執行！（再按一次「下一步」可略過預測）'; }
+      return;
+    }
+    this.go(this.i + d);
+  }
+  go(i) {
+    i = Math.max(0, Math.min(this.steps.length - 1, i)); this.pauseLine = null; $$('.codetab tr.pause', this.root).forEach(tr => tr.classList.remove('pause'));
+    const moved = i !== this.i; this.i = i;
+    const s = this.steps[i];
+    // 程式碼高亮
+    $$('.codetab tbody tr', this.root).forEach(tr => {
+      const on = tr.dataset.id === s.line; tr.classList.toggle('cur', on && !s.err); tr.classList.toggle('err', on && !!s.err);
+      tr.querySelector('.gut').textContent = on ? (s.err ? '✘' : '▶') : '';
+    });
+    const cur = this.root.querySelector('.codetab tr.cur, .codetab tr.err');
+    if (cur && moved) { const box = this.root.querySelector('.codebox'); const top = cur.offsetTop - box.clientHeight / 2; if (box.scrollHeight > box.clientHeight) box.scrollTop = Math.max(0, top); }
+    // 變量
+    const vb = this.$('.vars'); const keys = Object.keys(s.vars);
+    const order = this.cols.filter(c => keys.includes(c)).concat(keys.filter(k => !this.cols.includes(k)));
+    vb.innerHTML = order.length ? order.map(k => {
+      const lab = this.prog.varLabel ? this.prog.varLabel(k) : ''; const chg = s.changed.includes(k);
+      return `<div class="crate${chg ? ' chg' : ''}${chg && !REDUCED ? ' anim' : ''}"><div class="lbl">${esc(k)}${lab ? ' · ' + lab : ''}</div><div class="val">${esc(s.vars[k])}</div></div>`;
+    }).join('') : '<span class="empty">（未有任何變量）</span>';
+    // 輸出
+    const con = this.$('.console'); const old = s.out.length - s.newOut.length;
+    con.innerHTML = s.out.length ? s.out.map((o, k) => {
+      const er = /^(Traceback|\s+File|\w*Error)/.test(o) || (s.err && k >= old);
+      return `<div class="${er ? 'er' : ''} ${k >= old ? 'new' : ''}"><span class="pr">${er ? '✘' : '&gt;'}</span> ${esc(o)}</div>`;
+    }).join('') : '<span class="hint" style="color:#999">（未有輸出）</span>';
+    // 解說
+    const nt = this.$('.note'); nt.classList.toggle('err', !!s.err); nt.textContent = s.note || '';
+    // 追蹤表
+    $$('.trace tbody tr', this.root).forEach((tr, k) => { tr.classList.toggle('fut', k + 1 > i); tr.classList.toggle('cur', k + 1 === i); });
+    const ct = this.root.querySelector('.trace tr.cur'); const tw = this.$('.trace-wrap');
+    if (ct && moved) tw.scrollTop = Math.max(0, ct.offsetTop - tw.clientHeight + ct.offsetHeight + 8);
+    // 計數
+    this.$('.cnt').textContent = `第 ${i} / ${this.steps.length - 1} 步`;
+    this.root.querySelector('[data-a=prev]').disabled = i === 0;
+    this.root.querySelector('[data-a=next]').disabled = i === this.steps.length - 1;
+    if (moved && i > 0) Sound.step();
+    if (i === this.steps.length - 1 && moved) { this.revealPred(); if (s.err) Sound.bad(); }
+    if (this.hooks.onStep) this.hooks.onStep(s, i, this.steps, this);
+  }
+  play() {
+    if (this.i === this.steps.length - 1) this.go(0);
+    if (this.i === 0 && this.pred && this.choice == null) this.skipPred = true;
+    const b = this.root.querySelector('[data-a=play]'); b.setAttribute('aria-pressed', 'true'); b.textContent = '⏸ 暫停';
+    const tick = () => {
+      if (this.i >= this.steps.length - 1) { this.stop(); return; }
+      this.go(this.i + 1);
+      const sp = +this.root.querySelector('[data-a=speed]').value;
+      this.timer = setTimeout(tick, [0, 2000, 1400, 900, 550, 300][sp]);
+    };
+    this.timer = setTimeout(tick, 150);
+  }
+  stop() {
+    if (this.timer) clearTimeout(this.timer); this.timer = null;
+    const b = this.root && this.root.querySelector('[data-a=play]'); if (b) { b.setAttribute('aria-pressed', 'false'); b.textContent = '⏵ 自動播放'; }
+  }
+}
+
+/* 拖放工具（滑鼠與觸控通用） */
+function makeDraggable(node, { onDrop, onTap, ghostClass = '' }) {
+  let sx, sy, ghost = null, active = false, pid = null;
+  node.addEventListener('pointerdown', e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (node.dataset.locked === '1') return;
+    sx = e.clientX; sy = e.clientY; active = true; pid = e.pointerId;
+    try { node.setPointerCapture(pid); } catch (er) {}
+  });
+  node.addEventListener('pointermove', e => {
+    if (!active) return;
+    if (!ghost && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) {
+      ghost = node.cloneNode(true); ghost.classList.add('ghost'); if (ghostClass) ghost.classList.add(ghostClass);
+      ghost.style.width = node.offsetWidth + 'px'; document.body.appendChild(ghost);
+    }
+    if (ghost) {
+      e.preventDefault();
+      ghost.style.left = (e.clientX - 20) + 'px'; ghost.style.top = (e.clientY - 20) + 'px';
+      const t = document.elementFromPoint(e.clientX, e.clientY); $$('.hov').forEach(x => x.classList.remove('hov'));
+      const slot = t && t.closest('[data-drop]'); if (slot) slot.classList.add('hov');
+    }
+  });
+  const end = e => {
+    if (!active) return; active = false;
+    try { node.releasePointerCapture(pid); } catch (er) {}
+    $$('.hov').forEach(x => x.classList.remove('hov'));
+    if (ghost) {
+      ghost.remove(); ghost = null;
+      const t = document.elementFromPoint(e.clientX, e.clientY); const slot = t && t.closest('[data-drop]');
+      if (slot && e.type === 'pointerup') onDrop(slot);
+    } else if (e.type === 'pointerup') onTap && onTap();
+  };
+  node.addEventListener('pointerup', end); node.addEventListener('pointercancel', end);
+  node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap && onTap(); } });
+}
+<\/script>
+<script>
+/* ================= 共用：模擬的 students.txt 與卡片抽屜 ================= */
+const DEFAULT_STUDENTS = 'S001,陳大文,78\nS002,李小明,65\nS004,王家欣,91\n';
+let STUDENTS = DEFAULT_STUDENTS;
+const FILE_LISTENERS = [];
+function pyLines(s) { return String(s).match(/[^\n]*\n|[^\n]+$/g) || []; }   // 等同 Python 逐行讀取（保留行末 \n）
+let feTimer = null;
+function setStudents(v, src) {
+  STUDENTS = v;
+  $$('textarea.fileedit').forEach(t => { if (t !== src) t.value = v; });
+  clearTimeout(feTimer); feTimer = setTimeout(() => FILE_LISTENERS.forEach(f => { try { f(); } catch (e) { console.error(e); } }), 300);
+}
+function initFileEditors() {
+  $$('[data-fe]').forEach(box => {
+    box.innerHTML = `<div class="editor-bar"><b>📁 students.txt</b><span class="hint">可直接修改；本章所有例子共用這個檔案</span><button class="btn alt" data-fereset style="margin-left:auto">還原預設內容</button></div><textarea class="fileedit" spellcheck="false" autocapitalize="off" aria-label="students.txt 的內容"></textarea>`;
+    const ta = box.querySelector('textarea'); ta.value = STUDENTS;
+    ta.addEventListener('input', () => setStudents(ta.value, ta));
+    box.querySelector('[data-fereset]').addEventListener('click', () => setStudents(DEFAULT_STUDENTS, null));
+  });
+}
+function cardText(t) { return esc(String(t).replace(/\n$/, '')) + (String(t).endsWith('\n') ? '<span class="nl" title="換行字符 \\n">↵</span>' : ''); }
+/* d = { name, lines, cur, marks: {i: [符號, 說明]}, newIdx, skip: Set, gone, sub, mem } */
+function drawerHTML(d) {
+  const lines = d.lines || [];
+  const cards = lines.length ? lines.map((t, i) => {
+    const m = d.marks && d.marks[i];
+    const cls = ['icard', d.cur === i ? 'cur' : '', d.newIdx === i ? 'new' : '', d.newIdx === i && !REDUCED ? 'anim' : '', d.skip && d.skip.has(i) ? 'skip' : ''].join(' ');
+    return `<div class="${cls}"><span class="no">${i + 1}</span>${m ? `<span class="mk" title="${esc(m[1])}">${esc(m[0])}</span>` : ''}${cardText(t)}</div>`;
+  }).join('') : `<div class="empty-drawer">（抽屜是空的${d.empty ? '：' + esc(d.empty) : ''}）</div>`;
+  return `<div class="drawer${d.gone ? ' gone' : ''}"><div class="plate">${esc(d.name)}${d.sub ? `<small>${esc(d.sub)}</small>` : ''}</div><div class="cards">${cards}</div>${d.mem ? `<div class="mem">${esc(d.mem)}</div>` : ''}</div>`;
+}
+function renderDrawerHook(s, i, steps, st) {
+  const box = st.root.querySelector('.hook');
+  box.innerHTML = s.files && s.files.length ? `<div class="drawers">${s.files.map(drawerHTML).join('')}</div>` : '';
+}
+function prOut(r, s) { String(s).split('\n').forEach(x => r.print(x)); }   // print() 的輸出可能有多行
+function pyIntOk(s) { return /^\s*[+-]?\d+\s*$/.test(s); }
+
+/* ================= 4.1 ① 字符檢視 ================= */
+function renderChars() {
+  const s = STUDENTS;
+  const view = $('#charView');
+  let h = '';
+  for (const ch of s) {
+    if (ch === '\n') h += '<span class="nl" title="換行字符 \\n">↵</span><span class="br"></span>';
+    else if (ch === ',') h += '<span class="sep" title="分隔符">,</span>';
+    else if (ch === ' ') h += '<span title="空格">␣</span>';
+    else h += `<span>${esc(ch)}</span>`;
+  }
+  view.innerHTML = h || '<span class="hint">（檔案是空的）</span>';
+  const lines = pyLines(s);
+  const maxF = Math.max(3, ...lines.map(l => l.replace(/\n$/, '').split(',').length));
+  const heads = ['sid', 'name', 'score'];
+  $('#fieldTab').innerHTML = `<thead><tr><th>記錄</th>${Array.from({ length: maxF }, (_, k) => `<th>欄位 ${k}${heads[k] ? '（' + heads[k] + '）' : ''}</th>`).join('')}<th>檢查</th></tr></thead><tbody>${lines.map((l, i) => {
+    const f = l.replace(/\n$/, '').split(','); const ok = f.length === 3;
+    return `<tr><td>第 ${i + 1} 行</td>${Array.from({ length: maxF }, (_, k) => `<td class="${!ok && k < f.length ? 'warn' : ''}">${k < f.length ? esc(f[k]) : ''}</td>`).join('')}<td class="${ok ? '' : 'warn'}">${ok ? '✔ 3 個欄位' : `✘ ${f.length} 個欄位${f.length > 3 ? '：分隔符多了，欄位錯位' : ''}`}</td></tr>`;
+  }).join('')}</tbody>`;
+}
+function initChars() {
+  renderChars(); FILE_LISTENERS.push(renderChars);
+  $('#badComma').addEventListener('click', () => {
+    let s = STUDENTS; if (s && !s.endsWith('\n')) s += '\n';
+    setStudents(s + 'S005,陳,大文,80\n', null); Sound.bad();
+  });
+}
+
+/* ================= 4.1 ② 五種檔案操作 ================= */
+let opLines = pyLines(DEFAULT_STUDENTS), opState = { marks: {}, newIdx: null, ghost: null };
+function renderOps() {
+  const lines = opState.ghost ? opLines.slice(0, opState.ghost.at).concat([opState.ghost.text], opLines.slice(opState.ghost.at)) : opLines;
+  const marks = Object.assign({}, opState.marks), skip = new Set();
+  if (opState.ghost) { skip.add(opState.ghost.at); marks[opState.ghost.at] = ['✂ 已刪除', '刪除']; }
+  $('#opDrawer').innerHTML = drawerHTML({ name: 'students.txt', lines, marks, newIdx: opState.newIdx, skip });
+}
+function initOps() {
+  renderOps();
+  $('#opBtns').addEventListener('click', e => {
+    const b = e.target.closest('[data-op]'); if (!b) return; const op = b.dataset.op, note = $('#opNote');
+    opState = { marks: {}, newIdx: null, ghost: null };
+    if (op === 'reset') { opLines = pyLines(DEFAULT_STUDENTS); note.textContent = '已還原。'; }
+    if (op === 'read') { opLines.forEach((l, i) => opState.marks[i] = ['👁 已讀', '讀取']); note.textContent = '讀取：由第一張卡開始逐張翻閱，抽屜的內容完全不變。'; }
+    if (op === 'append') { opLines = opLines.concat(['S005,何美玲,88\n']); opState.newIdx = opLines.length - 1; opState.marks[opState.newIdx] = ['＋ 添加', '添加']; note.textContent = '添加：新記錄放在抽屜最後（檔案末端），不用理會次序。'; }
+    if (op === 'insert') {
+      let at = opLines.findIndex(l => l.split(',')[0] > 'S003'); if (at < 0) at = opLines.length;
+      opLines = opLines.slice(0, at).concat(['S003,張美美,82\n'], opLines.slice(at)); opState.newIdx = at; opState.marks[at] = ['＋ 插入', '插入'];
+      note.textContent = '插入：按 ID 次序，把 S003 放在 S002 和 S004 之間。';
+    }
+    if (op === 'modify') {
+      const at = opLines.findIndex(l => l.startsWith('S002,'));
+      if (at < 0) note.textContent = '抽屜裏沒有 S002，無法修訂。'; else { opLines = opLines.slice(); opLines[at] = 'S002,李小明,70\n'; opState.marks[at] = ['✎ 修訂', '修訂']; opState.newIdx = at; note.textContent = '修訂：找到 S002，把分數由 65 改為 70，其他卡不變。'; }
+    }
+    if (op === 'delete') {
+      const at = opLines.findIndex(l => l.startsWith('S001,'));
+      if (at < 0) note.textContent = '抽屜裏沒有 S001，無法刪除。'; else { const text = opLines[at]; opLines = opLines.filter((l, i) => i !== at); opState.ghost = { at, text }; note.textContent = '刪除：拿走 S001 這張卡，其他卡保留。'; }
+    }
+    Sound.step(); renderOps();
+  });
+}
+<\/script>
+<script>
+/* ================= 4.2 ① with open 與緩衝區 ================= */
+let wbMode = 'open';
+const WB_REC = 'S005,何美玲,88\n';
+const PROG_WB = {
+  rows(p) {
+    if (p.mode === 'open') return [
+      { id: 'W1', py: 'f = open("log.txt", "w")', pc: 'OPEN "log.txt" FOR WRITE AS f' },
+      { id: 'W2', py: 'f.write("S005,何美玲,88\\n")', pc: 'WRITE f, "S005,何美玲,88"' },
+      { id: 'W3', py: 'g = open("log.txt", "r")      # 忘記先 f.close()', pc: 'OPEN "log.txt" FOR READ AS g' },
+      { id: 'W4', py: 'print(g.read())', pc: 'OUTPUT 全部內容 of g' }];
+    return [
+      { id: 'X1', py: 'with open("log.txt", "w") as f:', pc: 'OPEN "log.txt" FOR WRITE AS f' },
+      { id: 'X2', py: '    f.write("S005,何美玲,88\\n")', pc: '  WRITE f, "S005,何美玲,88"' },
+      { id: 'XE', py: '', pc: 'CLOSE f   // with 區塊結束時自動關閉' },
+      { id: 'X3', py: 'with open("log.txt", "r") as g:', pc: 'OPEN "log.txt" FOR READ AS g' },
+      { id: 'X4', py: '    print(g.read())', pc: '  OUTPUT 全部內容 of g' }];
+  },
+  cols() { return ['緩衝區', 'log.txt（磁碟）']; },
+  run(p) {
+    const r = new Rec();
+    const F = (buf, disk, sub) => ({ files: [{ name: '緩衝區（記憶體）', lines: pyLines(buf), sub: sub || '' }, { name: 'log.txt（磁碟）', lines: pyLines(disk) }] });
+    if (p.mode === 'open') {
+      r.set('緩衝區', "''"); r.set('log.txt（磁碟）', "''"); r.push('W1', '以 "w" 模式開啟 log.txt：磁碟上建立了一個空檔案。', F('', ''));
+      r.set('緩衝區', PY.str(WB_REC)); r.push('W2', 'write() 先把內容放進緩衝區（記憶體），還未寫到磁碟。', F(WB_REC, '', '未寫入磁碟'));
+      r.push('W3', '沒有關閉 f，便再開啟同一個檔案來讀取。', F(WB_REC, '', '未寫入磁碟'));
+      r.print(''); r.push('W4', '讀到的是磁碟上的內容——空白！記錄仍困在緩衝區。要等檔案關閉（或程式結束）才會寫入；如果程式中途崩潰，記錄便會遺失。', F(WB_REC, '', '未寫入磁碟'));
+      return r.steps;
+    }
+    r.set('緩衝區', "''"); r.set('log.txt（磁碟）', "''"); r.push('X1', '以 "w" 模式開啟 log.txt。', F('', ''));
+    r.set('緩衝區', PY.str(WB_REC)); r.push('X2', 'write() 把內容放進緩衝區。', F(WB_REC, '', '未寫入磁碟'));
+    r.set('緩衝區', "''"); r.set('log.txt（磁碟）', PY.str(WB_REC));
+    r.push('X3', 'with 區塊結束，檔案自動關閉：緩衝區的內容寫進磁碟。然後開啟檔案來讀取。', F('', WB_REC));
+    prOut(r, WB_REC); r.push('X4', '讀到剛寫入的記錄。（print 輸出字串尾的 \\n，所以多了一個空行。）', F('', WB_REC));
+    return r.steps;
+  },
+  predict(p) {
+    return { q: 'print(g.read()) 會輸出甚麼？', options: [
+      { t: 'S005,何美玲,88', ok: p.mode === 'with', why: p.mode === 'with' ? 'with 區塊結束時檔案已關閉，內容已寫入磁碟，所以讀得到。' : '檔案未關閉，內容仍在緩衝區，磁碟上的檔案仍然是空的。' },
+      { t: '（空白，甚麼也讀不到）', ok: p.mode === 'open', why: p.mode === 'open' ? '沒有關閉 f，內容未從緩衝區寫入磁碟，讀到的是空檔案。' : 'with 已自動關閉檔案，內容已經寫入。' },
+      { t: 'FileNotFoundError', ok: false, why: '以 "w" 模式開啟時已建立了 log.txt，所以檔案存在。' }] };
+  }
+};
+let wbStepper;
+function initWb() {
+  wbStepper = new Stepper($('#wbStepper'), PROG_WB, () => ({ mode: wbMode }), { onStep: renderDrawerHook, noVars: true });
+  $$('[data-wb]').forEach(b => b.addEventListener('click', () => { wbMode = b.dataset.wb; $$('[data-wb]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); wbStepper.rebuild(); }));
+}
+
+/* ================= 4.2 ② strip() 與 split(",") ================= */
+function renderSplit() {
+  const lines = pyLines(STUDENTS), sel = $('#spLine');
+  const prev = +sel.value || 1;
+  sel.innerHTML = lines.map((l, i) => `<option value="${i + 1}">${i + 1}</option>`).join('') || '<option value="0">（沒有記錄）</option>';
+  sel.value = String(Math.min(prev, Math.max(1, lines.length)));
+  const pipe = $('#spPipe');
+  if (!lines.length) { pipe.innerHTML = '<div>檔案是空的。</div>'; return; }
+  const line = lines[(+sel.value || 1) - 1], noStrip = $('#spNoStrip').checked, noComma = $('#spNoComma').checked;
+  const st = noStrip ? line : line.trim();
+  const fields = noComma ? st.trim().split(/\s+/).filter(x => x !== '') : st.split(',');
+  const call = (noStrip ? 'line' : 'line.strip()') + (noComma ? '.split()' : '.split(",")');
+  let h = `<div><b>line</b>${esc(PY.str(line))}</div><div class="arrow">↓ ${noStrip ? '（沒有 strip，\\n 仍在）' : 'strip()：移除前後的空白字符，包括 \\n'}</div>`;
+  h += `<div><b>${noStrip ? 'line' : 'line.strip()'}</b>${esc(PY.str(st))}</div><div class="arrow">↓ ${noComma ? 'split()：沒有參數，按空白分割——但記錄內沒有空格！' : 'split(",")：遇到逗號便切開'}</div>`;
+  h += `<div><b>fields = ${esc(call)}</b>${esc(PY.list(fields.map(x => PY.str(x))))}</div>`;
+  const names = ['sid', 'name', 'score'];
+  h += `<div><b>各欄位</b><span class="idx">${[0, 1, 2].map(k => k < fields.length ? `<span><i>fields[${k}]（${names[k]}）</i>${esc(PY.str(fields[k]))}</span>` : `<span class="er"><i>fields[${k}]</i>IndexError: list index out of range</span>`).join('')}</span></div>`;
+  if (fields.length > 2) {
+    const sc = fields[2];
+    h += `<div><b>fields[2] == "${esc(sc.trim())}"</b>${PY.bool(sc === sc.trim())}${sc !== sc.trim() ? '　✘ 因為 fields[2] 尾部還有 \\n，與 "' + esc(sc.trim()) + '" 不相等' : ''}</div>`;
+    h += `<div><b>int(fields[2])</b>${pyIntOk(sc) ? String(parseInt(sc, 10)) : `<span class="er">ValueError: invalid literal for int() with base 10: ${esc(PY.str(sc))}</span>`}</div>`;
+  }
+  pipe.innerHTML = h;
+}
+function initSplit() {
+  renderSplit(); FILE_LISTENERS.push(renderSplit);
+  ['#spLine', '#spNoStrip', '#spNoComma'].forEach(s => $(s).addEventListener('change', renderSplit));
+}
+
+/* ================= 4.2 ③ 兩種讀取方法 ================= */
+let rdMode = 'loop';
+function rdP() { return { mode: rdMode, text: STUDENTS }; }
+function readRun(lines, mode) {   // 純計算：傳回 { out, err }
+  let total = 0, count = 0;
+  if (mode === 'readlines' && !lines.length) return { err: 'IndexError: list index out of range' };
+  for (const line of lines) {
+    const f = line.trim().split(',');
+    if (f.length < 3) return { err: 'IndexError: list index out of range' };
+    if (!pyIntOk(f[2])) return { err: `ValueError: invalid literal for int() with base 10: ${PY.str(f[2])}` };
+    total += parseInt(f[2], 10); count++;
+  }
+  if (!count) return { err: 'ZeroDivisionError: division by zero' };
+  return { avg: PY.float(total / count), total, count };
+}
+const PROG_RD = {
+  rows(p) {
+    if (p.mode === 'loop') return [
+      { id: 'R1', py: 'total = 0', pc: 'total ← 0' },
+      { id: 'R2', py: 'count = 0', pc: 'count ← 0' },
+      { id: 'R3', py: 'with open("students.txt", "r") as f:', pc: 'OPEN "students.txt" FOR READ AS f' },
+      { id: 'R4', py: '    for line in f:', pc: '  FOR EACH line IN f' },
+      { id: 'R5', py: '        fields = line.strip().split(",")', pc: '    fields ← SPLIT(TRIM(line), ",")' },
+      { id: 'R6', py: '        total = total + int(fields[2])', pc: '    total ← total + INT(fields[2])' },
+      { id: 'R7', py: '        count = count + 1', pc: '    count ← count + 1' },
+      { id: 'RN', py: '', pc: '  NEXT line' },
+      { id: 'R8', py: 'print("平均分：", total / count)', pc: 'OUTPUT "平均分：", total / count' }];
+    return [
+      { id: 'L1', py: 'with open("students.txt", "r") as f:', pc: 'OPEN "students.txt" FOR READ AS f' },
+      { id: 'L2', py: '    lines = f.readlines()', pc: '  lines ← 全部行 of f' },
+      { id: 'L3', py: 'print("共", len(lines), "條記錄")', pc: 'OUTPUT "共", LENGTH(lines), "條記錄"' },
+      { id: 'L4', py: 'print("第一條：", lines[0].strip())', pc: 'OUTPUT "第一條：", TRIM(lines[0])' },
+      { id: 'L5', py: 'total = 0', pc: 'total ← 0' },
+      { id: 'L6', py: 'for line in lines:', pc: 'FOR EACH line IN lines' },
+      { id: 'L7', py: '    fields = line.strip().split(",")', pc: '  fields ← SPLIT(TRIM(line), ",")' },
+      { id: 'L8', py: '    total = total + int(fields[2])', pc: '  total ← total + INT(fields[2])' },
+      { id: 'LN', py: '', pc: 'NEXT line' },
+      { id: 'L9', py: 'print("平均分：", total / len(lines))', pc: 'OUTPUT "平均分：", total / LENGTH(lines)' }];
+  },
+  cols(p) { return p.mode === 'loop' ? ['line', 'fields', 'total', 'count'] : ['lines', 'line', 'fields', 'total']; },
+  run(p) {
+    const r = new Rec(), lines = pyLines(p.text);
+    const D = (cur, memo, loaded) => ({ files: [{ name: 'students.txt', lines, cur, sub: loaded ? '已全部載入列表' : '', mem: memo }] });
+    const crash = (line, msg, note, extra) => { r.print('Traceback (most recent call last):'); r.print(`  File "main.py", line ${line}, in <module>`); r.print(msg); r.push(extra.id, note, Object.assign({ err: true }, extra.f)); };
+    if (p.mode === 'loop') {
+      let total = 0, count = 0;
+      r.set('total', '0'); r.push('R1', 'total 由 0 開始。');
+      r.set('count', '0'); r.push('R2', 'count 由 0 開始。');
+      r.push('R3', '以讀取模式 "r" 開啟檔案。with 區塊結束時會自動關閉。', D(null, '記憶體中的記錄：0 條'));
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        r.set('line', PY.str(line)); r.push('R4', `讀入第 ${i + 1} 行：${PY.str(line)}（行末有 \\n）。`, D(i, '記憶體中的記錄：1 條（只有目前這一行）'));
+        const f = line.trim().split(',');
+        r.set('fields', PY.list(f.map(x => PY.str(x)))); r.push('R5', `strip() 去掉 \\n，split(",") 分成 ${f.length} 個欄位。`, D(i, '記憶體中的記錄：1 條'));
+        if (f.length < 3) { crash(6, 'IndexError: list index out of range', `這一行只有 ${f.length} 個欄位，fields[2] 不存在。（例如空行或少了逗號）`, { id: 'R6', f: D(i, '') }); return r.steps; }
+        if (!pyIntOk(f[2])) { crash(6, `ValueError: invalid literal for int() with base 10: ${PY.str(f[2])}`, `fields[2] 是 ${PY.str(f[2])}，不能轉換成整數。`, { id: 'R6', f: D(i, '') }); return r.steps; }
+        const v = parseInt(f[2], 10), o = total; total += v;
+        r.set('total', String(total)); r.push('R6', `int(fields[2]) = ${v}；total = ${o} + ${v} = ${total}。`, D(i, '記憶體中的記錄：1 條'));
+        count++; r.set('count', String(count)); r.push('R7', `count = ${count}。`, D(i, '記憶體中的記錄：1 條'));
+      }
+      r.push('R4', '已讀到檔案末端，循環結束；離開 with 區塊，檔案自動關閉。', D(null, ''));
+      if (!count) { crash(8, 'ZeroDivisionError: division by zero', '檔案沒有記錄，count 是 0。', { id: 'R8', f: D(null, '') }); return r.steps; }
+      const avg = PY.float(total / count); r.print('平均分： ' + avg);
+      r.push('R8', `平均分 = ${total} / ${count} = ${avg}。`, D(null, ''));
+      return r.steps;
+    }
+    const L = PY.list(lines.map(x => PY.str(x)));
+    r.push('L1', '以讀取模式開啟檔案。', D(null, ''));
+    r.set('lines', L); r.push('L2', `readlines() 一次過把全部 ${lines.length} 行載入列表 lines；每一行是一個元素，例如 lines[0]。`, D(null, `記憶體中的記錄：${lines.length} 條（整個檔案）`, true));
+    r.print(`共 ${lines.length} 條記錄`); r.push('L3', `len(lines) = ${lines.length}。檔案已關閉，但列表仍在記憶體中。`, D(null, `記憶體中的記錄：${lines.length} 條`, true));
+    if (!lines.length) { crash(4, 'IndexError: list index out of range', '列表是空的，lines[0] 不存在。', { id: 'L4', f: D(null, '', true) }); return r.steps; }
+    r.print('第一條： ' + lines[0].trim()); r.push('L4', '用索引直接存取第一行 lines[0]，不用由頭讀起。', D(0, `記憶體中的記錄：${lines.length} 條`, true));
+    let total = 0; r.set('total', '0'); r.push('L5', 'total 由 0 開始。', D(null, `記憶體中的記錄：${lines.length} 條`, true));
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]; r.set('line', PY.str(line)); r.push('L6', `取出 lines[${i}]。`, D(i, `記憶體中的記錄：${lines.length} 條`, true));
+      const f = line.trim().split(','); r.set('fields', PY.list(f.map(x => PY.str(x)))); r.push('L7', `分成 ${f.length} 個欄位。`, D(i, `記憶體中的記錄：${lines.length} 條`, true));
+      if (f.length < 3) { crash(8, 'IndexError: list index out of range', `這一行只有 ${f.length} 個欄位，fields[2] 不存在。`, { id: 'L8', f: D(i, '', true) }); return r.steps; }
+      if (!pyIntOk(f[2])) { crash(8, `ValueError: invalid literal for int() with base 10: ${PY.str(f[2])}`, `fields[2] 是 ${PY.str(f[2])}，不能轉換成整數。`, { id: 'L8', f: D(i, '', true) }); return r.steps; }
+      const v = parseInt(f[2], 10), o = total; total += v; r.set('total', String(total)); r.push('L8', `total = ${o} + ${v} = ${total}。`, D(i, `記憶體中的記錄：${lines.length} 條`, true));
+    }
+    r.push('L6', '列表已沒有元素，循環結束。', D(null, `記憶體中的記錄：${lines.length} 條`, true));
+    const avg = PY.float(total / lines.length); r.print('平均分： ' + avg); r.push('L9', `平均分 = ${total} / ${lines.length} = ${avg}。`, D(null, '', true));
+    return r.steps;
+  },
+  predict(p) {
+    const lines = pyLines(p.text), res = readRun(lines, p.mode);
+    const right = res.err ? res.err.split(':')[0] + '（程式出錯）' : '平均分： ' + res.avg;
+    const raw = [{ t: right, ok: true, why: res.err ? '檔案內容有問題：' + res.err : `總分 ${res.total} ÷ ${res.count} 人。` }];
+    if (!res.err) {
+      raw.push({ t: '平均分： ' + res.total, ok: false, why: '這是總分，程式最後有除以人數。' });
+      raw.push({ t: '平均分： ' + Math.trunc(res.total / res.count), ok: false, why: '用 / 除法得到浮點數，不會截去小數部分。' });
+      raw.push({ t: 'ValueError（程式出錯）', ok: false, why: '每行的 fields[2] 都是整數字串，int() 可以轉換。' });
+    } else raw.push({ t: '平均分： 0.0', ok: false, why: '程式在計算前已出錯。' });
+    const o = []; raw.forEach(x => { if (!o.some(y => y.t === x.t)) o.push(x); });
+    return { q: '執行後輸出的最後一行是甚麼？', options: o };
+  }
+};
+let rdStepper;
+function initRd() {
+  rdStepper = new Stepper($('#rdStepper'), PROG_RD, rdP, { onStep: renderDrawerHook, traceOpen: true, wide: true });
+  $$('[data-rd]').forEach(b => b.addEventListener('click', () => { rdMode = b.dataset.rd; $$('[data-rd]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); rdStepper.rebuild(); }));
+  FILE_LISTENERS.push(() => rdStepper.rebuild());
+}
+<\/script>
+<script>
+/* ================= 4.3 ① 逐行 vs 載入列表 ================= */
+const MEM_N = [10, 100, 1000, 10000, 100000, 1000000];
+function fmtBytes(b) { return b >= 1e6 ? (b / 1e6).toFixed(b >= 1e7 ? 0 : 1) + ' MB' : b >= 1e3 ? (b / 1e3).toFixed(b >= 1e4 ? 0 : 1) + ' KB' : b + ' B'; }
+function renderMem() {
+  const n = MEM_N[clampInt($('#memN').value, 1, 6, 2) - 1], per = 30;
+  $('#memLabel').textContent = n.toLocaleString('en-US') + ' 條記錄';
+  const a = per, b = per * n;
+  const w = x => Math.max(.6, Math.log10(x) / Math.log10(per * 1e6) * 100);
+  $('#memA').innerHTML = `<i style="width:${w(a)}%"></i><span>約 ${fmtBytes(a)}</span>`;
+  $('#memB').innerHTML = `<i style="width:${w(b)}%"></i><span>約 ${fmtBytes(b)}</span>`;
+  $('#memNoteA').innerHTML = `記憶體中每次只有 <b>1 條</b>記錄，檔案再大也一樣。<br>重新排序？✘ 只能按檔案原本的次序逐行處理。`;
+  $('#memNoteB').innerHTML = `記憶體中有全部 <b>${n.toLocaleString('en-US')} 條</b>記錄。<br>重新排序？✔ 可以 lines.sort()，也可以用索引隨時存取。`;
+}
+function initMem() {
+  $('#memCodeA').innerHTML = hlPy('with open("students.txt", "r") as f:\n    for line in f:\n        process(line)    # 每次只處理一行');
+  $('#memCodeB').innerHTML = hlPy('with open("students.txt", "r") as f:\n    lines = f.readlines()   # 全部載入列表\nlines.sort()                # 容易重新排序');
+  $('#memN').addEventListener('input', renderMem); renderMem();
+}
+
+/* ================= 4.3 ② 添加記錄："a" vs "w" ================= */
+let apMode = 'a';
+function cleanRec(s, d) { const t = String(s).replace(/["\\\n\r]/g, '').trim(); return t || d; }
+function apP() { return { mode: apMode, rec: cleanRec($('#apRec').value, 'S005,何美玲,88'), text: STUDENTS }; }
+const PROG_AP = {
+  rows(p) {
+    return [
+      { id: 'A1', py: `new_record = "${p.rec}"`, pc: `new_record ← "${p.rec}"` },
+      { id: 'A2', py: `with open("students.txt", "${p.mode}") as f:${p.mode === 'w' ? '   # ✘' : ''}`, pc: `OPEN "students.txt" FOR ${p.mode === 'a' ? 'APPEND' : 'WRITE'} AS f` },
+      { id: 'A3', py: '    f.write(new_record + "\\n")', pc: '  WRITE f, new_record' },
+      { id: 'AE', py: '', pc: 'CLOSE f' },
+      { id: 'A4', py: 'with open("students.txt", "r") as f:', pc: 'OPEN "students.txt" FOR READ AS f' },
+      { id: 'A5', py: '    print(f.read())', pc: '  OUTPUT 全部內容 of f' }];
+  },
+  cols() { return ['new_record', '記錄數目']; },
+  run(p) {
+    const r = new Rec(), before = pyLines(p.text);
+    const D = (lines, o) => ({ files: [Object.assign({ name: 'students.txt', lines }, o || {})] });
+    r.set('new_record', PY.str(p.rec)); r.set('記錄數目', String(before.length)); r.push('A1', '準備好新記錄（還未加上 \\n）。', D(before));
+    const opened = p.mode === 'w' ? '' : p.text;
+    const after = opened + p.rec + '\n';
+    if (p.mode === 'w') { r.set('記錄數目', '0'); r.push('A2', '"w" 模式：檔案一開啟便被清空！原有的全部記錄已經消失。', D([], { empty: '"w" 開啟時已清空' })); }
+    else r.push('A2', '"a" 模式：保留原有內容，寫入位置移到檔案末端。', D(before, { sub: '寫入位置：末端' }));
+    const al = pyLines(after);
+    const glued = p.mode === 'a' && p.text !== '' && !p.text.endsWith('\n');
+    r.set('記錄數目', String(al.length));
+    r.push('A3', glued ? '⚠ 原檔最後一行沒有 \\n，新記錄被接在同一行上！' : `寫入 ${PY.str(p.rec + '\n')}，成為最後一張卡。`, D(al, { newIdx: al.length - 1, marks: { [al.length - 1]: ['＋ 新寫入', '新記錄'] } }));
+    r.push('A4', 'with 結束，檔案關閉；再以讀取模式開啟。', D(al));
+    prOut(r, after); r.push('A5', p.mode === 'w' ? `檔案只剩 ${al.length} 條記錄——用 "w" 添加記錄是嚴重錯誤。` : `原有 ${before.length} 條記錄全部保留，加上新記錄，共 ${al.length} 條。`, D(al));
+    return r.steps;
+  },
+  predict(p) {
+    const before = pyLines(p.text).length, nA = pyLines(p.text + p.rec + '\n').length;
+    const ans = p.mode === 'a' ? nA : 1;
+    const raw = [
+      { t: `${nA} 條`, ok: ans === nA, why: p.mode === 'a' ? '"a" 保留原有記錄，再加上一條。' : '"w" 會先清空檔案，原有記錄不會保留。' },
+      { t: '1 條', ok: ans === 1, why: p.mode === 'w' ? '"w" 一開啟便清空檔案，只剩下新寫入的一條。' : '"a" 不會清空檔案。' },
+      { t: `${before} 條`, ok: false, why: '新記錄確實寫入了檔案。' }];
+    const o = []; raw.forEach(x => { const k = o.find(y => y.t === x.t); if (k) { if (x.ok) { k.ok = true; k.why = x.why; } } else o.push(x); });
+    return { q: '執行後，students.txt 有多少條記錄？', options: o };
+  }
+};
+let apStepper;
+function initAp() {
+  apStepper = new Stepper($('#apStepper'), PROG_AP, apP, { onStep: renderDrawerHook });
+  $$('[data-ap]').forEach(b => b.addEventListener('click', () => { apMode = b.dataset.ap; $$('[data-ap]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); apStepper.rebuild(); }));
+  $('#apRec').addEventListener('change', () => apStepper.rebuild());
+  FILE_LISTENERS.push(() => apStepper.rebuild());
+}
+
+/* ================= 4.3 ③ 暫存檔策略 ================= */
+let upMode = 'mod';
+function upP() {
+  const id = cleanRec($('#upId').value, 'S002').replace(/,/g, ''), name = cleanRec($('#upName').value, '李小明').replace(/,/g, ''), sc = cleanRec($('#upScore').value, '70').replace(/,/g, '');
+  return { mode: upMode, id, rec: `${id},${name},${sc}`, text: STUDENTS };
+}
+const PROG_UP = {
+  rows(p) {
+    const m = p.mode;
+    const rows = [{ id: 'U0', py: 'import os', pc: '' }, { id: 'U1', py: `target = "${p.id}"`, pc: `target ← "${p.id}"` }];
+    if (m !== 'del') rows.push({ id: 'U2', py: `new_record = "${p.rec}"`, pc: `new_record ← "${p.rec}"` });
+    if (m === 'ins') rows.push({ id: 'U2b', py: 'done = False', pc: 'done ← FALSE' });
+    rows.push(m === 'bad'
+      ? { id: 'U3', py: 'with open("students.txt", "w") as f:   # ✘ 應用 "r"', pc: 'OPEN "students.txt" FOR WRITE AS f' }
+      : { id: 'U3', py: 'with open("students.txt", "r") as f:', pc: 'OPEN "students.txt" FOR READ AS f' });
+    rows.push({ id: 'U4', py: '    with open("temp.txt", "w") as t:', pc: '  OPEN "temp.txt" FOR WRITE AS t' },
+      { id: 'U5', py: '        for line in f:', pc: '    FOR EACH line IN f' },
+      { id: 'U6', py: '            fields = line.strip().split(",")', pc: '      fields ← SPLIT(TRIM(line), ",")' });
+    if (m === 'mod' || m === 'bad') rows.push(
+      { id: 'U7', py: '            if fields[0] == target:', pc: '      IF fields[0] = target THEN' },
+      { id: 'U8', py: '                t.write(new_record + "\\n")', pc: '        WRITE t, new_record' },
+      { id: 'U9', py: '            else:', pc: '      ELSE' },
+      { id: 'U10', py: '                t.write(line)', pc: '        WRITE t, line' },
+      { id: 'UE', py: '', pc: '      END IF\n    NEXT line' });
+    if (m === 'del') rows.push(
+      { id: 'U7', py: '            if fields[0] != target:', pc: '      IF fields[0] ≠ target THEN' },
+      { id: 'U10', py: '                t.write(line)', pc: '        WRITE t, line' },
+      { id: 'UE', py: '', pc: '      END IF\n    NEXT line' });
+    if (m === 'ins') rows.push(
+      { id: 'U7', py: '            if not done and fields[0] > target:', pc: '      IF NOT done AND fields[0] > target THEN' },
+      { id: 'U8', py: '                t.write(new_record + "\\n")', pc: '        WRITE t, new_record' },
+      { id: 'U8b', py: '                done = True', pc: '        done ← TRUE' },
+      { id: 'UE', py: '', pc: '      END IF' },
+      { id: 'U10', py: '            t.write(line)', pc: '      WRITE t, line' },
+      { id: 'UN', py: '', pc: '    NEXT line' },
+      { id: 'U11', py: '        if not done:', pc: '    IF NOT done THEN' },
+      { id: 'U12', py: '            t.write(new_record + "\\n")', pc: '      WRITE t, new_record' },
+      { id: 'UE2', py: '', pc: '    END IF' });
+    rows.push({ id: 'U13', py: 'os.replace("temp.txt", "students.txt")', pc: 'REPLACE "students.txt" WITH "temp.txt"' },
+      { id: 'U14', py: 'with open("students.txt", "r") as f:', pc: 'OPEN "students.txt" FOR READ AS f' },
+      { id: 'U15', py: '    print(f.read())', pc: '  OUTPUT 全部內容 of f' });
+    return rows;
+  },
+  cols(p) { return p.mode === 'ins' ? ['line', 'fields[0]', 'done'] : ['line', 'fields[0]']; },
+  run(p) {
+    const r = new Rec(), src = pyLines(p.text), m = p.mode;
+    const marks = {}, tmp = [], tmarks = {};
+    const D = (cur, o) => ({ files: [
+      Object.assign({ name: 'students.txt', lines: src, cur, marks: Object.assign({}, marks), sub: '原抽屜（讀取）' }, o && o.src || {}),
+      Object.assign({ name: 'temp.txt', lines: tmp.slice(), marks: Object.assign({}, tmarks), sub: '暫存抽屜（寫入）' }, o && o.tmp || {})] });
+    r.push('U0', '匯入 os 模組，稍後要用 os.replace()。', { files: [{ name: 'students.txt', lines: src }] });
+    r.set('target', PY.str(p.id)); r.push('U1', `要處理的 ID 是 ${p.id}。`, { files: [{ name: 'students.txt', lines: src }] });
+    if (m !== 'del') { r.set('new_record', PY.str(p.rec)); r.push('U2', m === 'ins' ? '準備要插入的新記錄。' : '準備更新後的記錄。', { files: [{ name: 'students.txt', lines: src }] }); }
+    let done = false;
+    if (m === 'ins') { r.set('done', 'False'); r.push('U2b', 'done 記錄新記錄是否已經寫入。', { files: [{ name: 'students.txt', lines: src }] }); }
+    if (m === 'bad') {
+      r.push('U3', '✘ 用 "w" 開啟原檔：一開啟便清空了 students.txt！', { files: [{ name: 'students.txt', lines: [], empty: '已被 "w" 清空' }] });
+      r.push('U4', '開啟暫存檔 temp.txt。', { files: [{ name: 'students.txt', lines: [], empty: '已被 "w" 清空' }, { name: 'temp.txt', lines: [] }] });
+      r.print('Traceback (most recent call last):'); r.print('  File "main.py", line 6, in <module>'); r.print('io.UnsupportedOperation: not readable');
+      r.push('U5', '以 "w" 開啟的檔案不能讀取，程式崩潰。更糟的是：原檔已被清空，而 os.replace() 沒有執行——全部記錄永久遺失。', { err: true, files: [{ name: 'students.txt', lines: [], empty: '全部記錄遺失' }, { name: 'temp.txt', lines: [] }] });
+      return r.steps;
+    }
+    r.push('U3', '以讀取模式 "r" 開啟原始檔案。', D(null));
+    r.push('U4', '以寫入模式 "w" 開啟暫存檔 temp.txt（新的空抽屜）。', D(null));
+    for (let i = 0; i < src.length; i++) {
+      const line = src[i];
+      r.set('line', PY.str(line)); r.push('U5', `抄寫員拿起第 ${i + 1} 張卡。`, D(i));
+      const f0 = line.trim().split(',')[0];
+      r.set('fields[0]', PY.str(f0)); r.push('U6', `這張卡的 ID 是 ${f0 || '（空）'}。`, D(i));
+      if (m === 'mod') {
+        const hit = f0 === p.id;
+        r.push('U7', `${PY.str(f0)} == ${PY.str(p.id)} → ${PY.bool(hit)}。`, D(i));
+        if (hit) { tmp.push(p.rec + '\n'); marks[i] = ['✎ 已修訂', '修訂']; tmarks[tmp.length - 1] = ['✎ 更新後', '更新後的記錄']; r.push('U8', 'ID 匹配：寫入更新後的記錄。', D(i, { tmp: { newIdx: tmp.length - 1 } })); }
+        else { r.push('U9', '不匹配，進入 else。', D(i)); tmp.push(line); marks[i] = ['✔ 照抄', '照抄']; r.push('U10', '寫入原始記錄（照抄）。', D(i, { tmp: { newIdx: tmp.length - 1 } })); }
+      } else if (m === 'del') {
+        const keep = f0 !== p.id;
+        r.push('U7', `${PY.str(f0)} != ${PY.str(p.id)} → ${PY.bool(keep)}。${keep ? '' : 'ID 匹配：跳過，不寫入。'}`, D(i));
+        if (keep) { tmp.push(line); marks[i] = ['✔ 照抄', '照抄']; r.push('U10', '寫入原始記錄（照抄）。', D(i, { tmp: { newIdx: tmp.length - 1 } })); }
+        else marks[i] = ['✂ 跳過', '刪除'];
+      } else {
+        const c = !done && f0 > p.id;
+        r.push('U7', `not done 是 ${PY.bool(!done)}；${PY.str(f0)} > ${PY.str(p.id)} 是 ${PY.bool(f0 > p.id)} → ${PY.bool(c)}。`, D(i));
+        if (c) {
+          tmp.push(p.rec + '\n'); tmarks[tmp.length - 1] = ['＋ 插入', '新記錄']; r.push('U8', `找到第一個 ID 大於 ${p.id} 的記錄：先把新記錄寫在它前面。`, D(i, { tmp: { newIdx: tmp.length - 1 } }));
+          done = true; r.set('done', 'True'); r.push('U8b', 'done = True，之後不會再插入。', D(i));
+        }
+        tmp.push(line); marks[i] = ['✔ 照抄', '照抄']; r.push('U10', '再寫入原始記錄，繼續複製。', D(i, { tmp: { newIdx: tmp.length - 1 } }));
+      }
+    }
+    r.push('U5', '原檔已讀完，循環結束。', D(null));
+    if (m === 'ins') {
+      r.push('U11', `done 是 ${PY.bool(done)}。${done ? '新記錄已寫入，不用再寫。' : '沒有 ID 比它大的記錄：新記錄應放在最後。'}`, D(null));
+      if (!done) { tmp.push(p.rec + '\n'); tmarks[tmp.length - 1] = ['＋ 插入', '新記錄']; r.push('U12', '把新記錄寫在末端。', D(null, { tmp: { newIdx: tmp.length - 1 } })); }
+    }
+    const result = tmp.slice();
+    r.push('U13', 'with 區塊結束，兩個檔案都已關閉。os.replace() 用 temp.txt 取代 students.txt。', { files: [{ name: 'students.txt', lines: result, sub: '已由 temp.txt 取代' }, { name: 'temp.txt', lines: [], gone: true }] });
+    r.push('U14', '再開啟 students.txt 檢查結果。', { files: [{ name: 'students.txt', lines: result }] });
+    prOut(r, result.join('')); r.push('U15', `更新完成：students.txt 現有 ${result.length} 條記錄。`, { files: [{ name: 'students.txt', lines: result }] });
+    return r.steps;
+  },
+  predict(p) {
+    if (p.mode === 'bad') return { q: '這個程式執行後，students.txt 會怎樣？', options: [
+      { t: '全部記錄被清空', ok: true, why: '"w" 一開啟便清空原檔，之後程式又崩潰，os.replace() 沒有執行。' },
+      { t: '記錄被正確修訂', ok: false, why: '"w" 模式的檔案不能讀取，程式根本無法逐行複製。' },
+      { t: '檔案保持不變', ok: false, why: '"w" 開啟時已經清空了檔案。' }] };
+    const src = pyLines(p.text), n = src.length, hits = src.filter(l => l.trim().split(',')[0] === p.id).length;
+    const ans = p.mode === 'mod' ? n : p.mode === 'del' ? n - hits : n + 1;
+    const raw = [ans, n, n - 1, n + 1].filter(x => x >= 0).map(x => ({ t: `${x} 條`, ok: x === ans, why: x === ans
+      ? (p.mode === 'mod' ? '修訂只改內容，記錄數目不變。' : p.mode === 'del' ? `跳過 ${hits} 條 ID 為 ${p.id} 的記錄。` : '插入一條新記錄。')
+      : (p.mode === 'mod' ? '修訂不會增加或減少記錄。' : p.mode === 'del' ? `檔案中 ID 為 ${p.id} 的記錄有 ${hits} 條，只有它們被跳過。` : '插入只會多一條記錄。') }));
+    const o = []; raw.forEach(x => { if (!o.some(y => y.t === x.t)) o.push(x); });
+    return { q: '執行後，students.txt 有多少條記錄？', options: o };
+  }
+};
+let upStepper;
+function initUp() {
+  upStepper = new Stepper($('#upStepper'), PROG_UP, upP, { onStep: renderDrawerHook, traceOpen: true, wide: true });
+  $$('[data-up]').forEach(b => b.addEventListener('click', () => {
+    upMode = b.dataset.up; $$('[data-up]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    if (upMode === 'ins' && $('#upId').value === 'S002') { $('#upId').value = 'S003'; $('#upName').value = '張美美'; $('#upScore').value = '82'; }
+    if ((upMode === 'mod' || upMode === 'del') && $('#upId').value === 'S003') { $('#upId').value = 'S002'; $('#upName').value = '李小明'; $('#upScore').value = '70'; }
+    upStepper.rebuild();
+  }));
+  ['#upId', '#upName', '#upScore'].forEach(s => $(s).addEventListener('change', () => upStepper.rebuild()));
+  FILE_LISTENERS.push(() => upStepper.rebuild());
+}
+<\/script>
+<script>
+/* ================= 練習引擎 ================= */
+const QSTATE = { results: store.get('results', {}), best: store.get('best', {}) };
+const norm = s => String(s == null ? '' : s).replace(/\s+/g, '').replace(/"/g, "'");
+const normB = s => { const n = norm(s); return /^(true|false)$/i.test(n) ? n[0].toUpperCase() + n.slice(1).toLowerCase() : n; };
+function shuffleNot(arr, seed) {
+  const a = arr.slice(); let s = seed;
+  const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  for (let k = 0; k < 20; k++) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } if (a.some((x, i) => x !== arr[i])) break; }
+  return a;
+}
+function record(q, ok) {
+  if (!(q.id in QSTATE.results)) { QSTATE.results[q.id] = ok; store.set('results', QSTATE.results); }
+  const sec = q.sec, score = secScore(sec);
+  if (score > (QSTATE.best[sec] || 0)) { QSTATE.best[sec] = score; store.set('best', QSTATE.best); }
+  ok ? Sound.ok() : Sound.bad();
+  updateScores();
+}
+const secQs = sec => QUESTIONS.filter(q => q.sec === sec);
+const secScore = sec => secQs(sec).filter(q => QSTATE.results[q.id] === true).length;
+function updateScores() {
+  SECTIONS.forEach(S => {
+    const n = secQs(S.id).length, done = secQs(S.id).filter(q => q.id in QSTATE.results).length;
+    const box = $(`#drill${S.id} .score`);
+    const bd = document.querySelector(`.badge[data-score="${S.id}"]`); if (bd) bd.textContent = `★ ${secScore(S.id)}/${n}`;
+    if (box) box.innerHTML = `<span>本節得分 ${secScore(S.id)} / ${n}</span><span>已作答 ${done} / ${n}</span><span>最佳紀錄 ${QSTATE.best[S.id] || 0} / ${n}</span>`;
+  });
+  renderReport();
+}
+function fbHTML(ok, html) { return `<div class="fb ${ok ? 'ok' : 'no'}"><div class="vd">${ok ? '正確！' : '未正確。'}</div>${html}</div>`; }
+function codeBlock(c) { return `<div class="codebox" style="margin:.3rem 0 .6rem"><pre class="pre">${hlPy(c)}</pre></div>`; }
+
+function renderQuestion(q, num) {
+  const card = el('div', 'q'); card.id = 'card-' + q.id;
+  const prev = q.id in QSTATE.results ? `（首次作答：${QSTATE.results[q.id] ? '✔ 答對' : '✘ 答錯'}）` : '';
+  card.innerHTML = `<div class="qh"><span class="qn">Q${num}</span><span class="qt">${q.tag}</span><span class="qstat">${prev}</span></div><div class="stem">${esc(q.stem)}</div>${q.code && q.type !== 'fill' ? codeBlock(q.code) : ''}<div class="body"></div><div class="acts"></div><div class="fbx" aria-live="polite"></div>`;
+  const body = card.querySelector('.body'), acts = card.querySelector('.acts'), fbx = card.querySelector('.fbx');
+  const submit = el('button', 'btn', '提交答案'); const retry = el('button', 'btn alt', '⟲ 再試一次'); retry.hidden = true;
+  acts.append(submit, retry);
+  const finish = (ok, html) => { fbx.innerHTML = fbHTML(ok, html); record(q, ok); submit.disabled = true; retry.hidden = false; card.querySelector('.qstat').textContent = `（首次作答：${QSTATE.results[q.id] ? '✔ 答對' : '✘ 答錯'}）`; };
+  retry.addEventListener('click', () => { const fresh = renderQuestion(q, num); card.replaceWith(fresh); });
+
+  if (q.type === 'mc') {
+    let pick = null;
+    body.innerHTML = `<div class="opts">${q.options.map((o, i) => `<button class="opt${o.mono ? ' mono' : ''}" data-i="${i}" aria-pressed="false">${String.fromCharCode(65 + i)}. ${esc(o.t)}</button>`).join('')}</div>`;
+    body.addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b || submit.disabled) return; pick = +b.dataset.i; $$('.opt', body).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
+    submit.addEventListener('click', () => {
+      if (pick == null) { fbx.innerHTML = '<div class="fb no"><div class="vd">請先揀選一個答案。</div></div>'; return; }
+      const o = q.options[pick], ci = q.options.findIndex(x => x.ok);
+      $$('.opt', body).forEach((b, i) => { if (i === ci) b.classList.add('right'); else if (i === pick) b.classList.add('wrong'); });
+      finish(!!o.ok, o.ok ? `<p>${esc(o.why)}</p>` : `<p><b>你選了 ${String.fromCharCode(65 + pick)}：</b>${esc(o.why)}</p><p><b>正確答案 ${String.fromCharCode(65 + ci)}：</b>${esc(q.options[ci].why)}</p>`);
+    });
+  }
+
+  if (q.type === 'trace') {
+    let h = `<div class="tt-wrap"><table class="tt"><thead><tr><th>#</th>${q.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+    q.rows.forEach((r, ri) => {
+      h += `<tr><td>${ri + 1}</td>${r.c.map((c, ci) => c.a ? `<td><input class="${q.wide ? 'wide' : ''}" data-r="${ri}" data-c="${ci}" aria-label="第 ${ri + 1} 行 ${esc(q.cols[ci])}" autocomplete="off" autocapitalize="off" spellcheck="false"></td>` : `<td class="given">${esc(c.g)}</td>`).join('')}</tr>`;
+    });
+    h += `</tbody></table></div><label class="typed" style="margin-top:.4rem"><b>輸出：</b><input data-out="1" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="輸出"></label>`;
+    body.innerHTML = h;
+    submit.addEventListener('click', () => {
+      let allOk = true; const notes = [];
+      q.rows.forEach((r, ri) => r.c.forEach((c, ci) => {
+        if (!c.a) return; const inp = body.querySelector(`input[data-r="${ri}"][data-c="${ci}"]`);
+        const ok = c.a.map(normB).includes(normB(inp.value)); inp.parentElement.classList.toggle('cok', ok); inp.parentElement.classList.toggle('cno', !ok);
+        if (!ok) { allOk = false; notes.push(`第 ${ri + 1} 行「${q.cols[ci]}」應為 <code>${esc(c.a[0])}</code>${inp.value.trim() ? `（你寫了 <code>${esc(inp.value.trim())}</code>）` : '（未填）'}：${esc(r.why)}`); }
+      }));
+      const oi = body.querySelector('[data-out]'); const ook = q.output.a.map(norm).includes(norm(oi.value));
+      oi.style.borderStyle = ook ? 'solid' : 'dashed'; oi.style.background = ook ? '#e1f0e3' : '#f8e0d6';
+      if (!ook) { allOk = false; notes.push(`輸出：${esc(q.output.why)}`); }
+      $$('input', body).forEach(i => i.readOnly = true);
+      finish(allOk, allOk ? `<p>追蹤表全部正確。${esc(q.output.why)}</p>` : `<ul>${notes.map(n => `<li>${n}</li>`).join('')}</ul>`);
+    });
+  }
+
+  if (q.type === 'fill') {
+    const parts = q.code.split(/\[\[(\d+)\]\]/);
+    let h = '';
+    parts.forEach((p, i) => { h += i % 2 ? `<input data-b="${p}" aria-label="空格 ${+p + 1}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="(${+p + 1})">` : hlPy(p); });
+    body.innerHTML = `<div class="fillcode">${h}</div>`;
+    submit.addEventListener('click', () => {
+      let allOk = true; const notes = [];
+      q.blanks.forEach((b, i) => {
+        const inp = body.querySelector(`[data-b="${i}"]`); const v = inp.value.trim();
+        let ok, why;
+        if (b.check) ({ ok, why } = b.check(v));
+        else { ok = b.a.includes(v); why = ok ? b.why : ((b.wrong && b.wrong[v]) || (v ? `這不是合適的答案。${b.why}` : '未填寫。')); }
+        inp.classList.toggle('cok', ok); inp.classList.toggle('cno', !ok); inp.readOnly = true;
+        if (!ok) allOk = false;
+        notes.push(`<li>空格 (${i + 1})：${ok ? '✔' : '✘'} ${esc(why)}${ok ? '' : `　參考答案：<code>${esc(b.model)}</code>`}</li>`);
+      });
+      finish(allOk, `<ul>${notes.join('')}</ul>`);
+    });
+  }
+
+  if (q.type === 'find') {
+    let pick = null;
+    body.innerHTML = `<ul class="linepick">${q.lines.map((l, i) => `<li><button data-i="${i}" aria-pressed="false"><span class="ln">${i + 1}</span><span class="flag"></span><code>${hlPy(l.c)}</code></button></li>`).join('')}</ul>`;
+    body.addEventListener('click', e => { const b = e.target.closest('button'); if (!b || submit.disabled) return; pick = +b.dataset.i; $$('li', body).forEach((li, i) => li.classList.toggle('sel', i === pick)); });
+    submit.addEventListener('click', () => {
+      if (pick == null) { fbx.innerHTML = '<div class="fb no"><div class="vd">請先點選一行。</div></div>'; return; }
+      const ci = q.lines.findIndex(l => l.ok), ok = pick === ci;
+      $$('li', body).forEach((li, i) => { li.classList.remove('sel'); if (i === ci) li.classList.add('r-ok'); else if (i === pick) li.classList.add('r-no'); });
+      finish(ok, ok ? `<p>第 ${ci + 1} 行：${esc(q.lines[ci].why)}</p>` : `<p><b>你選了第 ${pick + 1} 行：</b>${esc(q.lines[pick].why)}</p><p><b>出錯的是第 ${ci + 1} 行：</b>${esc(q.lines[ci].why)}</p>`);
+    });
+  }
+
+  if (q.type === 'parsons') {
+    const order = shuffleNot(q.lines.map((l, i) => i), q.id.length * 97 + num * 31);
+    const ul = el('ol', 'parsons'); ul.setAttribute('aria-label', '可排列的程式碼');
+    order.forEach(i => {
+      const li = el('li', '', `<span class="grip" aria-hidden="true">☰</span><code>${hlPy(q.lines[i].c)}</code><span class="mv"><button type="button" data-m="-1" aria-label="上移">▲</button><button type="button" data-m="1" aria-label="下移">▼</button></span>`);
+      li.dataset.i = i; ul.appendChild(li);
+    });
+    body.appendChild(ul);
+    const clearMarks = () => $$('li', ul).forEach(li => li.classList.remove('pok', 'pno'));
+    ul.addEventListener('click', e => {
+      const b = e.target.closest('button[data-m]'); if (!b || submit.disabled) return;
+      const li = b.closest('li'); clearMarks();
+      if (b.dataset.m === '-1' && li.previousElementSibling) ul.insertBefore(li, li.previousElementSibling);
+      if (b.dataset.m === '1' && li.nextElementSibling) ul.insertBefore(li.nextElementSibling, li);
+      b.focus();
+    });
+    let drag = null;
+    ul.addEventListener('pointerdown', e => {
+      const g = e.target.closest('.grip'); if (!g || submit.disabled) return;
+      drag = g.closest('li'); drag.classList.add('dragging'); clearMarks(); e.preventDefault();
+      try { ul.setPointerCapture(e.pointerId); } catch (er) {}
+    });
+    ul.addEventListener('pointermove', e => {
+      if (!drag) return; e.preventDefault();
+      const items = $$('li', ul).filter(li => li !== drag);
+      let target = null;
+      for (const li of items) { const r = li.getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { target = li; break; } }
+      if (target) { if (drag.nextElementSibling !== target) ul.insertBefore(drag, target); } else if (ul.lastElementChild !== drag) ul.appendChild(drag);
+    });
+    const endDrag = e => { if (!drag) return; drag.classList.remove('dragging'); drag = null; try { ul.releasePointerCapture(e.pointerId); } catch (er) {} };
+    ul.addEventListener('pointerup', endDrag); ul.addEventListener('pointercancel', endDrag);
+    submit.addEventListener('click', () => {
+      const cur = $$('li', ul).map(li => +li.dataset.i); let first = -1;
+      $$('li', ul).forEach((li, pos) => { const ok = cur[pos] === pos; li.classList.toggle('pok', ok); li.classList.toggle('pno', !ok); if (!ok && first < 0) first = pos; });
+      const ok = first < 0;
+      finish(ok, ok ? '<p>次序完全正確！</p>' : `<p>第一個放錯的位置是第 ${first + 1} 行：這裏應該是 <code>${esc(q.lines[first].c.trim())}</code>——${esc(q.lines[first].why)}</p><p>你放在這裏的 <code>${esc(q.lines[cur[first]].c.trim())}</code>：${esc(q.lines[cur[first]].why)}</p><div class="boxtitle">正確次序</div>${codeBlock(q.lines.map(l => l.c).join('\n'))}`);
+    });
+  }
+  return card;
+}
+function renderDrill(sec) {
+  const S = SECTIONS.find(s => s.id === sec), box = $('#drill' + sec);
+  box.innerHTML = `<div class="dh"><span class="tag" style="font-family:var(--stencil);background:var(--yellow);color:var(--ink);padding:0 .45em">PRACTICE</span><h3>${S.name} · 練習</h3><div class="score"></div><button class="btn alt" data-reset="${sec}">重做本節</button></div><div class="qs"></div>`;
+  const qs = box.querySelector('.qs');
+  let num = QUESTIONS.findIndex(q => q.sec === sec);
+  secQs(sec).forEach(q => qs.appendChild(renderQuestion(q, ++num)));
+  box.querySelector('[data-reset]').addEventListener('click', () => {
+    secQs(sec).forEach(q => delete QSTATE.results[q.id]); store.set('results', QSTATE.results); renderDrill(sec); updateScores();
+  });
+}
+function renderReport() {
+  const box = $('#reportCards'); if (!box) return;
+  let tot = 0, all = 0, weakest = null;
+  box.innerHTML = SECTIONS.map(S => {
+    const n = secQs(S.id).length, sc = secScore(S.id), done = secQs(S.id).filter(q => q.id in QSTATE.results).length, best = QSTATE.best[S.id] || 0;
+    tot += sc; all += n; const ratio = done ? sc / done : 1;
+    if (done && (!weakest || ratio < weakest.r)) weakest = { r: ratio, S };
+    return `<div class="manifest"><div class="hint">借閱卡 · ${S.name}</div><div class="big">${sc}<span style="font-size:1.2rem"> / ${n}</span></div>
+      <div class="bar2" role="img" aria-label="得分比例"><i style="width:${n ? sc / n * 100 : 0}%"></i></div>
+      <div>已作答 ${done} / ${n} ｜ 最佳紀錄 ${best} / ${n}</div><a href="${S.anchor}">重溫本節 →</a></div>`;
+  }).join('');
+  const t = $('#reportTotal');
+  if (t) t.innerHTML = `全章得分：<b>${tot} / ${all}</b>。` + (weakest && weakest.r < .8 ? ` 建議重溫：<a href="${weakest.S.anchor}">${weakest.S.name}</a>。` : (tot === all ? ' 全部答對，歸檔完成！' : ''));
+}
+
+function renderMapping() {
+  $('#mapTable').innerHTML = `<thead><tr><th>課本重點</th><th>對應的互動</th><th>對應的練習</th></tr></thead><tbody>${MAPPING.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody>`;
+}
+
+/* ================= 啟動 ================= */
+function safe(fn, name) { try { fn(); } catch (e) { console.error('初始化失敗：' + name, e); } }
+document.addEventListener('DOMContentLoaded', () => {
+  const il = document.getElementById('indexLink'); if (il) il.href = CONFIG.INDEX_URL;
+  $('#sndBtn').addEventListener('click', e => { Sound.on = !Sound.on; e.currentTarget.setAttribute('aria-pressed', Sound.on); e.currentTarget.textContent = Sound.on ? '🔊 音效：開' : '🔇 音效：關'; if (Sound.on) Sound.ok(); });
+  const big = store.get('big', false); if (big) { document.body.classList.add('big'); $('#bigBtn').setAttribute('aria-pressed', 'true'); }
+  $('#bigBtn').addEventListener('click', e => { const on = document.body.classList.toggle('big'); e.currentTarget.setAttribute('aria-pressed', on); store.set('big', on); });
+  safe(initFileEditors, 'editors'); safe(initChars, 'chars'); safe(initOps, 'ops');
+  safe(initWb, 'wb'); safe(initSplit, 'split'); safe(initRd, 'rd');
+  safe(initMem, 'mem'); safe(initAp, 'ap'); safe(initUp, 'up');
+  safe(() => SECTIONS.forEach(S => renderDrill(S.id)), 'drills');
+  safe(updateScores, 'scores'); safe(renderMapping, 'mapping');
+  $('#clearAll').addEventListener('click', () => { store.clear(); QSTATE.results = {}; QSTATE.best = {}; SECTIONS.forEach(S => renderDrill(S.id)); updateScores(); });
+  // 倉區切換（一次只顯示一節）
+  const show = (id, scroll) => {
+    if (!['s41', 's42', 's43'].includes(id)) id = 's41';
+    $$('.sec').forEach(x => x.classList.toggle('on', x.id === id));
+    $$('.zone').forEach(z => z.setAttribute('aria-current', z.dataset.go === id ? 'true' : 'false'));
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    if (scroll) window.scrollTo({ top: $('.zones').offsetTop, behavior: REDUCED ? 'auto' : 'smooth' });
+  };
+  $$('.zone').forEach(z => z.addEventListener('click', () => show(z.dataset.go, true)));
+  $$('.chips [data-jump]').forEach(c => c.addEventListener('click', () => { const t = document.getElementById(c.dataset.jump); if (t) t.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }));
+  document.addEventListener('click', e => { const a = e.target.closest('a[href^="#s4"]'); if (a) { e.preventDefault(); show(a.getAttribute('href').slice(1), true); } });
+  show((location.hash || '#s41').slice(1).split('-')[0], false);
+});
+<\/script>
+</body>
+</html>
+
+</script>
 
 <script>
 const CONFIG = {
@@ -4995,7 +6801,7 @@ const CHAPTERS = [
   { id: 'ch1', no: 1, name: '專業程式設計基礎', theme: '智能物流倉', ready: true },
   { id: 'ch2', no: 2, name: '控制結構與算法基本組成部分', theme: '程式夜市', ready: true },
   { id: 'ch3', no: 3, name: '結構化編程與程式質素——測試及偵錯', theme: '程式鑑證科', ready: true },
-  { id: 'ch4', no: 4, name: '檔案操作與數據處理', ready: false },
+  { id: 'ch4', no: 4, name: '檔案操作與數據處理', theme: '圖書館檔案室', ready: true },
   { id: 'ch5', no: 5, name: '檢索算法', ready: false },
   { id: 'ch6', no: 6, name: '數據結構', ready: false },
   { id: 'ch7', no: 7, name: '排序算法與數據合併技巧', ready: false },
