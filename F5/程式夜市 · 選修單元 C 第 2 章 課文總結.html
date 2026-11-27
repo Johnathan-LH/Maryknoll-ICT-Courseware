@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>程式夜市 · 選修單元 C 第 2 章 課文總結</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0a12; --panel:#16111e; --panel2:#1f1829; --ink:#f4efe7; --dim:#a99fb8; --line:#3b3049;
+  --pink:#ff4fa3; --cyan:#3ee8ff; --amber:#ffb63d; --lime:#93ff7e; --red:#ff6262;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",sans-serif;
+  --mono:"JetBrains Mono","Noto Sans TC",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html{font-size:clamp(15px, .55vw + 10px, 21px)}
+body{
+  margin:0; color:var(--ink); font-family:var(--sans); line-height:1.6; overflow-x:clip;
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(ellipse at 15% -10%, rgba(255,79,163,.20), transparent 50%),
+    radial-gradient(ellipse at 95% 5%, rgba(62,232,255,.13), transparent 45%),
+    radial-gradient(ellipse at 50% 110%, rgba(255,182,61,.10), transparent 50%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 2px, transparent 2px 44px);
+  background-attachment:fixed;
+}
+button,input,select{font:inherit}
+:focus-visible{outline:3px solid var(--amber); outline-offset:2px}
+.dim{color:var(--dim)}
+code,.mono{font-family:var(--mono)}
+code,.mono,.code,.sboard,.console,.crate,.tok,.opt,.tin,pre,input,svg text,.dig,.pill,.olines,.stall .tag,.stall .v,.big{font-variant-ligatures:none; font-feature-settings:"liga" 0, "calt" 0}
+.box{scroll-margin-top:6.5rem}
+
+/* ---------- 招牌 ---------- */
+header.hero{position:relative; padding:2.2rem 1rem 1rem; text-align:center}
+.lights{position:absolute; left:0; right:0; top:0; height:30px; pointer-events:none;
+  background:
+   radial-gradient(circle at 50% 70%, #ffe1a1 0 3px, rgba(255,210,122,.45) 4px, transparent 9px) 0 0/44px 30px repeat-x,
+   linear-gradient(transparent 19px, #3a2f2a 19px 20px, transparent 20px);
+  filter:drop-shadow(0 0 6px rgba(255,200,110,.6))}
+.neon-sign{display:inline-block; padding:.4rem 1.6rem .6rem; border:3px solid var(--cyan); border-radius:18px;
+  box-shadow:0 0 6px var(--cyan), 0 0 22px rgba(62,232,255,.55), inset 0 0 14px rgba(62,232,255,.35)}
+.neon-sign h1{margin:0; font-weight:900; font-size:clamp(2.2rem, 6vw, 4rem); letter-spacing:.12em; color:#fff2f9;
+  text-shadow:0 0 3px #fff, 0 0 10px var(--pink), 0 0 26px var(--pink), 0 0 52px rgba(255,79,163,.7)}
+.flick{animation:flick 7s infinite}
+@keyframes flick{0%,18%,20%,22%,61%,63%,100%{opacity:1} 19%,21%,62%{opacity:.35}}
+.hero .sub{margin:.8rem 0 0; color:var(--amber); font-weight:700; letter-spacing:.06em;
+  text-shadow:0 0 8px rgba(255,182,61,.55)}
+.hero .how{max-width:46rem; margin:.6rem auto 0; color:var(--dim); font-size:.92rem}
+
+/* ---------- 街牌導航 ---------- */
+nav.streets{position:sticky; top:0; z-index:20; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap;
+  padding:.7rem .6rem; background:rgba(12,10,18,.88); backdrop-filter:blur(6px); border-bottom:1px solid var(--line)}
+.sign{position:relative; cursor:pointer; background:#f6f3ea; color:#111; border:none; border-radius:4px; padding:.35rem 1rem .3rem;
+  box-shadow:inset 0 0 0 3px #f6f3ea, inset 0 0 0 5px #111; text-align:center; min-width:9.5rem; transition:transform .15s}
+.sign b{display:block; font-size:1.05rem; font-weight:900; letter-spacing:.05em}
+.sign small{display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.08em}
+.sign .badge{position:absolute; top:-.6rem; right:-.5rem; background:#111; color:var(--amber); border:2px solid var(--amber);
+  border-radius:999px; font-size:.68rem; padding:0 .45rem; font-family:var(--mono)}
+.sign[aria-current="page"]{transform:translateY(-2px); box-shadow:inset 0 0 0 3px #f6f3ea, inset 0 0 0 5px #111, 0 0 0 3px var(--c), 0 0 22px var(--c)}
+.sign[aria-current="page"] b::before{content:"📍 "}
+
+/* ---------- 街 / 區 ---------- */
+main{max-width:1500px; margin:0 auto; padding:1rem clamp(.6rem, 2vw, 2rem) 3rem}
+.street{display:none}
+.street.show{display:block}
+.street-banner{text-align:center; margin:1.2rem 0 .6rem}
+.street-banner h2{display:inline-block; margin:0; padding:.2rem 1.2rem; font-size:clamp(1.6rem, 3.6vw, 2.6rem); font-weight:900;
+  color:#fff; border:3px solid var(--c); border-radius:12px; letter-spacing:.08em;
+  text-shadow:0 0 4px #fff, 0 0 14px var(--c), 0 0 30px var(--c);
+  box-shadow:0 0 8px var(--c), inset 0 0 12px color-mix(in srgb, var(--c) 40%, transparent)}
+.street-banner p{margin:.5rem 0 0; color:var(--dim)}
+.chips{display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin:.8rem 0 1.4rem}
+.chips button{background:transparent; color:var(--ink); border:2px dashed var(--line); border-radius:999px; padding:.25rem .9rem; cursor:pointer}
+.chips button:hover{border-color:var(--c); border-style:solid}
+
+/* ---------- 燈箱 ---------- */
+.box{--c:var(--pink); position:relative; margin:2.2rem 0; padding:1.8rem clamp(.7rem,1.6vw,1.5rem) 1.3rem;
+  background:linear-gradient(180deg, var(--panel2), var(--panel)); border:2px solid var(--c); border-radius:8px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6), 0 0 26px -8px var(--c)}
+.box-tag{position:absolute; top:-1.05rem; left:1rem; background:var(--c); color:#130d19; font-weight:900; font-size:1.1rem;
+  padding:.15rem 1.1rem .15rem .9rem; clip-path:polygon(0 0, 100% 0, calc(100% - .6rem) 100%, 0 100%); letter-spacing:.04em}
+.keypts{margin:0 0 1rem; padding:.7rem 1rem; border-left:4px solid var(--c); background:rgba(255,255,255,.035); border-radius:0 6px 6px 0}
+.keypts ul{margin:.2rem 0; padding-left:1.3rem}
+.keypts li{margin:.15rem 0}
+.keypts b{color:#fff}
+.controls{display:flex; flex-wrap:wrap; gap:.8rem 1.4rem; align-items:center; margin:0 0 1rem; padding:.7rem 1rem;
+  background:rgba(0,0,0,.28); border:1px dashed var(--line); border-radius:6px}
+.controls label{display:flex; align-items:center; gap:.5rem; flex-wrap:wrap}
+.controls input[type=number],.controls input[type=text],.controls select{background:#0b0910; color:var(--ink); border:2px solid var(--line);
+  border-radius:5px; padding:.25rem .5rem; font-family:var(--mono)}
+.controls input[type=number]{width:5.2rem}
+.controls input[type=range]{accent-color:var(--c); width:min(14rem, 45vw)}
+.pill{font-family:var(--mono); background:#0b0910; border:1px solid var(--line); padding:.05rem .5rem; border-radius:4px}
+
+/* switch */
+.sw{display:inline-flex; align-items:center; gap:.5rem; cursor:pointer}
+.sw input{position:absolute; opacity:0; width:1px; height:1px}
+.sw .track{width:3.2rem; height:1.7rem; border-radius:999px; background:#2a2236; border:2px solid var(--line); position:relative; transition:.2s}
+.sw .track::after{content:"✗"; position:absolute; top:50%; left:.15rem; transform:translateY(-50%); width:1.25rem; height:1.25rem; border-radius:50%;
+  background:#776a88; color:#111; font-size:.75rem; display:grid; place-items:center; transition:.2s; font-weight:900}
+.sw input:checked + .track{background:color-mix(in srgb, var(--c) 35%, #2a2236); border-color:var(--c)}
+.sw input:checked + .track::after{content:"✓"; left:calc(100% - 1.4rem); background:var(--c)}
+.sw input:focus-visible + .track{outline:3px solid var(--amber)}
+
+/* ---------- 按鈕 ---------- */
+.btn{background:#241c30; color:var(--ink); border:2px solid #4b3d60; padding:.4rem .9rem; border-radius:6px; cursor:pointer; font-weight:700}
+.btn:hover:not(:disabled){border-color:var(--c)}
+.btn:disabled{opacity:.4; cursor:not-allowed}
+.btn.primary{background:var(--c); color:#100b16; border-color:var(--c)}
+
+/* ---------- 逐步追蹤器 ---------- */
+.tracer{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:1rem; align-items:start}
+.tracer > *{min-width:0}
+.tracer .note,.tracer .extra.full,.tracer .ctrl{grid-column:1 / -1}
+.board{position:relative; background:#09070d; border:2px solid var(--amber); border-radius:6px; padding:1.3rem 0 .6rem;
+  box-shadow:0 0 18px -6px var(--amber), inset 0 0 30px rgba(255,182,61,.06)}
+.board-tag{position:absolute; top:-.85rem; left:.8rem; background:#09070d; color:var(--amber); border:2px solid var(--amber);
+  padding:0 .6rem; font-size:.8rem; font-weight:700; border-radius:4px}
+.code{overflow-x:auto; font-family:var(--mono); font-size:1rem}
+.ln{display:flex; align-items:baseline; white-space:pre; padding:.12rem .8rem .12rem 0; border-left:5px solid transparent; min-width:max-content}
+.ln .no{color:#5f556e; width:2.6em; text-align:right; padding-right:.4em; user-select:none; flex:none}
+.ln .mk{width:1.3em; flex:none; color:var(--amber); font-weight:700}
+.ln.cur{background:rgba(255,182,61,.17); border-left-color:var(--amber)}
+.ln.cur .mk::before{content:"▶"}
+.ln.cur code{font-weight:700; text-decoration:underline; text-decoration-color:rgba(255,182,61,.6); text-underline-offset:4px}
+.ln code{font-family:inherit}
+.c-kw{color:#ff7fc0; font-weight:700} .c-fn{color:#6ff0ff} .c-str{color:#ffd896} .c-num{color:#a9ff92} .c-com{color:#7bd88f; font-style:italic}
+.side{display:flex; flex-direction:column; gap:.4rem}
+.mini-tag{font-size:.8rem; color:var(--dim); font-weight:700; letter-spacing:.05em}
+.crates{display:flex; flex-wrap:wrap; gap:.6rem; margin-bottom:.4rem}
+.crate{min-width:5.6rem; max-width:100%; border:2px solid #9a7440; border-radius:4px; padding:.15rem .5rem .3rem; text-align:center;
+  background:repeating-linear-gradient(0deg, #3d2c18 0 11px, #31230f 11px 13px)}
+.crate .vn{font-family:var(--mono); font-size:.78rem; color:#f1d3a2; border-bottom:1px dashed #9a7440}
+.crate .val{font-family:var(--mono); font-size:1.25rem; font-weight:700; color:#fff; overflow-wrap:anywhere}
+.crate.empty .val{color:#9c8a74}
+.crate.bump{animation:bump .55s}
+@keyframes bump{0%{transform:scale(1)} 35%{transform:scale(1.15); box-shadow:0 0 0 3px var(--cyan), 0 0 22px var(--cyan)} 100%{transform:scale(1)}}
+.console{background:#040306; border:1px solid #2d2538; border-radius:4px; padding:.4rem .7rem; font-family:var(--mono); color:var(--lime);
+  min-height:3rem; max-height:13rem; overflow:auto; font-size:.95rem}
+.console .dim{color:#5f6b5c}
+.note{background:rgba(255,79,163,.08); border-left:5px solid var(--pink); padding:.6rem .9rem; border-radius:0 6px 6px 0; min-height:2.8rem}
+.note::before{content:"💡 "}
+.ctrl{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center}
+.ctrl .spd{display:flex; align-items:center; gap:.4rem; color:var(--dim); font-size:.9rem}
+.ctrl .spd input{accent-color:var(--cyan); width:7rem}
+.ctrl .prog{margin-left:auto; font-family:var(--mono); color:var(--dim); font-size:.9rem}
+.chip-fly{position:fixed; z-index:99; pointer-events:none; font-family:var(--mono); font-weight:700; font-size:1.25rem; color:#120c18;
+  background:var(--cyan); padding:0 .5rem; border-radius:4px; box-shadow:0 0 16px var(--cyan)}
+
+/* ---------- 流程圖 ---------- */
+.flowwrap{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem; align-items:start}
+.flowwrap > *{min-width:0}
+svg.flow{width:100%; max-width:430px; display:block; margin:auto}
+.flow .n{fill:#140f1b; stroke:#6b5d80; stroke-width:2; stroke-dasharray:6 4}
+.flow .n.on{fill:rgba(62,232,255,.12); stroke:var(--cyan); stroke-width:3; stroke-dasharray:none}
+.flow .n.cur{fill:rgba(62,232,255,.3); stroke-width:4.5}
+.flow .e{fill:none; stroke:#5a4e6c; stroke-width:2; stroke-dasharray:5 5}
+.flow .e.on{stroke:var(--cyan); stroke-width:3.5; stroke-dasharray:none}
+.flow text{fill:var(--ink); font-family:var(--sans); font-size:13px; text-anchor:middle; dominant-baseline:middle}
+.flow text.code{font-family:var(--mono); font-size:12px}
+.flow text.yn{font-size:12px; fill:var(--amber); font-weight:700}
+table.t{border-collapse:collapse; width:100%; font-size:.95rem}
+table.t th,table.t td{border:1px solid var(--line); padding:.3rem .5rem; text-align:center}
+table.t th{background:#241c30; color:#fff}
+table.t td.mono{font-family:var(--mono)}
+table.t tr.hi td{background:rgba(62,232,255,.13); font-weight:700}
+table.t tr.hi td:first-child::before{content:"▶ "; color:var(--cyan)}
+.twrap{overflow-x:auto}
+
+/* ---------- range 帶 ---------- */
+.rstrip{display:flex; flex-wrap:wrap; gap:.4rem; margin:.3rem 0}
+.rc{min-width:3.2rem; text-align:center; border:2px solid var(--line); border-radius:5px; padding:.15rem .3rem; background:#140f1b}
+.rc span{display:block; font-family:var(--mono); font-size:1.2rem; font-weight:700}
+.rc small{display:block; font-size:.7rem; min-height:1.1em; color:var(--dim)}
+.rc.past{border-color:#5e8d58}
+.rc.past small{color:var(--lime)}
+.rc.cur{border-color:var(--cyan); box-shadow:0 0 14px var(--cyan); background:rgba(62,232,255,.14)}
+.rc.cur small{color:var(--cyan)}
+.rc.excl{border-style:dashed; border-color:var(--red); opacity:.85}
+.rc.excl span{text-decoration:line-through}
+.rc.excl small{color:var(--red)}
+.warn{background:rgba(255,98,98,.1); border:2px dashed var(--red); border-radius:6px; padding:.5rem .8rem; margin:.4rem 0}
+.warn::before{content:"⚠ "; font-weight:900; color:var(--red)}
+.stat{display:flex; gap:.8rem; flex-wrap:wrap; margin:.4rem 0}
+.stat span{background:#0b0910; border:1px solid var(--line); border-radius:5px; padding:.2rem .7rem}
+.stat b{font-family:var(--mono); color:var(--amber)}
+
+/* ---------- 攤位網格 ---------- */
+.sgrid{display:grid; grid-template-columns:auto repeat(var(--cols), minmax(0,1fr)); gap:6px; align-items:stretch}
+.sgrid .clab,.sgrid .rlab{font-size:.72rem; font-weight:900; color:#111; background:#f6f3ea; border-radius:3px;
+  box-shadow:inset 0 0 0 2px #f6f3ea, inset 0 0 0 3px #111; display:grid; place-items:center; padding:.15rem .35rem; white-space:nowrap}
+.sgrid .corner{font-size:.7rem; color:var(--dim); display:grid; place-items:center}
+.stall{position:relative; min-height:3.4rem; background:#1a1424; border:2px solid #3e3250; border-radius:4px; padding:.9rem .2rem .25rem;
+  text-align:center; display:flex; flex-direction:column; justify-content:center; font-size:.9rem; overflow:hidden; user-select:none}
+.stall::before{content:""; position:absolute; left:0; right:0; top:0; height:.6rem;
+  background:repeating-linear-gradient(90deg, #c23a6e 0 10px, #f3e7ee 10px 20px); opacity:.75}
+.stall .v{font-family:var(--mono); font-weight:700; font-size:1.15rem}
+.stall .tag{font-size:.68rem; color:var(--dim); font-family:var(--mono)}
+.stall.click{cursor:pointer}
+.stall.click:hover{border-color:var(--c)}
+.stall.lit{border-color:#6c9d64; background:#18221a}
+.stall.cur{border-color:var(--cyan); border-width:3px; box-shadow:0 0 16px var(--cyan); background:rgba(62,232,255,.16)}
+.stall.cur::after{content:"▶"; position:absolute; left:.2rem; bottom:.05rem; color:var(--cyan); font-size:.75rem}
+.stall.good{border-color:var(--lime); background:rgba(147,255,126,.1)}
+.stall.bad{border-color:var(--red); border-style:dashed; animation:shake .4s}
+.stall.booked{background:#2b1220}
+@keyframes shake{25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}}
+.odo{display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:.6rem}
+.odo .d{display:flex; align-items:center; gap:.5rem}
+.odo .lab{font-family:var(--mono); color:var(--dim)}
+.odo .dig{font-family:var(--mono); font-size:1.8rem; font-weight:700; width:2.4ch; text-align:center; background:#050407; color:var(--amber);
+  border:2px solid #4a3c5e; border-radius:5px; overflow:hidden; text-shadow:0 0 8px rgba(255,182,61,.7)}
+.odo .dig.roll{animation:roll .35s}
+@keyframes roll{0%{transform:translateY(-60%); opacity:0} 100%{transform:none; opacity:1}}
+.two{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem; align-items:start}
+.two > *{min-width:0}
+.info{background:#0b0910; border:2px solid var(--line); border-radius:6px; padding:.7rem .9rem; min-height:6rem}
+.info .big{font-family:var(--mono); font-size:1.3rem; font-weight:700; color:var(--cyan)}
+.tok{font:inherit; font-family:var(--mono); color:#ffd896; background:transparent; border:1px solid transparent; border-radius:3px; padding:0 .1rem; cursor:pointer}
+.tok:hover{border-color:var(--cyan)}
+.tok.on{background:rgba(62,232,255,.25); border-color:var(--cyan); font-weight:700}
+.ln.rowon{background:rgba(62,232,255,.09); border-left-color:var(--cyan)}
+.legend{font-size:.85rem; color:var(--dim); margin:.4rem 0}
+
+/* ---------- 分類遊戲 ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fill, minmax(15rem,1fr)); gap:.8rem}
+.gcard{background:#140f1b; border:2px solid var(--line); border-radius:6px; padding:.7rem}
+.gcard p{margin:0 0 .5rem}
+.gcard .row{display:flex; gap:.5rem}
+.gcard.ok{border-color:var(--lime)} .gcard.bad{border-color:var(--red); border-style:dashed}
+.gcard .why{font-size:.85rem; margin-top:.4rem}
+
+/* ---------- 溢出 ---------- */
+.meter{position:relative; height:2.2rem; margin:1.4rem .5rem .4rem; border:2px solid var(--line); border-radius:4px;
+  background:linear-gradient(90deg, rgba(62,232,255,.12), rgba(255,79,163,.12))}
+.meter .z{position:absolute; top:-1.3rem; font-family:var(--mono); font-size:.75rem; color:var(--dim); transform:translateX(-50%)}
+.meter .pin{position:absolute; top:-.3rem; bottom:-.3rem; width:4px; background:var(--amber); transform:translateX(-50%); box-shadow:0 0 10px var(--amber); transition:left .4s}
+.meter.over{border-color:var(--red); border-style:dashed}
+.meter.over .pin{background:var(--red); box-shadow:0 0 14px var(--red)}
+.olines{font-family:var(--mono); display:grid; gap:.3rem}
+.olines div{padding:.3rem .6rem; border:1px solid var(--line); border-radius:4px; background:#0b0910; overflow-wrap:anywhere}
+.olines .bad{border:2px dashed var(--red); color:#ffc2c2}
+.olines .bad::after{content:"  ✘ 算術溢出"; color:var(--red); font-weight:700}
+.olines .ok::after{content:"  ✓"; color:var(--lime)}
+.olines .skip{opacity:.4}
+
+/* ---------- 練習區 ---------- */
+.pscore{display:flex; flex-wrap:wrap; gap:.6rem 1.4rem; align-items:center; padding:.6rem 1rem; background:#0b0910; border:2px solid var(--c);
+  border-radius:6px; margin-bottom:1rem}
+.pscore .big{font-size:1.3rem; font-weight:900; color:#fff}
+.qcard{background:#140f1b; border:2px solid var(--line); border-radius:6px; padding:.9rem 1rem; margin:.9rem 0}
+.qcard.is-ok{border-color:var(--lime)}
+.qcard.is-bad{border-color:var(--red); border-style:dashed}
+.qhead{display:flex; gap:.6rem; align-items:center; margin-bottom:.3rem}
+.qno{font-weight:900; color:var(--c)}
+.qtype{font-size:.75rem; border:1px solid var(--line); border-radius:999px; padding:0 .55rem; color:var(--dim)}
+.qtext{margin-bottom:.6rem}
+.sboard{background:#09070d; border:1px solid #4a3c2a; border-radius:5px; padding:.4rem 0; margin:.4rem 0 .7rem; overflow-x:auto; font-family:var(--mono)}
+.opts{display:grid; grid-template-columns:repeat(auto-fit, minmax(13rem,1fr)); gap:.5rem}
+.opt{text-align:left; background:#1f1829; color:var(--ink); border:2px solid var(--line); border-radius:6px; padding:.45rem .7rem; cursor:pointer; font-family:var(--mono)}
+.opt:hover{border-color:var(--c)}
+.opt.sel-ok{border-color:var(--lime); background:rgba(147,255,126,.1)}
+.opt.sel-ok::after{content:"  ✔"; color:var(--lime)}
+.opt.sel-bad{border-color:var(--red); border-style:dashed}
+.opt.sel-bad::after{content:"  ✘"; color:var(--red)}
+.fb{margin-top:.6rem; padding:.5rem .8rem; border-radius:5px; display:none}
+.fb.ok{display:block; background:rgba(147,255,126,.08); border-left:5px solid var(--lime)}
+.fb.bad{display:block; background:rgba(255,98,98,.08); border-left:5px solid var(--red)}
+.fb .exp{margin-top:.3rem; color:#e9e2f2}
+.fill-row{display:flex; gap:.6rem; flex-wrap:wrap; align-items:center}
+.fill-row input,.tin{background:#0b0910; color:var(--ink); border:2px solid var(--line); border-radius:5px; padding:.25rem .5rem; font-family:var(--mono)}
+.fill-row input{width:9rem}
+.tin{width:100%; min-width:4.5rem; text-align:center}
+.tin.ok{border-color:var(--lime)} .tin.bad{border-color:var(--red); border-style:dashed}
+.should{display:block; font-size:.75rem; color:var(--red)}
+.blank{color:#130d19; background:var(--amber); padding:0 .3rem; border-radius:3px}
+ol.parsons{list-style:none; margin:.4rem 0; padding:0; display:grid; gap:.35rem}
+ol.parsons li{display:flex; align-items:center; gap:.4rem; background:#1f1829; border:2px solid var(--line); border-radius:5px; padding:.25rem .4rem}
+ol.parsons li.dragging{border-color:var(--cyan); box-shadow:0 0 14px var(--cyan); opacity:.9}
+ol.parsons li.ok{border-color:var(--lime)} ol.parsons li.bad{border-color:var(--red); border-style:dashed}
+.handle{cursor:grab; touch-action:none; user-select:none; font-size:1.2rem; padding:0 .4rem; color:var(--dim)}
+ol.parsons pre{margin:0; flex:1; min-width:0; overflow-x:auto; font-family:var(--mono); white-space:pre}
+.mv{background:#241c30; border:1px solid var(--line); color:var(--ink); border-radius:4px; cursor:pointer; padding:0 .45rem}
+.bugline{display:flex; width:100%; text-align:left; background:transparent; border:none; border-left:5px solid transparent; color:inherit; cursor:pointer; padding:.12rem .8rem .12rem 0; white-space:pre; font-family:var(--mono); min-width:max-content}
+.bugline:hover{background:rgba(255,255,255,.05)}
+.bugline.sel-ok{border-left-color:var(--lime); background:rgba(147,255,126,.1)}
+.bugline.sel-bad{border-left-color:var(--red); background:rgba(255,98,98,.1)}
+.bugline .no{color:#5f556e; width:2.6em; text-align:right; padding-right:.8em; flex:none}
+.cmp{display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin:1rem 0}
+.cmp > div{background:#0b0910; border:2px solid var(--line); border-radius:6px; padding:.6rem .8rem}
+.cmp h4{margin:0 0 .3rem}
+footer{text-align:center; color:var(--dim); font-size:.85rem; padding:1.5rem 1rem 2.5rem}
+
+@media (max-width: 900px){
+  .tracer,.flowwrap,.two,.cmp{grid-template-columns:minmax(0,1fr)}
+  .sign{min-width:7.5rem}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="lights" aria-hidden="true"></div>
+  <div class="neon-sign"><h1>程<span class="flick">式</span>夜市</h1></div>
+  <p class="sub">DSE ICT 選修單元 C · 算法與程式編寫 · 第 2 章 課文總結</p>
+  <p class="how">揀一條街逛逛：每個攤檔都有一塊「程式價錢牌」，按 <b>下一步 ▶</b> 逐行執行，看變量貨箱和輸出怎樣變化。每條街的尾段都有練習攤。</p>
+</header>
+
+<nav class="streets" aria-label="章節">
+  <button class="sign" data-go="s1" style="--c:var(--pink)"><b>2.1 控制結構街</b><small>CONTROL ST.</small><span class="badge" data-score="s1"></span></button>
+  <button class="sign" data-go="s2" style="--c:var(--cyan)"><b>2.2 陣列攤位街</b><small>ARRAY ST.</small><span class="badge" data-score="s2"></span></button>
+  <button class="sign" data-go="s3" style="--c:var(--amber)"><b>2.3 算法巷</b><small>ALGORITHM LANE</small><span class="badge" data-score="s3"></span></button>
+</nav>
+
+<main>
+<!-- ======================= 2.1 ======================= -->
+<section class="street" id="s1" style="--c:var(--pink)">
+  <div class="street-banner"><h2>2.1 應用控制結構</h2><p>順序 · 選擇 · 迭代（循環）· 嵌套循環</p></div>
+  <div class="chips">
+    <button data-jump="s1-seq">① 順序</button><button data-jump="s1-sel">② 選擇</button><button data-jump="s1-loop">③ 迭代</button>
+    <button data-jump="s1-game">for 定 while？</button><button data-jump="s1-nest">④ 嵌套循環</button><button data-jump="s1-prac">🎯 練習攤</button>
+  </div>
+
+  <article class="box" id="s1-seq" style="--c:var(--pink)">
+    <div class="box-tag">① 順序</div>
+    <div class="keypts"><ul><li>指令<b>從上到下逐行執行</b>。</li></ul></div>
+    <div class="controls"><label>輸入數字（模擬 input）：<input type="number" id="seqN" value="7" step="1"></label><button class="btn" id="seqGo">套用</button></div>
+    <div id="trSeq"></div>
+  </article>
+
+  <article class="box" id="s1-sel" style="--c:var(--pink)">
+    <div class="box-tag">② 選擇 · 嵌套選擇</div>
+    <div class="keypts"><ul>
+      <li>允許程式使用<b>布爾邏輯</b>做出決定，使用 <code>if</code>、<code>elif</code> 和 <code>else</code>。</li>
+      <li><b>嵌套選擇</b>：將一個 if 語句放在另一個 if 語句內，以檢查特定的子條件。</li>
+    </ul></div>
+    <div class="controls">
+      <label>age = <input type="range" id="selAge" min="0" max="100" value="65"><span class="pill" id="selAgeV">65</span></label>
+      <label class="sw">is_student = <input type="checkbox" id="selStu" checked><span class="track"></span><span class="pill" id="selStuV">True</span></label>
+    </div>
+    <div id="trSel"></div>
+  </article>
+
+  <article class="box" id="s1-loop" style="--c:var(--pink)">
+    <div class="box-tag">③ 迭代（循環）</div>
+    <div class="keypts"><ul>
+      <li><b>for 循環</b>：適合重複次數已知時使用（<b>確定性迭代</b>）。</li>
+      <li><b>while 循環</b>：一種<b>預先測試循環</b>，只要條件為 True 就會運行，適合重複次數未知時使用。</li>
+    </ul></div>
+    <h3>for 循環（固定範圍）</h3>
+    <div class="controls">
+      <label>range( <input type="number" id="forA" value="1" min="-5" max="15"> , <input type="number" id="forB" value="6" min="-5" max="20"> )</label>
+      <button class="btn" id="forGo">套用</button>
+      <span class="dim">提示：試試 range(1, 1)、range(0, 5)</span>
+    </div>
+    <div id="trFor"></div>
+    <h3 style="margin-top:2rem">while 循環（預先測試）</h3>
+    <div class="controls">
+      <label>count 的初始值 <input type="number" id="whC" value="10" min="-3" max="12"></label>
+      <button class="btn" id="whGo">套用</button>
+      <span class="dim">提示：試試 0 或負數，看看循環體會否執行</span>
+    </div>
+    <div id="trWhile"></div>
+  </article>
+
+  <article class="box" id="s1-game" style="--c:var(--pink)">
+    <div class="box-tag">for 定 while？分類小遊戲</div>
+    <p>判斷每個情境較適合用哪一種循環。關鍵：<b>重複次數是否事先已知？</b></p>
+    <div class="stat"><span>答對 <b id="gScore">0</b> / <b id="gTotal">8</b></span><button class="btn" id="gReset">🔄 重新開始</button></div>
+    <div class="cards" id="gCards"></div>
+  </article>
+
+  <article class="box" id="s1-nest" style="--c:var(--pink)">
+    <div class="box-tag">④ 嵌套循環</div>
+    <div class="keypts"><ul>
+      <li>一個循環在另一個循環內，對於處理<b>二維陣列（網格 / 表格）</b>至關重要。</li>
+      <li><b>外層循環</b>通常控制<b>行（i）</b>；<b>內層循環</b>通常控制<b>列（j）</b>。</li>
+      <li>外層循環每完成一次迭代，內層循環就完成一個完整的週期。</li>
+    </ul></div>
+    <div class="controls">
+      <label>行數 <input type="number" id="nR" value="3" min="1" max="5"></label>
+      <label>列數 <input type="number" id="nC" value="5" min="1" max="6"></label>
+      <button class="btn" id="nGo">套用</button>
+    </div>
+    <div id="trNest"></div>
+  </article>
+
+  <article class="box" id="s1-prac" style="--c:var(--pink)">
+    <div class="box-tag">🎯 練習攤 · 2.1</div>
+    <div id="p1"></div>
+  </article>
+</section>
+
+<!-- ======================= 2.2 ======================= -->
+<section class="street" id="s2" style="--c:var(--cyan)">
+  <div class="street-banner"><h2>2.2 二維陣列</h2><p>行 = row（i，由上數下）· 列 = column（j，由左數右）· 索引都由 0 開始</p></div>
+  <div class="chips">
+    <button data-jump="s2-map">① 攤位地圖</button><button data-jump="s2-seat">② seats 座位表</button>
+    <button data-jump="s2-init">③ 嵌套 for 賦值</button><button data-jump="s2-prac">🎯 練習攤</button>
+  </div>
+
+  <article class="box" id="s2-map" style="--c:var(--cyan)">
+    <div class="box-tag">① 攤位地圖 F：讀取與賦值</div>
+    <div class="keypts"><ul>
+      <li>要提取（讀取）陣列中的資訊，只需引用<b>陣列名稱</b>和<b>特定索引</b>：偽代碼 <code>Variable ← ArrayName[Row][Column]</code>；Python <code>Variable = ArrayName[Row][Column]</code>。</li>
+      <li>要賦值陣列中的一個元素：偽代碼 <code>F[3][2] ← 29</code>；Python <code>F[3][2] = 29</code>。</li>
+    </ul></div>
+    <div class="controls">
+      <button class="btn primary" id="mapMode">🎯 開始賦值挑戰</button>
+      <span class="stat" style="margin:0"><span>答對 <b id="mapOk">0</b> / <b id="mapTot">0</b></span></span>
+    </div>
+    <div class="two">
+      <div id="mapGrid"></div>
+      <div class="info" id="mapInfo" aria-live="polite">👆 點選任何一個攤位，看看怎樣用索引<b>讀取</b>它。</div>
+    </div>
+  </article>
+
+  <article class="box" id="s2-seat" style="--c:var(--cyan)">
+    <div class="box-tag">② seats：二維陣列的寫法</div>
+    <p class="legend">點<b>座位</b> = 預訂 / 取消（<b>賦值</b>）；點程式碼中的 <span class="mono">"O"</span> = <b>讀取</b>該元素。兩邊會互相高亮。</p>
+    <div class="two">
+      <div class="board"><div class="board-tag">程式價錢牌</div><div class="code" id="seatCode"></div></div>
+      <div>
+        <div id="seatGrid"></div>
+        <div class="info" id="seatInfo" style="margin-top:.8rem" aria-live="polite">戲院座位：<b>O</b> = 空位，<b>X</b> = 已預訂。</div>
+      </div>
+    </div>
+  </article>
+
+  <article class="box" id="s2-init" style="--c:var(--cyan)">
+    <div class="box-tag">③ 用嵌套 for 循環賦值</div>
+    <div class="keypts"><ul>
+      <li>外層循環控制行索引 <b>i</b>；對於每一行，內層循環遍歷所有列 <b>j</b> 並賦值一個攤位號碼。</li>
+      <li>想<b>初始化</b>陣列時，這方法特別有用。</li>
+    </ul></div>
+    <div class="controls">
+      <label>賦值公式 F[i][j] =
+        <select id="fExpr">
+          <option value="4 * i + j">4 * i + j（課本）</option>
+          <option value="i + j">i + j</option>
+          <option value="i * j">i * j</option>
+          <option value="10 * i + j">10 * i + j</option>
+        </select></label>
+      <span class="dim">想一想：哪一條公式能令每個攤位都有不同的號碼？</span>
+    </div>
+    <div id="trInit"></div>
+  </article>
+
+  <article class="box" id="s2-prac" style="--c:var(--cyan)">
+    <div class="box-tag">🎯 練習攤 · 2.2</div>
+    <div id="p2"></div>
+  </article>
+</section>
+
+<!-- ======================= 2.3 ======================= -->
+<section class="street" id="s3" style="--c:var(--amber)">
+  <div class="street-banner"><h2>2.3 計數、累加及交換算法</h2><p>計數器加常數 · 總數加實際數據值 · 交換要先保護數據</p></div>
+  <div class="chips">
+    <button data-jump="s3-count">① 計數 vs 累加</button><button data-jump="s3-swap">② 交換</button>
+    <button data-jump="s3-over">③ 算術溢出</button><button data-jump="s3-prac">🎯 練習攤</button>
+  </div>
+
+  <article class="box" id="s3-count" style="--c:var(--amber)">
+    <div class="box-tag">① 計數 與 累加（求和）</div>
+    <div class="keypts"><ul>
+      <li><b>計數</b>：滿足特定條件發生的次數。將計數器初始化為 0；在循環內部，當滿足條件時加上一個<b>常數值</b>（通常是 1）。</li>
+      <li><b>累加</b>：計算<b>運行總和</b>。將總數初始化為 0；在循環內部，加上<b>實際數據值</b>（例如價格、分數）。</li>
+    </ul></div>
+    <div class="controls">
+      <label>data = [ <input type="text" id="cData" value="10, 55, 60, 20" style="width:min(16rem,60vw)"> ]</label>
+      <button class="btn" id="cGo">套用到兩邊</button>
+      <span class="dim">最多 8 個整數，用逗號分隔</span>
+    </div>
+    <div class="cmp">
+      <div><h4>🔢 計數</h4><code>count = count + 1</code><br><span class="dim">條件成立才加，每次加<b>常數 1</b></span></div>
+      <div><h4>➕ 累加</h4><code>total = total + item</code><br><span class="dim">每次都加，加的是<b>實際數據值</b></span></div>
+    </div>
+    <h3>計數：計算 &gt; 50 的項目</h3>
+    <div id="trCount"></div>
+    <h3 style="margin-top:2rem">累加：計算所有項目的總和</h3>
+    <div id="trSum"></div>
+  </article>
+
+  <article class="box" id="s3-swap" style="--c:var(--amber)">
+    <div class="box-tag">② 交換</div>
+    <div class="keypts"><ul>
+      <li>在兩個變量（例如 A 和 B）之間交換值。</li>
+      <li><b>暫存變量方法</b>：防止數據丟失的標準、安全方法。</li>
+      <li><b>數學方法</b>：使用加法和減法進行交換而不需要第三個變量，但有<b>算術溢出</b>的風險。</li>
+    </ul></div>
+    <div class="controls">
+      <label>A = <input type="number" id="swA" value="3"></label>
+      <label>B = <input type="number" id="swB" value="8"></label>
+      <button class="btn" id="swGo">套用</button>
+    </div>
+    <h3>✔ 暫存變量方法</h3>
+    <div id="trTemp"></div>
+    <h3 style="margin-top:2rem">✘ 錯誤示範：沒有暫存變量</h3>
+    <div id="trWrong"></div>
+    <h3 style="margin-top:2rem">➗ 數學方法（無暫存變量）</h3>
+    <div class="controls">
+      <label>x = <input type="number" id="mxX" value="6"></label>
+      <label>y = <input type="number" id="mxY" value="2"></label>
+      <button class="btn" id="mxGo">套用</button>
+    </div>
+    <div id="trMath"></div>
+  </article>
+
+  <article class="box" id="s3-over" style="--c:var(--amber)">
+    <div class="box-tag">③ 數學方法的風險：算術溢出</div>
+    <p>假設變量只可儲存 <b>8 位元有符號整數</b>（−128 至 127）。用數學方法交換時，第一步 <code>x = x + y</code> 的結果可能超出範圍，於是發生<b>算術溢出</b>。</p>
+    <div class="controls">
+      <label>x = <input type="number" id="ovX" value="100" min="-128" max="127"></label>
+      <label>y = <input type="number" id="ovY" value="50" min="-128" max="127"></label>
+      <button class="btn" id="ovGo">執行數學交換</button>
+      <button class="btn" data-ov="100,50">例子：100, 50</button>
+      <button class="btn" data-ov="20,30">例子：20, 30</button>
+    </div>
+    <div class="meter" id="ovMeter"><span class="z" style="left:0">−128</span><span class="z" style="left:50.2%">0</span><span class="z" style="left:100%">127</span><div class="pin" id="ovPin" style="left:50%"></div></div>
+    <div class="olines" id="ovLines"></div>
+    <p class="dim" style="margin-top:.8rem">註：Python 的整數沒有大小上限，所以在 Python 中不會溢出；但很多程式語言或系統的變量大小是固定的。暫存變量方法完全沒有這個風險。</p>
+  </article>
+
+  <article class="box" id="s3-prac" style="--c:var(--amber)">
+    <div class="box-tag">🎯 練習攤 · 2.3</div>
+    <div id="p3"></div>
+  </article>
+</section>
+</main>
+<footer>程式夜市 · DSE ICT 選修單元 C 第 2 章 · 呂Sir 的 ICT 互動課件</footer>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+             set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TF=b=>b?'True':'False';
+function fmt(v){ if(v===undefined) return '—'; if(v===true) return 'True'; if(v===false) return 'False';
+  if(typeof v==='string') return '"'+v+'"'; if(Array.isArray(v)) return '['+v.map(fmt).join(', ')+']'; return String(v); }
+function int(el,min,max,def){ let v=parseInt(el.value,10); if(isNaN(v)) v=def; v=Math.max(min,Math.min(max,v)); el.value=v; return v; }
+function el(tag,cls,html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+
+/* ---------- Python 語法高亮 ---------- */
+function hl(line){
+  const re=/(#.*$)|(f?"[^"]*")|\b(for|in|if|elif|else|while|True|False|and|or|not)\b|\b(print|range|int|input|len)\b|(\b\d+\b)/g;
+  let out='',last=0,m;
+  while((m=re.exec(line))){
+    out+=esc(line.slice(last,m.index));
+    const cls=m[1]?'c-com':m[2]?'c-str':m[3]?'c-kw':m[4]?'c-fn':'c-num';
+    out+='<span class="'+cls+'">'+esc(m[0])+'</span>'; last=re.lastIndex;
+  }
+  return out+esc(line.slice(last));
+}
+function codeLines(lines){ return lines.map((l,i)=>'<div class="ln" data-i="'+i+'"><span class="no">'+(i+1)+'</span><span class="mk" aria-hidden="true"></span><code>'+(hl(l)||'&nbsp;')+'</code></div>').join(''); }
+function staticCode(src){ return '<div class="sboard">'+codeLines(src.split('\n'))+'</div>'; }
+
+/* ---------- 步驟紀錄器 ---------- */
+function Rec(){
+  const S=[],V={},O=[];
+  return {S,V,O,
+    rec(line,note,extra){ S.push(Object.assign({line,vars:Object.assign({},V),out:O.slice(),note},extra||{})); },
+    end(note,extra){ S.push(Object.assign({line:-1,vars:Object.assign({},V),out:O.slice(),note:note||'✔ 程式執行完畢。',end:true},extra||{})); }
+  };
+}
+
+/* ---------- 逐步追蹤器 ---------- */
+function makeTracer(o){
+  const R=o.mount; R.classList.add('tracer');
+  R.innerHTML=
+   '<div class="board"><div class="board-tag">'+(o.title||'程式價錢牌')+'</div><div class="code"></div></div>'+
+   '<div class="side"><div class="mini-tag">📦 變量貨箱</div><div class="crates"></div>'+
+   (o.noConsole?'':'<div class="mini-tag">🖥 輸出</div><div class="console" aria-live="polite"></div>')+
+   (o.sideExtra?'<div class="extra"></div>':'')+'</div>'+
+   '<div class="note" aria-live="polite"></div>'+
+   (o.sideExtra||!o.extra?'':'<div class="extra full"></div>')+
+   '<div class="ctrl"><button class="btn" data-a="reset">⏮ 重設</button><button class="btn" data-a="prev">◀ 上一步</button>'+
+   '<button class="btn primary" data-a="next">下一步 ▶</button><button class="btn" data-a="play">⏵ 自動播放</button>'+
+   '<label class="spd">速度 <input type="range" min="1" max="5" value="3" aria-label="播放速度"></label><span class="prog"></span></div>';
+  const codeEl=$('.code',R), cr=$('.crates',R), con=$('.console',R), note=$('.note',R), ex=$('.extra',R), prog=$('.prog',R);
+  const bPlay=$('[data-a=play]',R), bPrev=$('[data-a=prev]',R), bNext=$('[data-a=next]',R), spd=$('.spd input',R);
+  let P=null, idx=-1, last=-1, timer=null;
+  const delay=()=>[1500,1050,650,350,140][spd.value-1];
+  function stop(){ clearInterval(timer); timer=null; bPlay.textContent='⏵ 自動播放'; }
+  function fly(m){
+    const a=cr.querySelector('[data-v="'+m.from+'"] .val'), b=cr.querySelector('[data-v="'+m.to+'"] .val');
+    if(!a||!b||!a.animate) return;
+    const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(); if(!ra.width) return;
+    const c=el('div','chip-fly',esc(String(m.val))); c.style.left=ra.left+'px'; c.style.top=ra.top+'px'; document.body.appendChild(c);
+    const dx=rb.left-ra.left, dy=rb.top-ra.top;
+    const an=c.animate([{transform:'translate(0,0)'},{transform:'translate('+dx/2+'px,'+(dy/2-38)+'px) scale(1.2)'},{transform:'translate('+dx+'px,'+dy+'px)'}],{duration:700,easing:'ease-in-out'});
+    an.onfinish=()=>c.remove(); an.oncancel=()=>c.remove();
+  }
+  function render(){
+    const fwd = idx===last+1;
+    const st = idx>=0 ? P.steps[idx] : null;
+    $$('.ln',codeEl).forEach(l=>l.classList.toggle('cur', !!st && +l.dataset.i===st.line));
+    const cur=$('.ln.cur',codeEl); if(cur && timer==null){ /* keep code in view horizontally only */ }
+    const vars = st ? st.vars : {};
+    o.order.forEach(n=>{
+      const c=cr.querySelector('[data-v="'+n+'"]'), v=$('.val',c), s=fmt(vars[n]);
+      if(v.textContent!==s){ v.textContent=s; if(fwd && idx>=0 && s!=='—' && !RM){ c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump'); } }
+      c.classList.toggle('empty', vars[n]===undefined);
+    });
+    if(con){ const out=st?st.out:[]; con.innerHTML = out.length? out.map(x=>'<div>'+esc(x)+'</div>').join('') : '<div class="dim">（未有輸出）</div>'; con.scrollTop=con.scrollHeight; }
+    note.innerHTML = st ? st.note : (o.intro || '按「下一步 ▶」開始逐行執行。');
+    prog.textContent = '步驟 '+(idx+1)+' / '+P.steps.length;
+    if(st && st.move && fwd && !RM) fly(st.move);
+    if(o.extra) o.extra(st, ex, P, idx);
+    bPrev.disabled = idx<0; bNext.disabled = idx>=P.steps.length-1;
+    last=idx;
+  }
+  function rebuild(){
+    stop(); P=o.build(); codeEl.innerHTML=codeLines(P.lines);
+    cr.innerHTML=o.order.map(n=>'<div class="crate empty" data-v="'+n+'"><div class="vn">'+n+'</div><div class="val">—</div></div>').join('');
+    idx=-1; last=-1; render();
+  }
+  function step(){ if(idx<P.steps.length-1){ idx++; render(); } if(idx>=P.steps.length-1) stop(); }
+  R.addEventListener('click',e=>{
+    const b=e.target.closest('[data-a]'); if(!b) return;
+    const a=b.dataset.a;
+    if(a==='next'){ stop(); step(); }
+    else if(a==='prev'){ stop(); if(idx>-1){ idx--; render(); } }
+    else if(a==='reset'){ stop(); idx=-1; last=-1; render(); }
+    else if(a==='play'){ if(timer){ stop(); return; } if(idx>=P.steps.length-1){ idx=-1; last=-1; render(); }
+      bPlay.textContent='⏸ 暫停'; timer=setInterval(step, delay()); }
+  });
+  spd.addEventListener('input',()=>{ if(timer){ clearInterval(timer); timer=setInterval(step, delay()); } });
+  rebuild();
+  return {rebuild};
+}
+
+/* ---------- 攤位網格 ---------- */
+function gridHTML(R,C,cell,corner){
+  let h='<div class="sgrid" style="--cols:'+C+'"><div class="corner">'+(corner||'')+'</div>';
+  for(let c=0;c<C;c++) h+='<div class="clab">第 '+c+' 列</div>';
+  for(let r=0;r<R;r++){ h+='<div class="rlab">第 '+r+' 行</div>';
+    for(let c=0;c<C;c++){ const x=cell(r,c); h+='<div class="stall '+(x.cls||'')+'" data-r="'+r+'" data-c="'+c+'" '+(x.attr||'')+'>'+x.html+'</div>'; } }
+  return h+'</div>';
+}
+function clickable(container, fn){
+  container.addEventListener('click',e=>{ const s=e.target.closest('.stall.click'); if(s) fn(+s.dataset.r,+s.dataset.c,s); });
+  container.addEventListener('keydown',e=>{ if(e.key!=='Enter'&&e.key!==' ') return; const s=e.target.closest('.stall.click'); if(s){ e.preventDefault(); fn(+s.dataset.r,+s.dataset.c,s); } });
+}
+
+/* ================= 路由 ================= */
+function show(id){
+  if(!['s1','s2','s3'].includes(id)) id='s1';
+  $$('.street').forEach(s=>s.classList.toggle('show', s.id===id));
+  $$('.sign').forEach(b=>{ if(b.dataset.go===id) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+}
+$$('.sign').forEach(b=>b.addEventListener('click',()=>{ if(location.hash!=='#'+b.dataset.go) location.hash=b.dataset.go; else show(b.dataset.go); window.scrollTo({top:0, behavior:RM?'auto':'smooth'}); }));
+window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+$$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{ const t=document.getElementById(b.dataset.jump); if(t) t.scrollIntoView({behavior:RM?'auto':'smooth', block:'start'}); }));
+show(location.hash.slice(1));
+
+/* ================= 2.1 順序 ================= */
+const seqN=$('#seqN');
+const trSeq=makeTracer({mount:$('#trSeq'), order:['n1','n2'], build(){
+  const n=int(seqN,-999,999,7), r=Rec();
+  const lines=['n1 = int(input("輸入數字："))','n2 = n1 + 5','print(n2)'];
+  r.V.n1=n; r.rec(0,'用戶輸入「'+n+'」，<code>int()</code> 把它轉成整數 '+n+'，存入 n1。');
+  r.V.n2=n+5; r.rec(1,'計算 n1 + 5 = '+n+' + 5 = '+(n+5)+'，存入 n2。');
+  r.O.push(String(n+5)); r.rec(2,'列印 n2 的值 → '+(n+5)+'。');
+  r.end('✔ 程式執行完畢：三行指令由上到下，每行只執行一次——這就是<b>順序</b>。');
+  return {lines, steps:r.S};
+}});
+$('#seqGo').addEventListener('click',trSeq.rebuild);
+seqN.addEventListener('keydown',e=>{ if(e.key==='Enter') trSeq.rebuild(); });
+
+/* ================= 2.1 選擇 ================= */
+const FLOW_SVG=
+'<svg class="flow" viewBox="0 0 340 345" role="img" aria-label="嵌套選擇流程圖">'+
+'<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8f82a3"/></marker></defs>'+
+'<rect class="n" id="f-st" x="130" y="4" width="80" height="26" rx="13"/><text x="170" y="17">開始</text>'+
+'<path class="e" id="f-e0" d="M170 30V52" marker-end="url(#ah)"/>'+
+'<polygon class="n" id="f-c1" points="170,55 248,87 170,119 92,87"/><text class="code" x="170" y="87">age &gt;= 60 ?</text>'+
+'<path class="e" id="f-e1" d="M92 87H70V138" marker-end="url(#ah)"/><text class="yn" x="80" y="78">是</text>'+
+'<path class="e" id="f-e2" d="M248 87H280V138" marker-end="url(#ah)"/><text class="yn" x="262" y="78">否</text>'+
+'<rect class="n" id="f-p1" x="10" y="140" width="120" height="34" rx="4"/><text x="70" y="157">列印「長者優惠」</text>'+
+'<rect class="n" id="f-p3" x="220" y="140" width="116" height="34" rx="4"/><text x="278" y="157">列印「標準價格」</text>'+
+'<path class="e" id="f-e3" d="M70 174V200" marker-end="url(#ah)"/>'+
+'<polygon class="n" id="f-c2" points="70,203 132,233 70,263 8,233"/><text class="code" x="70" y="233">is_student ?</text>'+
+'<path class="e" id="f-e4" d="M70 263V286" marker-end="url(#ah)"/><text class="yn" x="82" y="274">是</text>'+
+'<path class="e" id="f-e5" d="M132 233H255V296" marker-end="url(#ah)"/><text class="yn" x="150" y="224">否</text>'+
+'<rect class="n" id="f-p2" x="4" y="288" width="132" height="34" rx="4"/><text x="70" y="305">列印「外加學生優惠」</text>'+
+'<path class="e" id="f-e6" d="M136 305H222" marker-end="url(#ah)"/>'+
+'<path class="e" id="f-e7" d="M290 174V296" marker-end="url(#ah)"/>'+
+'<rect class="n" id="f-end" x="224" y="298" width="90" height="26" rx="13"/><text x="269" y="311">結束</text>'+
+'</svg>';
+const selAge=$('#selAge'), selStu=$('#selStu');
+const trSel=makeTracer({mount:$('#trSel'), order:['age','is_student'], build(){
+  const age=+selAge.value, stu=selStu.checked, r=Rec();
+  const lines=['# 例子：嵌套選擇','age = '+age,'is_student = '+TF(stu),'','if age >= 60:','    print("長者優惠")','    if is_student:','        print("外加學生優惠")   # 嵌套檢查','else:','    print("標準價格")'];
+  let f=['st'];
+  r.V.age=age; r.rec(1,'把 age 設為 '+age+'。',{flow:f.slice()});
+  r.V.is_student=stu; r.rec(2,'把 is_student 設為 '+TF(stu)+'。',{flow:f.slice()});
+  const c1=age>=60; f.push('e0','c1');
+  r.rec(4,'檢查外層條件：age &gt;= 60 → '+age+' &gt;= 60 → <b>'+TF(c1)+'</b>'+(c1?'，進入 if 區塊。':'，跳到 else。'),{flow:f.slice()});
+  if(c1){
+    f.push('e1','p1'); r.O.push('長者優惠'); r.rec(5,'列印「長者優惠」。',{flow:f.slice()});
+    f.push('e3','c2'); r.rec(6,'檢查<b>嵌套</b>條件：is_student → <b>'+TF(stu)+'</b>'+(stu?'，進入內層 if。':'，內層 print 被略過。'),{flow:f.slice()});
+    if(stu){ f.push('e4','p2'); r.O.push('外加學生優惠'); r.rec(7,'列印「外加學生優惠」。',{flow:f.slice()}); f.push('e6','end'); }
+    else { f.push('e5','end'); }
+  } else {
+    f.push('e2'); r.rec(8,'外層條件不成立，執行 else。注意：內層的 <code>if is_student</code> <b>根本不會被檢查</b>。',{flow:f.slice()});
+    f.push('p3'); r.O.push('標準價格'); r.rec(9,'列印「標準價格」。',{flow:f.slice()}); f.push('e7','end');
+  }
+  r.end('✔ 程式執行完畢。看看下面流程圖中實線、發亮的路徑——那就是今次實際經過的分支。',{flow:f.slice()});
+  return {lines, steps:r.S, age, stu};
+}, extra(st, ex, P){
+  if(!ex.dataset.ready){ ex.innerHTML='<div class="flowwrap"><div>'+FLOW_SVG+'</div><div class="twrap"><table class="t"><thead><tr><th>age &gt;= 60</th><th>is_student</th><th>輸出</th></tr></thead><tbody></tbody></table><p class="legend">四種組合一覽（▶ = 現在的設定）。注意：<b>不是長者</b>的學生不會檢查學生優惠。</p></div></div>'; ex.dataset.ready='1'; }
+  const fl=st?st.flow:[], lastN=fl.filter(x=>!x.startsWith('e')).pop();
+  $$('.n,.e',ex).forEach(n=>{ const id=n.id.slice(2); n.classList.toggle('on', fl.includes(id)); n.classList.toggle('cur', id===lastN && !!st); });
+  const combos=[[true,true,'長者優惠、外加學生優惠'],[true,false,'長者優惠'],[false,true,'標準價格'],[false,false,'標準價格']];
+  $('tbody',ex).innerHTML=combos.map(c=>'<tr class="'+(c[0]===(P.age>=60)&&c[1]===P.stu?'hi':'')+'"><td class="mono">'+TF(c[0])+'</td><td class="mono">'+TF(c[1])+'</td><td>'+c[2]+'</td></tr>').join('');
+}});
+function selUpd(){ $('#selAgeV').textContent=selAge.value; $('#selStuV').textContent=TF(selStu.checked); trSel.rebuild(); }
+selAge.addEventListener('input',selUpd); selStu.addEventListener('change',selUpd);
+
+/* ================= 2.1 for ================= */
+const forA=$('#forA'), forB=$('#forB');
+const trFor=makeTracer({mount:$('#trFor'), order:['i'], build(){
+  const a=int(forA,-5,15,1); let b=int(forB,-5,20,6); if(b-a>20){ b=a+20; forB.value=b; }
+  const r=Rec(), seen=[];
+  const lines=['# 例子：for 循環（固定範圍）','for i in range('+a+', '+b+'):','    print(i)   # '+(b>a?'列印 '+a+' 到 '+(b-1):'不會列印任何東西')];
+  for(let i=a;i<b;i++){
+    r.V.i=i; r.rec(1,'i 取 range 的下一個值：<b>'+i+'</b>（第 '+(i-a+1)+' 次迭代）。',{cur:i,seen:seen.slice()});
+    r.O.push(String(i)); seen.push(i); r.rec(2,'列印 i → '+i+'。',{cur:i,seen:seen.slice()});
+  }
+  r.rec(1, b>a ? 'range('+a+', '+b+') 已沒有下一個值——<b>'+b+' 不包括在內</b>，循環結束。' : 'range('+a+', '+b+') 是空的（終點不大於起點），循環體一次都不執行。',{seen:seen.slice()});
+  r.end('✔ 循環共執行 '+Math.max(0,b-a)+' 次 = '+b+' − '+a+'。',{seen:seen.slice()});
+  return {lines, steps:r.S, a, b};
+}, extra(st, ex, P){
+  const a=P.a,b=P.b, seen=st?st.seen:[]; let h='';
+  if(b>a){ h+='<div class="rstrip" aria-label="range 產生的數字">';
+    for(let v=a;v<=b;v++){ const end=v===b, cur=st&&st.cur===v, past=seen.includes(v)&&!cur;
+      h+='<div class="rc'+(end?' excl':'')+(past?' past':'')+(cur?' cur':'')+'"><span>'+v+'</span><small>'+(end?'✗ 不包括':cur?'▶ 現在':past?'✓ 已做':'')+'</small></div>'; }
+    h+='</div>'; }
+  h+='<div class="warn">range('+a+', '+b+') 由 '+a+' 開始，到 <b>'+(b-1)+'</b> 為止；終點 '+b+' 本身<b>不包括</b>在內，共 '+Math.max(0,b-a)+' 個數字。這是最常見的「差一錯誤」（off-by-one）！</div>';
+  ex.innerHTML=h;
+}});
+$('#forGo').addEventListener('click',trFor.rebuild);
+
+/* ================= 2.1 while ================= */
+const whC=$('#whC');
+const trWhile=makeTracer({mount:$('#trWhile'), order:['count'], build(){
+  const c=int(whC,-3,12,10), r=Rec(); let checks=0, body=0;
+  const lines=['# 例子：while 循環（預先測試）','count = '+c,'while count > 0:','    print(count)','    count = count - 1'];
+  r.V.count=c; r.rec(1,'count 初始化為 '+c+'。',{checks,body});
+  while(true){
+    checks++; const ok=r.V.count>0;
+    r.rec(2,'第 '+checks+' 次<b>先檢查</b>條件：count &gt; 0 → '+r.V.count+' &gt; 0 → <b>'+TF(ok)+'</b>'+(ok?'，進入循環體。':'，離開循環。'),{checks,body});
+    if(!ok) break;
+    body++; r.O.push(String(r.V.count)); r.rec(3,'列印 count → '+r.V.count+'。',{checks,body});
+    const old=r.V.count; r.V.count--; r.rec(4,'count = count - 1 → '+old+' - 1 = '+r.V.count+'。',{checks,body});
+  }
+  r.end(body===0?'✔ 條件一開始已是 False，循環體<b>一次都沒有執行</b>——這就是「預先測試循環」的特點。':'✔ 循環體執行了 '+body+' 次，條件檢查了 '+checks+' 次（最後一次檢查得到 False 才離開）。',{checks,body});
+  return {lines, steps:r.S};
+}, extra(st, ex){
+  const ch=st?st.checks:0, bd=st?st.body:0;
+  ex.innerHTML='<div class="stat"><span>條件檢查次數 <b>'+ch+'</b></span><span>循環體執行次數 <b>'+bd+'</b></span></div><p class="legend">留意：條件檢查次數永遠比循環體執行次數多 1，因為最後一次檢查得到 False 才會離開。</p>';
+}});
+$('#whGo').addEventListener('click',trWhile.rebuild);
+
+/* ================= 分類遊戲 ================= */
+const GAME=[
+  ['列印 1 到 100 的所有整數','for','重複次數已知（100 次），用 for 配合 range(1, 101)。'],
+  ['不斷要求用戶輸入密碼，直至輸入正確為止','while','不知道用戶要試多少次，用 while。'],
+  ['計算全班 35 位學生的平均分','for','學生人數已知，逐個處理用 for。'],
+  ['不斷擲骰子，直至擲出 6 為止','while','不知道要擲多少次才出 6，用 while。'],
+  ['為一個 5 × 4 的網格逐格賦值','for','行數和列數已知，用嵌套 for 循環。'],
+  ['遊戲一直運行，直至玩家選擇離開','while','不知道玩家會玩多久，用 while。'],
+  ['列印 7 的乘數表（7 × 1 到 7 × 12）','for','固定 12 次，用 for。'],
+  ['存款每年加息，計算多少年後超過 $10000','while','年數正正是要求的答案，事先未知，用 while。']
+];
+let gOk=0;
+function gameInit(){
+  gOk=0; $('#gScore').textContent=0; $('#gTotal').textContent=GAME.length;
+  $('#gCards').innerHTML=GAME.map((g,i)=>'<div class="gcard" data-i="'+i+'"><p>'+g[0]+'</p><div class="row"><button class="btn" data-pick="for">for</button><button class="btn" data-pick="while">while</button></div><div class="why" aria-live="polite"></div></div>').join('');
+}
+$('#gCards').addEventListener('click',e=>{
+  const b=e.target.closest('[data-pick]'); if(!b) return; const card=b.closest('.gcard'); if(card.dataset.done) return;
+  const g=GAME[+card.dataset.i], ok=b.dataset.pick===g[1]; card.dataset.done=1;
+  card.classList.add(ok?'ok':'bad'); $$('button',card).forEach(x=>x.disabled=true);
+  $('.why',card).innerHTML=(ok?'✔ 正確！':'✘ 應該用 <b>'+g[1]+'</b>。')+' '+g[2];
+  if(ok){ gOk++; $('#gScore').textContent=gOk; }
+});
+$('#gReset').addEventListener('click',gameInit); gameInit();
+
+/* ================= 2.1 嵌套循環 ================= */
+const nR=$('#nR'), nC=$('#nC');
+let odoPrev={row:'—',col:'—'};
+const trNest=makeTracer({mount:$('#trNest'), order:['row','col'], build(){
+  const R=int(nR,1,5,3), C=int(nC,1,6,5), r=Rec(), lit=[];
+  const lines=['# 例子：處理二維網格（行和列）','for row in range(0, '+R+'):       # 外層循環（第 0-'+(R-1)+' 行）','    for col in range(0, '+C+'):   # 內層循環（第 0-'+(C-1)+' 列）','        print(f"第 {row} 行，第 {col} 列")'];
+  for(let i=0;i<R;i++){
+    r.V.row=i; r.rec(1,'<b>外層循環</b>：row = '+i+'，開始處理第 '+i+' 行。',{lit:lit.slice()});
+    for(let j=0;j<C;j++){
+      r.V.col=j; r.rec(2,'<b>內層循環</b>：col = '+j+'。',{lit:lit.slice(),cur:[i,j]});
+      r.O.push('第 '+i+' 行，第 '+j+' 列'); lit.push(i+','+j); r.rec(3,'列印「第 '+i+' 行，第 '+j+' 列」。',{lit:lit.slice(),cur:[i,j]});
+    }
+    r.rec(2,'內層循環完成<b>一個完整週期</b>（col 走完 0 到 '+(C-1)+'），回到外層循環。',{lit:lit.slice()});
+  }
+  r.rec(1,'外層循環亦走完 0 到 '+(R-1)+'，整個嵌套循環結束。',{lit:lit.slice()});
+  r.end('✔ print 共執行 '+R+' × '+C+' = <b>'+R*C+'</b> 次：外層每走一步，內層就完整跑一輪。',{lit:lit.slice()});
+  odoPrev={row:'—',col:'—'};
+  return {lines, steps:r.S, R, C};
+}, extra(st, ex, P){
+  if(!ex.dataset.ready){ ex.innerHTML='<div class="odo"><div class="d"><span class="lab">外層 row</span><span class="dig" data-o="row">—</span></div><div class="d"><span class="lab">內層 col</span><span class="dig" data-o="col">—</span></div><div class="stat" style="margin:0"><span>已列印 <b class="cnt">0</b> / '+'<b class="tot"></b></span></div></div><div class="g"></div>'; ex.dataset.ready='1'; }
+  ['row','col'].forEach(k=>{ const d=$('[data-o="'+k+'"]',ex), v=st&&st.vars[k]!==undefined?String(st.vars[k]):'—'; if(d.textContent!==v){ d.textContent=v; if(!RM){ d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll'); } } });
+  const lit=st?st.lit:[], cur=st&&st.cur?st.cur:null;
+  $('.cnt',ex).textContent=lit.length; $('.tot',ex).textContent=P.R*P.C;
+  $('.g',ex).innerHTML=gridHTML(P.R,P.C,(r,c)=>{ const k=lit.indexOf(r+','+c), isCur=cur&&cur[0]===r&&cur[1]===c;
+    return {cls:(isCur?'cur':k>=0?'lit':''), html:'<span class="v">'+(k>=0?'#'+(k+1):'·')+'</span><span class="tag">('+r+', '+c+')</span>'}; },'row＼col');
+}});
+$('#nGo').addEventListener('click',trNest.rebuild);
+
+/* ================= 2.2 攤位地圖 ================= */
+const FOOD=[['魚蛋','燒賣','雞蛋仔','格仔餅'],['臭豆腐','碗仔翅','豬腸粉','煎釀三寶'],['牛雜','車仔麵','菠蘿包','蛋撻'],['缽仔糕','糖葱餅','炸大腸','煨魷魚'],['炒栗子','烤番薯','涼粉','豆腐花']];
+let mapChal=null, mapPlaced={}, mapOk=0, mapTot=0, mapFlash={};
+function mapRender(sel){
+  $('#mapGrid').innerHTML=gridHTML(5,4,(r,c)=>{ const k=r+','+c, p=mapPlaced[k];
+    return {cls:'click '+(sel&&sel[0]===r&&sel[1]===c?'cur ':'')+(mapFlash[k]||''), attr:'tabindex="0" role="button" aria-label="第 '+r+' 行第 '+c+' 列 '+FOOD[r][c]+'"',
+      html:(p!==undefined?'<span class="v">'+p+'</span>':'')+'<span>'+FOOD[r][c]+'</span><span class="tag">F['+r+']['+c+']</span>'}; },'F');
+  mapFlash={};
+}
+function newChal(){
+  const free=[]; for(let r=0;r<5;r++) for(let c=0;c<4;c++) if(mapPlaced[r+','+c]===undefined) free.push([r,c]);
+  if(!free.length){ mapPlaced={}; return newChal(); }
+  const t=free[Math.floor(Math.random()*free.length)]; mapChal={r:t[0],c:t[1],v:10+Math.floor(Math.random()*90)};
+  $('#mapInfo').innerHTML='🎯 <b>賦值挑戰</b>：執行以下語句後，數值會放在哪個攤位？請點選。<div class="big" style="margin-top:.4rem">F['+mapChal.r+']['+mapChal.c+'] ← '+mapChal.v+'</div><div class="dim">Python：F['+mapChal.r+']['+mapChal.c+'] = '+mapChal.v+'</div>';
+}
+clickable($('#mapGrid'),(r,c)=>{
+  if(!mapChal){
+    mapRender([r,c]);
+    $('#mapInfo').innerHTML='你點了 <b>第 '+r+' 行、第 '+c+' 列</b>（由 0 數起）<div class="big" style="margin:.4rem 0">F['+r+']['+c+']</div>'+
+      '偽代碼：<code>item ← F['+r+']['+c+']</code><br>Python：<code>item = F['+r+']['+c+']</code><br>結果：item 的值是 <b>"'+FOOD[r][c]+'"</b>'+
+      '<p class="legend">第一個索引 = 行（由上數下），第二個索引 = 列（由左數右）。</p>';
+    return;
+  }
+  mapTot++;
+  if(r===mapChal.r && c===mapChal.c){
+    mapOk++; mapPlaced[r+','+c]=mapChal.v; mapFlash[r+','+c]='good';
+    $('#mapInfo').innerHTML='✔ <b>正確！</b> '+mapChal.v+' 已放入 F['+r+']['+c+']（第 '+r+' 行、第 '+c+' 列）。<p><button class="btn primary" id="mapNext">下一題 ▶</button></p>';
+    mapChal=null; mapRender();
+    $('#mapNext').addEventListener('click',()=>{ newChal(); mapRender(); });
+  } else {
+    mapFlash[r+','+c]='bad'; mapRender();
+    $('#mapInfo').innerHTML='✘ 你點的是 <b>F['+r+']['+c+']</b>（第 '+r+' 行、第 '+c+' 列）。<div class="big" style="margin:.4rem 0">目標：F['+mapChal.r+']['+mapChal.c+'] ← '+mapChal.v+'</div>提示：<b>先行後列</b>——第一個索引 '+mapChal.r+' 是行（由上數下），第二個索引 '+mapChal.c+' 是列（由左數右），都由 0 開始數。';
+  }
+  $('#mapOk').textContent=mapOk; $('#mapTot').textContent=mapTot;
+});
+$('#mapMode').addEventListener('click',()=>{
+  if(mapChal||$('#mapMode').dataset.on){ mapChal=null; $('#mapMode').dataset.on=''; $('#mapMode').textContent='🎯 開始賦值挑戰'; $('#mapInfo').innerHTML='👆 點選任何一個攤位，看看怎樣用索引<b>讀取</b>它。'; mapRender(); return; }
+  $('#mapMode').dataset.on='1'; $('#mapMode').textContent='⏹ 結束挑戰（回到讀取模式）'; newChal(); mapRender();
+});
+mapRender();
+
+/* ================= 2.2 seats ================= */
+const seats=[['O','O','O'],['O','O','O'],['O','O','O']]; let seatSel=null;
+function seatRender(){
+  let h='<div class="ln"><span class="no">1</span><span class="mk"></span><code>seats = [</code></div>';
+  for(let r=0;r<3;r++){
+    h+='<div class="ln'+(seatSel&&seatSel[0]===r?' rowon':'')+'"><span class="no">'+(r+2)+'</span><span class="mk"></span><code>    [';
+    h+=seats[r].map((v,c)=>'<button class="tok'+(seatSel&&seatSel[0]===r&&seatSel[1]===c?' on':'')+'" data-r="'+r+'" data-c="'+c+'" aria-label="seats['+r+']['+c+']">"'+v+'"</button>').join(', ');
+    h+=']'+(r<2?',':' ')+'   <span class="c-com"># 行 '+r+'</span></code></div>';
+  }
+  h+='<div class="ln"><span class="no">5</span><span class="mk"></span><code>]</code></div>';
+  $('#seatCode').innerHTML=h;
+  $('#seatGrid').innerHTML=gridHTML(3,3,(r,c)=>({cls:'click'+(seats[r][c]==='X'?' booked':'')+(seatSel&&seatSel[0]===r&&seatSel[1]===c?' cur':''),
+    attr:'tabindex="0" role="button" aria-label="座位 第 '+r+' 行第 '+c+' 列 '+(seats[r][c]==='X'?'已預訂':'空位')+'"',
+    html:'<span class="v">'+(seats[r][c]==='X'?'X':'O')+'</span><span class="tag">'+(seats[r][c]==='X'?'已預訂':'空位')+'</span>'}),'seats');
+}
+clickable($('#seatGrid'),(r,c)=>{
+  seats[r][c]=seats[r][c]==='O'?'X':'O'; seatSel=[r,c]; seatRender();
+  $('#seatInfo').innerHTML='<b>賦值</b>：'+(seats[r][c]==='X'?'預訂':'取消')+'第 '+r+' 行、第 '+c+' 列的座位<div class="big" style="margin:.4rem 0">seats['+r+']['+c+'] = "'+seats[r][c]+'"</div>偽代碼：<code>seats['+r+']['+c+'] ← "'+seats[r][c]+'"</code><p class="legend">留意左邊程式碼的第 '+(r+2)+' 行（# 行 '+r+'）中，第 '+(c+1)+' 個元素（索引 '+c+'）已改變。</p>';
+});
+$('#seatCode').addEventListener('click',e=>{
+  const t=e.target.closest('.tok'); if(!t) return; const r=+t.dataset.r, c=+t.dataset.c; seatSel=[r,c]; seatRender();
+  $('#seatInfo').innerHTML='<b>讀取</b>：這個元素位於第 '+r+' 行、第 '+c+' 列<div class="big" style="margin:.4rem 0">seat = seats['+r+']['+c+']</div>結果：seat 的值是 <b>"'+seats[r][c]+'"</b>（'+(seats[r][c]==='X'?'已預訂':'空位')+'）。<p class="legend">seats['+r+'] 先取出整個「行 '+r+'」列表，再用 ['+c+'] 取出其中第 '+c+' 個元素。</p>';
+});
+seatRender();
+
+/* ================= 2.2 嵌套 for 初始化 ================= */
+const fExpr=$('#fExpr');
+const FX={'4 * i + j':(i,j)=>4*i+j,'i + j':(i,j)=>i+j,'i * j':(i,j)=>i*j,'10 * i + j':(i,j)=>10*i+j};
+const trInit=makeTracer({mount:$('#trInit'), order:['i','j'], noConsole:true, sideExtra:true, build(){
+  const ex=fExpr.value, f=FX[ex], r=Rec(), G=[...Array(5)].map(()=>Array(4).fill(null));
+  const lines=['# 用攤位號碼初始化一個 5 × 4 網格 F','# i 代表行，j 代表列','for i in range(0, 5):          # 0 到 4','    for j in range(0, 4):      # 0 到 3','        F[i][j] = '+ex];
+  const snap=()=>G.map(x=>x.slice());
+  for(let i=0;i<5;i++){
+    r.V.i=i; r.rec(2,'外層循環：i = '+i+'（第 '+i+' 行）。',{G:snap()});
+    for(let j=0;j<4;j++){
+      r.V.j=j; r.rec(3,'內層循環：j = '+j+'（第 '+j+' 列）。',{G:snap(),cur:[i,j]});
+      const v=f(i,j); G[i][j]=v;
+      r.rec(4,'F['+i+']['+j+'] = '+ex.replace(/i/g,i).replace(/j/g,j)+' = <b>'+v+'</b>',{G:snap(),cur:[i,j]});
+    }
+  }
+  const flat=[].concat(...G), uniq=new Set(flat).size===flat.length;
+  r.end('✔ 20 個元素全部賦值完成。'+(uniq?'每個攤位的號碼都<b>不同</b>。':'⚠ 有些攤位得到<b>相同</b>的號碼，這條公式不適合做攤位號碼！'),{G:snap()});
+  return {lines, steps:r.S};
+}, extra(st, ex){
+  const G=st?st.G:[...Array(5)].map(()=>Array(4).fill(null)), cur=st&&st.cur;
+  ex.innerHTML='<div class="mini-tag">🏮 陣列 F（5 行 × 4 列）</div>'+gridHTML(5,4,(r,c)=>({cls:(cur&&cur[0]===r&&cur[1]===c?'cur':G[r][c]!==null?'lit':''),html:'<span class="v">'+(G[r][c]===null?'·':G[r][c])+'</span>'}),'F');
+}});
+fExpr.addEventListener('change',trInit.rebuild);
+
+/* ================= 2.3 計數 / 累加 ================= */
+const cData=$('#cData');
+function getData(){
+  let d=cData.value.split(/[,，\s]+/).map(x=>parseInt(x,10)).filter(x=>!isNaN(x)).slice(0,8);
+  if(!d.length) d=[10,55,60,20];
+  cData.value=d.join(', '); return d;
+}
+function traceTable(cols, rows, hi){
+  return '<div class="mini-tag">📋 追蹤表</div><div class="twrap"><table class="t"><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+
+    (rows.length?rows.map((r,k)=>'<tr class="'+(k===hi?'hi':'')+'">'+r.map(x=>'<td class="mono">'+x+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+cols.length+'" class="dim">（未有資料）</td></tr>')+
+    '</tbody></table></div>';
+}
+const trCount=makeTracer({mount:$('#trCount'), order:['count','i','item'], sideExtra:true, build(){
+  const d=getData(), r=Rec(), rows=[];
+  const lines=['# 例子：計算 > 50 的項目','count = 0','data = ['+d.join(', ')+']','','for i in range(0, len(data)):','    item = data[i]','    if item > 50:','        count = count + 1   # 加上常數 1','print(count)'];
+  r.V.count=0; r.rec(1,'計數器 count 初始化為 <b>0</b>。',{rows:[]});
+  r.rec(2,'data 有 '+d.length+' 個項目，所以 len(data) = '+d.length+'。',{rows:[]});
+  d.forEach((v,i)=>{
+    r.V.i=i; r.rec(4,'i = '+i+'（range(0, '+d.length+') 產生 0 到 '+(d.length-1)+'）。',{rows:rows.slice(),hi:-1});
+    r.V.item=v; r.rec(5,'item = data['+i+'] = '+v+'。',{rows:rows.slice(),hi:-1});
+    const ok=v>50;
+    if(ok){ r.rec(6,'檢查 item &gt; 50 → '+v+' &gt; 50 → <b>True</b>。',{rows:rows.slice(),hi:-1});
+      r.V.count++; rows.push([i,v,'True',r.V.count]); r.rec(7,'條件成立：count = count + 1 → <b>'+r.V.count+'</b>（加上常數 1）。',{rows:rows.slice(),hi:rows.length-1}); }
+    else { rows.push([i,v,'False',r.V.count]); r.rec(6,'檢查 item &gt; 50 → '+v+' &gt; 50 → <b>False</b>，count 不變（仍是 '+r.V.count+'）。',{rows:rows.slice(),hi:rows.length-1}); }
+  });
+  r.O.push(String(r.V.count)); r.rec(8,'列印 count → '+r.V.count+'。',{rows:rows.slice(),hi:-1});
+  r.end('✔ 共有 '+r.V.count+' 個項目大於 50。',{rows:rows.slice(),hi:-1});
+  return {lines, steps:r.S};
+}, extra(st, ex){ ex.innerHTML=traceTable(['i','item','item &gt; 50','count'], st?st.rows:[], st?st.hi:-1); }});
+const trSum=makeTracer({mount:$('#trSum'), order:['total','i','item'], sideExtra:true, build(){
+  const d=getData(), r=Rec(), rows=[];
+  const lines=['# 例子：計算總和','total = 0','data = ['+d.join(', ')+']','','for i in range(0, len(data)):','    item = data[i]','    total = total + item   # 加上實際數據值','print(total)'];
+  r.V.total=0; r.rec(1,'總數 total 初始化為 <b>0</b>。',{rows:[]});
+  r.rec(2,'data 有 '+d.length+' 個項目。',{rows:[]});
+  d.forEach((v,i)=>{
+    r.V.i=i; r.rec(4,'i = '+i+'。',{rows:rows.slice(),hi:-1});
+    r.V.item=v; r.rec(5,'item = data['+i+'] = '+v+'。',{rows:rows.slice(),hi:-1});
+    const old=r.V.total; r.V.total+=v; rows.push([i,v,r.V.total]);
+    r.rec(6,'total = total + item → '+old+' + '+v+' = <b>'+r.V.total+'</b>（加上實際數據值）。',{rows:rows.slice(),hi:rows.length-1});
+  });
+  r.O.push(String(r.V.total)); r.rec(7,'列印 total → '+r.V.total+'。',{rows:rows.slice(),hi:-1});
+  r.end('✔ 運行總和 = '+r.V.total+'。',{rows:rows.slice(),hi:-1});
+  return {lines, steps:r.S};
+}, extra(st, ex){ ex.innerHTML=traceTable(['i','item','total'], st?st.rows:[], st?st.hi:-1); }});
+$('#cGo').addEventListener('click',()=>{ trCount.rebuild(); trSum.rebuild(); });
+
+/* ================= 2.3 交換 ================= */
+const swA=$('#swA'), swB=$('#swB');
+const trTemp=makeTracer({mount:$('#trTemp'), order:['A','B','temp'], noConsole:true, build(){
+  const a=int(swA,-999,999,3), b=int(swB,-999,999,8), r=Rec();
+  const lines=['A = '+a,'B = '+b,'','# 例子：使用暫存變量的標準交換','temp = A','A = B','B = temp'];
+  r.V.A=a; r.rec(0,'A = '+a+'。'); r.V.B=b; r.rec(1,'B = '+b+'。');
+  r.V.temp=a; r.rec(4,'把 A 的值 '+a+' <b>複製</b>到暫存變量 temp——先把 A 的數據保護好。',{move:{from:'A',to:'temp',val:a}});
+  r.V.A=b; r.rec(5,'把 B 的值 '+b+' 放入 A。A 原本的 '+a+' 被覆蓋，但它已安全地存在 temp。',{move:{from:'B',to:'A',val:b}});
+  r.V.B=a; r.rec(6,'把 temp 的值 '+a+' 放入 B。',{move:{from:'temp',to:'B',val:a}});
+  r.end('✔ 交換成功：A = '+b+'，B = '+a+'。沒有任何數據丟失。');
+  return {lines, steps:r.S};
+}});
+const trWrong=makeTracer({mount:$('#trWrong'), order:['A','B'], noConsole:true, sideExtra:true, build(){
+  const a=int(swA,-999,999,3), b=int(swB,-999,999,8), r=Rec();
+  const lines=['A = '+a,'B = '+b,'','A = B','B = A      # ✘ 錯誤示範'];
+  r.V.A=a; r.rec(0,'A = '+a+'。'); r.V.B=b; r.rec(1,'B = '+b+'。');
+  r.V.A=b; r.rec(3,'A = B：A 變成 '+b+'。A 原本的 <b>'+a+'</b> 被覆蓋，<b>永久遺失</b>！',{move:{from:'B',to:'A',val:b},lost:a});
+  r.V.B=b; r.rec(4,'B = A：B 只能得到 A <b>現在</b>的值 '+b+'。',{move:{from:'A',to:'B',val:b},lost:a});
+  r.end(a===b?'兩個值本來相同，看不出問題——試試輸入兩個不同的數字。':'✘ 交換失敗：A = '+b+'，B = '+b+'，原本的 '+a+' 已經找不回來。',{lost:a});
+  return {lines, steps:r.S};
+}, extra(st, ex){ ex.innerHTML = st&&st.lost!==undefined ? '<div class="warn">🗑 遺失的數據：<b class="mono" style="text-decoration:line-through">'+st.lost+'</b></div>' : ''; }});
+$('#swGo').addEventListener('click',()=>{ trTemp.rebuild(); trWrong.rebuild(); });
+const mxX=$('#mxX'), mxY=$('#mxY');
+const trMath=makeTracer({mount:$('#trMath'), order:['x','y'], noConsole:true, build(){
+  const x=int(mxX,-999,999,6), y=int(mxY,-999,999,2), r=Rec(), s=x+y;
+  const lines=['x = '+x,'y = '+y,'','# 例子：數學交換（無暫存變量）','x = x + y','y = x - y','x = x - y'];
+  r.V.x=x; r.rec(0,'x = '+x+'。'); r.V.y=y; r.rec(1,'y = '+y+'。');
+  r.V.x=s; r.rec(4,'x = x + y → '+x+' + '+y+' = <b>'+s+'</b>（x 暫時存放兩數之和）。');
+  r.V.y=s-y; r.rec(5,'y = x - y → '+s+' − '+y+' = <b>'+x+'</b>（y 得到原本的 x）。');
+  r.V.x=s-x; r.rec(6,'x = x - y → '+s+' − '+x+' = <b>'+y+'</b>（x 得到原本的 y）。');
+  r.end('✔ 交換成功：x = '+y+'，y = '+x+'。沒有用第三個變量，但第一步的和 '+s+' 必須放得進變量之內。');
+  return {lines, steps:r.S};
+}});
+$('#mxGo').addEventListener('click',trMath.rebuild);
+
+/* ================= 2.3 溢出 ================= */
+function ovRun(){
+  const x=int($('#ovX'),-128,127,100), y=int($('#ovY'),-128,127,50);
+  const inR=v=>v>=-128&&v<=127; let X=x,Y=y,bad=false,pinV=null; const L=[];
+  const steps=[['x = x + y',()=>X+Y,v=>X=v,()=>X+' + '+Y],['y = x - y',()=>X-Y,v=>Y=v,()=>X+' − '+Y],['x = x - y',()=>X-Y,v=>X=v,()=>X+' − '+Y]];
+  L.push('<div>x = '+x+'，y = '+y+'</div>');
+  steps.forEach(s=>{ if(bad){ L.push('<div class="skip">'+s[0]+'（不會執行）</div>'); return; }
+    const expr=s[3](), v=s[1](); pinV=v;
+    if(!inR(v)){ bad=true; L.push('<div class="bad">'+s[0]+' → '+expr+' = '+v+'，超出 −128 至 127</div>'); }
+    else { s[2](v); L.push('<div class="ok">'+s[0]+' → '+expr+' = '+v+'</div>'); } });
+  L.push(bad?'<div class="bad" style="border-style:solid">結果：交換失敗，程式出錯</div>':'<div class="ok">結果：x = '+X+'，y = '+Y+'，交換成功</div>');
+  $('#ovLines').innerHTML=L.join('');
+  const m=$('#ovMeter'); m.classList.toggle('over',bad);
+  const pv=Math.max(-128,Math.min(127,pinV==null?0:pinV)); $('#ovPin').style.left=((pv+128)/255*100)+'%';
+}
+$('#ovGo').addEventListener('click',ovRun);
+$$('[data-ov]').forEach(b=>b.addEventListener('click',()=>{ const v=b.dataset.ov.split(','); $('#ovX').value=v[0]; $('#ovY').value=v[1]; ovRun(); }));
+ovRun();
+
+/* ================= 練習區 ================= */
+const TYPE={mcq:'預測 / 選擇',fill:'程式碼填空',trace:'填寫追蹤表',parsons:'排列程式碼',bug:'找錯'};
+const BOOL={'true':'true','t':'true','真':'true','是':'true','false':'false','f':'false','假':'false','否':'false'};
+const norm=s=>String(s).trim().toLowerCase().replace(/\s+/g,'').replace(/[−–]/g,'-').replace(/[“”「」]/g,'"');
+const same=(u,a)=>{ let x=norm(u),y=norm(a); x=BOOL[x]||x; y=BOOL[y]||y; return x!==''&&x===y; };
+const SC={};
+function navScore(){ Object.keys(SC).forEach(k=>{ const b=$('[data-score="'+k+'"]'); if(b) b.textContent='⭐ '+SC[k].ok+'/'+SC[k].n; }); }
+function shuffleDiff(n){ const base=[...Array(n).keys()]; let a; let guard=0; do{ a=base.slice(); for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }while(n>1 && a.every((v,i)=>v===i) && ++guard<20); return a; }
+
+const RENDER={
+  mcq(q,body,done){
+    body.innerHTML=(q.code?staticCode(q.code):'')+'<div class="opts">'+q.options.map((o,i)=>'<button class="opt" data-i="'+i+'">'+'ABCD'[i]+'. '+esc(o.t)+'</button>').join('')+'</div>';
+    body.addEventListener('click',e=>{ const b=e.target.closest('.opt'); if(!b) return; const i=+b.dataset.i;
+      $$('.opt',body).forEach(x=>x.classList.remove('sel-ok','sel-bad')); const ok=i===q.answer; b.classList.add(ok?'sel-ok':'sel-bad');
+      done(ok, ok?'':(q.options[i].why||'')); });
+  },
+  fill(q,body,done){
+    body.innerHTML=(q.code?'<div class="sboard">'+codeLines(q.code.split('\n')).replace(/____/g,'<span class="blank">____</span>')+'</div>':'')+
+      '<div class="fill-row"><label>你的答案：<input type="text" autocomplete="off" spellcheck="false"></label><button class="btn primary">提交</button></div>';
+    const inp=$('input',body);
+    const go=()=>{ const ok=q.answer.some(a=>same(inp.value,a)); done(ok, ok?'':(inp.value.trim()?'你填了「'+esc(inp.value.trim())+'」。':'請先填寫答案。')); };
+    $('button',body).addEventListener('click',go); inp.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
+  },
+  trace(q,body,done){
+    let h=(q.code?staticCode(q.code):'')+'<div class="twrap"><table class="t"><thead><tr>'+q.cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';
+    q.rows.forEach(r=>{ h+='<tr>'+r.map(c=>typeof c==='object'?'<td><input class="tin" data-a="'+esc(c.a)+'" autocomplete="off" spellcheck="false" aria-label="追蹤表空格"></td>':'<td class="mono">'+esc(c)+'</td>').join('')+'</tr>'; });
+    h+='</tbody></table></div><p class="legend">True / False 可寫 T / F。</p><button class="btn primary">提交追蹤表</button>';
+    body.innerHTML=h;
+    $('.btn',body).addEventListener('click',()=>{ let wrong=0;
+      $$('.tin',body).forEach(t=>{ const ok=same(t.value,t.dataset.a); t.classList.toggle('ok',ok); t.classList.toggle('bad',!ok);
+        let s=t.parentNode.querySelector('.should'); if(s) s.remove();
+        if(!ok){ wrong++; s=el('span','should','✘ 應為 '+esc(t.dataset.a)); t.parentNode.appendChild(s); } });
+      done(wrong===0, wrong?'有 '+wrong+' 格不正確，已在格下標示正確答案。':''); });
+  },
+  parsons(q,body,done){
+    const order=shuffleDiff(q.lines.length);
+    body.innerHTML=(q.prefix?'<div class="legend">已給出的開頭（不用移動）：</div>'+staticCode(q.prefix):'')+
+      '<div class="legend">用 ⠿ 拖動，或用 ▲▼ 調整次序（縮排已給出）：</div><ol class="parsons">'+
+      order.map(k=>'<li data-k="'+k+'"><span class="handle" aria-hidden="true">⠿</span><pre>'+hl(q.lines[k])+'</pre><button class="mv" data-m="-1" aria-label="上移">▲</button><button class="mv" data-m="1" aria-label="下移">▼</button></li>').join('')+
+      '</ol><button class="btn primary">提交次序</button>';
+    const ul=$('ol',body); let drag=null;
+    ul.addEventListener('click',e=>{ const m=e.target.closest('.mv'); if(!m) return; const li=m.closest('li');
+      if(m.dataset.m==='-1'&&li.previousElementSibling) ul.insertBefore(li,li.previousElementSibling);
+      else if(m.dataset.m==='1'&&li.nextElementSibling) ul.insertBefore(li.nextElementSibling,li); m.focus(); });
+    ul.addEventListener('pointerdown',e=>{ const h=e.target.closest('.handle'); if(!h) return; drag=h.closest('li'); drag.classList.add('dragging'); try{h.setPointerCapture(e.pointerId);}catch(_){} e.preventDefault(); });
+    ul.addEventListener('pointermove',e=>{ if(!drag) return; const y=e.clientY; let before=null;
+      for(const it of Array.from(ul.children)){ if(it===drag) continue; const r=it.getBoundingClientRect(); if(y<r.top+r.height/2){ before=it; break; } }
+      if(before){ if(drag.nextElementSibling!==before) ul.insertBefore(drag,before); } else if(ul.lastElementChild!==drag) ul.appendChild(drag); });
+    const end=()=>{ if(drag){ drag.classList.remove('dragging'); drag=null; } };
+    ul.addEventListener('pointerup',end); ul.addEventListener('pointercancel',end);
+    $('.btn',body).addEventListener('click',()=>{ const lis=Array.from(ul.children); let ok=true;
+      lis.forEach((li,i)=>{ const good=q.lines[+li.dataset.k]===q.lines[i]; li.classList.toggle('ok',good); li.classList.toggle('bad',!good); if(!good) ok=false; });
+      done(ok, ok?'':'有虛線框的行位置不對。'); });
+  },
+  bug(q,body,done){
+    const L=q.code.split('\n');
+    body.innerHTML='<div class="sboard">'+L.map((l,i)=>'<button class="bugline" data-i="'+i+'"><span class="no">'+(i+1)+'</span><code>'+(hl(l)||'&nbsp;')+'</code></button>').join('')+'</div><div class="legend">👆 直接點選有問題的一行。</div>';
+    body.addEventListener('click',e=>{ const b=e.target.closest('.bugline'); if(!b) return; const i=+b.dataset.i;
+      $$('.bugline',body).forEach(x=>x.classList.remove('sel-ok','sel-bad')); const ok=i===q.answer; b.classList.add(ok?'sel-ok':'sel-bad');
+      done(ok, ok?'':'你選了第 '+(i+1)+' 行，這一行沒有問題。'); });
+  }
+};
+function practice(mount,key,Q){
+  const head=el('div','pscore'); mount.appendChild(head);
+  const state=Q.map(()=>null);
+  function upd(){ const ok=state.filter(x=>x===true).length, n=state.filter(x=>x!==null).length;
+    const best=Math.max(store.get('ictC2-'+key,0), ok); store.set('ictC2-'+key,best);
+    SC[key]={ok,n:Q.length};
+    head.innerHTML='<span class="big">🎯 得分 '+ok+' / '+Q.length+'</span><span>已作答 '+n+' 題</span><span class="dim">最佳紀錄：'+best+' / '+Q.length+'</span><span class="dim">答錯可以再試，得分以最新作答計算。</span>';
+    navScore(); }
+  Q.forEach((q,qi)=>{
+    const card=el('div','qcard','<div class="qhead"><span class="qno">第 '+(qi+1)+' 題</span><span class="qtype">'+TYPE[q.type]+'</span></div><div class="qtext">'+q.q+'</div>');
+    const body=el('div','qbody'), fb=el('div','fb'); fb.setAttribute('aria-live','polite');
+    card.appendChild(body); card.appendChild(fb); mount.appendChild(card);
+    RENDER[q.type](q,body,(ok,msg)=>{ state[qi]=ok; fb.className='fb '+(ok?'ok':'bad');
+      fb.innerHTML=(ok?'<b>✔ 答對！</b> ':'<b>✘ 未答對。</b> ')+(msg||'')+'<div class="exp">📘 '+q.explain+'</div>';
+      card.classList.toggle('is-ok',ok); card.classList.toggle('is-bad',!ok); upd(); });
+  });
+  upd();
+}
+
+const P1=[
+ {type:'mcq', q:'以下程式的輸出是甚麼？', code:'x = 3\nif x > 5:\n    print("A")\nelif x > 2:\n    print("B")\nelse:\n    print("C")',
+  options:[{t:'A',why:'x > 5 → 3 > 5 是 False，不會列印 A。'},{t:'B'},{t:'C',why:'elif 的條件已經成立，else 不會再執行。'},{t:'B 和 C',why:'if / elif / else 只會執行其中一個分支。'}], answer:1,
+  explain:'x > 5 為 False，於是檢查 elif：x > 2 → 3 > 2 為 True，列印 B，其餘分支全部略過。'},
+ {type:'mcq', q:'把課本例子的 age 改為 45，is_student 仍是 True。輸出是甚麼？', code:'age = 45\nis_student = True\n\nif age >= 60:\n    print("長者優惠")\n    if is_student:\n        print("外加學生優惠")\nelse:\n    print("標準價格")',
+  options:[{t:'長者優惠',why:'45 >= 60 是 False，不會進入外層 if。'},{t:'長者優惠、外加學生優惠',why:'外層條件不成立，兩句 print 都不會執行。'},{t:'標準價格'},{t:'外加學生優惠、標準價格',why:'嵌套的 if 在外層 if 之內，外層不成立就根本不會檢查 is_student。'}], answer:2,
+  explain:'age >= 60 為 False，直接跳到 else 列印「標準價格」。嵌套的 if is_student 只會在外層條件成立時才被檢查。'},
+ {type:'trace', q:'完成以下 while 循環的追蹤表（每一行代表一次檢查條件）。', code:'count = 10\nwhile count > 0:\n    print(count)\n    count = count - 3',
+  cols:['count 的值','count &gt; 0','輸出'], rows:[['10','True','10'],[{a:'7'},{a:'True'},{a:'7'}],[{a:'4'},{a:'True'},{a:'4'}],[{a:'1'},{a:'True'},{a:'1'}],[{a:'-2'},{a:'False'},'（無）']],
+  explain:'每次進入循環前先檢查 count > 0。count 由 10 每次減 3：10 → 7 → 4 → 1 → −2；到 −2 時條件為 False，循環結束，共列印 4 次。'},
+ {type:'fill', q:'要列印 1 到 10，空格應填甚麼？', code:'for i in range(1, ____):\n    print(i)', answer:['11'],
+  explain:'range(a, b) 由 a 開始，到 b − 1 為止，b 本身不包括在內，所以要寫 range(1, 11)。'},
+ {type:'parsons', q:'把程式碼排成正確次序，輸出 3 行、每行 3 個 <code>*</code>（即 *** 重複 3 行）。',
+  lines:['for row in range(0, 3):','    line = ""','    for col in range(0, 3):','        line = line + "*"','    print(line)'],
+  explain:'line = "" 要放在外層循環內、內層循環之前，令每一行重新開始；print(line) 要在內層循環完成後才執行（縮排與內層 for 對齊）。'},
+ {type:'bug', q:'這段程式想列印 5 到 1，但會變成無限循環。點出有問題的一行。', code:'count = 5\nwhile count > 0:\n    print(count)\ncount = count - 1', answer:3,
+  explain:'count = count - 1 沒有縮排，不屬於循環體，count 永遠是 5，條件永遠是 True。應把它縮排到 print(count) 之下。'},
+ {type:'mcq', q:'以下程式會列印 "Hi" 多少次？', code:'for i in range(0, 3):\n    for j in range(0, 4):\n        print("Hi")',
+  options:[{t:'7',why:'不是 3 + 4。內層循環在外層每一次迭代都會完整執行。'},{t:'12'},{t:'3',why:'這只是外層循環的次數。'},{t:'4',why:'這只是內層循環一個週期的次數。'}], answer:1,
+  explain:'外層 3 次，每次內層完整跑 4 次：3 × 4 = 12。'},
+ {type:'mcq', q:'以下哪一種情況最適合使用 while 循環？',
+  options:[{t:'列印 1 到 50',why:'次數已知，用 for。'},{t:'處理 30 位學生的分數',why:'次數已知，用 for。'},{t:'不斷要求輸入，直至輸入 "Q" 為止'},{t:'為 5 × 4 網格賦值',why:'行數和列數已知，用嵌套 for。'}], answer:2,
+  explain:'while 循環適合重複次數未知的情況：事先不知道用戶何時才會輸入 "Q"。'}
+];
+const P2=[
+ {type:'mcq', q:'以下程式的輸出是甚麼？', code:'F = [\n    [1, 2, 3],\n    [4, 5, 6],\n    [7, 8, 9]\n]\nprint(F[2][0])',
+  options:[{t:'3',why:'3 是 F[0][2]，你把行和列倒轉了。'},{t:'7'},{t:'8',why:'8 是 F[2][1]。'},{t:'出錯',why:'索引 2 和 0 都在範圍之內。'}], answer:1,
+  explain:'F[2][0]：第一個索引 2 是行（由 0 數起的第 3 行 [7, 8, 9]），第二個索引 0 是該行的第一個元素 → 7。'},
+ {type:'fill', q:'執行以下程式後，F[3][2] 的值是多少？', code:'for i in range(0, 5):\n    for j in range(0, 4):\n        F[i][j] = 4 * i + j', answer:['14'],
+  explain:'i = 3、j = 2：4 × 3 + 2 = 14。'},
+ {type:'trace', q:'完成以下嵌套循環的追蹤表（按執行次序）。', code:'for i in range(0, 2):\n    for j in range(0, 3):\n        G[i][j] = i * 10 + j',
+  cols:['i','j','G[i][j]'], rows:[['0','0','0'],['0','1',{a:'1'}],['0',{a:'2'},{a:'2'}],[{a:'1'},{a:'0'},{a:'10'}],['1','1',{a:'11'}],[{a:'1'},{a:'2'},{a:'12'}]],
+  explain:'外層 i 每取一個值，內層 j 都由 0 走到 2。i = 0 時先填好第 0 行的三格，然後 i = 1 再填第 1 行。'},
+ {type:'mcq', q:'seats 有 3 行 4 列。右下角（最後一行、最後一列）的元素應怎樣表示？',
+  options:[{t:'seats[3][4]',why:'索引由 0 開始：3 行的索引是 0 至 2，4 列的索引是 0 至 3。'},{t:'seats[2][3]'},{t:'seats[3][2]',why:'行和列倒轉了，而且 3 已超出行的索引範圍。'},{t:'seats[4][3]',why:'先行後列，而且索引由 0 開始。'}], answer:1,
+  explain:'最後一行的索引 = 3 − 1 = 2，最後一列的索引 = 4 − 1 = 3，所以是 seats[2][3]。'},
+ {type:'bug', q:'F 有 5 行 4 列，想把所有元素設為 0。點出有問題的一行。', code:'for i in range(0, 5):\n    for j in range(0, 5):\n        F[i][j] = 0', answer:1,
+  explain:'F 只有 4 列（索引 0 至 3），range(0, 5) 會令 j 去到 4，超出範圍而出錯。應改為 range(0, 4)。'},
+ {type:'parsons', q:'F 有 4 列。排列程式碼，計算<b>第 1 行</b>所有元素的總和並列印出來。',
+  lines:['total = 0','for j in range(0, 4):','    total = total + F[1][j]','print(total)'],
+  explain:'行索引固定為 1，只需要一個循環，讓列索引 j 由 0 走到 3；total 要在循環前初始化，print 要在循環後。'},
+ {type:'fill', q:'一個有 5 行 4 列的二維陣列共有多少個元素？', answer:['20'], explain:'5 × 4 = 20 個元素。'},
+ {type:'mcq', q:'以下哪一句偽代碼把 29 賦值到第 3 行、第 2 列的元素？',
+  options:[{t:'F[3][2] ← 29'},{t:'29 ← F[3][2]',why:'箭頭指向接收數值的一方，這句是把 F[3][2] 的值放入「29」，不合理。'},{t:'F[2][3] ← 29',why:'先行後列：這是第 2 行、第 3 列。'},{t:'x ← F[3][2] + 29',why:'這是讀取 F[3][2] 再加 29，存入 x，沒有改變陣列。'}], answer:0,
+  explain:'偽代碼用 ← 表示賦值，左邊是接收數值的元素；F[3][2] 表示第 3 行、第 2 列。'}
+];
+const P3=[
+ {type:'trace', q:'完成計數程式的追蹤表（每一行代表一次迭代結束時的狀態）。', code:'count = 0\ndata = [30, 80, 51, 50]\nfor i in range(0, len(data)):\n    item = data[i]\n    if item > 50:\n        count = count + 1\nprint(count)',
+  cols:['i','item','item &gt; 50','count'], rows:[['0','30','False','0'],['1',{a:'80'},{a:'True'},{a:'1'}],[{a:'2'},{a:'51'},{a:'True'},{a:'2'}],[{a:'3'},{a:'50'},{a:'False'},{a:'2'}]],
+  explain:'50 > 50 是 False（等於不算大於），所以最後 count = 2。'},
+ {type:'fill', q:'以下程式的輸出是甚麼？', code:'total = 0\ndata = [3, 8, 5]\nfor i in range(0, len(data)):\n    total = total + data[i]\nprint(total)', answer:['16'],
+  explain:'total：0 → 3 → 11 → 16。累加時每次加上實際數據值。'},
+ {type:'mcq', q:'以下程式的輸出是甚麼？', code:'A = 5\nB = 9\nA = B\nB = A\nprint(A, B)',
+  options:[{t:'9 5',why:'這是成功交換的結果，但這段程式沒有用暫存變量。'},{t:'9 9'},{t:'5 5',why:'A = B 先執行，A 已變成 9。'},{t:'5 9',why:'A 已被改變。'}], answer:1,
+  explain:'A = B 令 A 變成 9，原本的 5 被覆蓋而遺失；B = A 只能得到 9。所以輸出 9 9。'},
+ {type:'parsons', q:'排列程式碼，用暫存變量交換 A 和 B，並列印結果（應輸出 7 4）。', prefix:'A = 4\nB = 7',
+  lines:['temp = A','A = B','B = temp','print(A, B)'],
+  explain:'先把 A 存入 temp，再把 B 放入 A，最後把 temp 放入 B。'},
+ {type:'trace', q:'用數學方法交換 x 和 y。完成每句執行後 x 和 y 的值。', code:'x = 6\ny = 2\nx = x + y\ny = x - y\nx = x - y',
+  cols:['語句','x','y'], rows:[['x = 6','6','—'],['y = 2','6','2'],['x = x + y',{a:'8'},{a:'2'}],['y = x - y',{a:'8'},{a:'6'}],['x = x - y',{a:'2'},{a:'6'}]],
+  explain:'x 先存放和 8；y = 8 − 2 = 6（原本的 x）；x = 8 − 6 = 2（原本的 y）。'},
+ {type:'bug', q:'這段程式想計算 data 中大於 50 的項目<b>數目</b>。點出有問題的一行。', code:'count = 0\ndata = [10, 55, 60, 20]\nfor i in range(0, len(data)):\n    if data[i] > 50:\n        count = count + data[i]\nprint(count)', answer:4,
+  explain:'計數應加上常數 1（count = count + 1）。加上 data[i] 變成了「累加」，會輸出 115 而不是 2。'},
+ {type:'mcq', q:'以下關於數學交換方法的描述，哪一項正確？',
+  options:[{t:'不需要第三個變量，但 x + y 可能超出變量可儲存的範圍'},{t:'比暫存變量方法更安全',why:'剛好相反：暫存變量方法才是防止數據丟失的標準、安全方法。'},{t:'只適用於字串',why:'它用加法和減法，只適用於數值。'},{t:'需要兩個暫存變量',why:'數學方法的特點正是不需要暫存變量。'}], answer:0,
+  explain:'數學方法用加法和減法交換，不需要第三個變量，但有算術溢出的風險。'},
+ {type:'mcq', q:'計數時，當條件成立，計數器通常加上甚麼？',
+  options:[{t:'一個常數值（通常是 1）'},{t:'實際數據值',why:'加實際數據值的是累加（求和）。'},{t:'循環變量 i',why:'i 只是索引，與次數無關。'},{t:'0',why:'加 0 不會改變計數器。'}], answer:0,
+  explain:'計數：初始化為 0，條件成立時加上常數 1；累加：初始化為 0，加上實際數據值。'}
+];
+practice($('#p1'),'s1',P1); practice($('#p2'),'s2',P2); practice($('#p3'),'s3',P3);
+})();
+</script>
+</body>
+</html>
